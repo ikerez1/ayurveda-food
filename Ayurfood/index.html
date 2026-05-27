@@ -633,11 +633,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       let client = null;
       if (window.supabase?.createClient) {
-        client = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON);
+        client = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON, {
+          auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+        });
       } else if (window.supabaseJs?.createClient) {
-        client = window.supabaseJs.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON);
+        client = window.supabaseJs.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON, {
+          auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+        });
       } else if (window.Supabase?.createClient) {
-        client = window.Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON);
+        client = window.Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON, {
+          auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+        });
       }
       if (client) {
         supabase = client;
@@ -679,28 +685,54 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Auth check
   if (supabase) {
     showSpinner('Checking your account...');
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      hideSpinner();
-      if (error) {
+
+    // Handle OAuth callback — Supabase puts tokens in URL hash
+    // Must set up listener BEFORE calling getSession
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event);
+      if (event === 'SIGNED_IN' && session) {
+        hideSpinner();
+        await onSignedIn(session.user);
+      }
+      if (event === 'SIGNED_OUT') {
+        user = null; profile = null;
+        document.getElementById('app').style.display = 'none';
         showPage('login');
-        showError('Connection error: ' + error.message + '\n\nCheck your Supabase URL and anon key in CONFIG.');
+      }
+      if (event === 'TOKEN_REFRESHED' && session && !user) {
+        hideSpinner();
+        await onSignedIn(session.user);
+      }
+    });
+
+    try {
+      // Small delay to let Supabase process the URL hash from OAuth redirect
+      await new Promise(r => setTimeout(r, 100));
+
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        hideSpinner();
+        showPage('login');
+        showError('Connection error: ' + error.message);
         return;
       }
       if (session) {
+        hideSpinner();
         await onSignedIn(session.user);
       } else {
+        hideSpinner();
         showPage('login');
       }
     } catch(e) {
       hideSpinner();
       showPage('login');
-      showError('Failed to connect to Supabase. Check your SUPABASE_URL and SUPABASE_ANON keys in CONFIG.');
+      showError('Failed to connect to Supabase. Check your SUPABASE_URL and SUPABASE_ANON keys.');
     }
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) await onSignedIn(session.user);
-      if (event === 'SIGNED_OUT') { user = null; profile = null; showPage('login'); }
-    });
+
+    // Clean up OAuth hash from URL without triggering reload
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    }
   } else {
     // Demo mode — no Supabase configured yet
     showPage(null); // show main app
