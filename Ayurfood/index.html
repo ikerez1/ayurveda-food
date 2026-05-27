@@ -34,29 +34,29 @@
 
     html, body {
       height: 100%;
-      background: #FBF8F3;
+      background: #2A2019;
       color: var(--dark);
       font-family: 'DM Sans', sans-serif;
       -webkit-font-smoothing: antialiased;
     }
-    /* Nuclear background fix */
-    html { background: #FBF8F3 !important; }
-    body { background: #FBF8F3 !important; position: relative; }
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: #FBF8F3;
-      z-index: -1;
-      pointer-events: none;
-    }
+    html { background: #2A2019 !important; }
+    body { background: #2A2019 !important; }
 
     /* ── APP SHELL ── */
     #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; max-width: 480px; margin: 0 auto; background: #FBF8F3; box-shadow: 0 0 60px rgba(0,0,0,0.1); overflow: hidden; position: relative; z-index: 1; isolation: isolate; }
 
     /* ── PAGES (full-screen overlays) ── */
-    .page { position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column; background: #FBF8F3; overflow-y: auto; max-width: 480px; margin: 0 auto; isolation: isolate; }
+    .page { position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column; overflow-y: auto; max-width: 480px; margin: 0 auto; isolation: isolate; }
     .page.active { display: flex; }
+    /* Full-width backdrop behind the centered page content */
+    .page.active::before { content: ''; position: fixed; inset: 0; z-index: -1; background: inherit; pointer-events: none; }
+    #page-login.active::before { background: #2A2019; }
+    #page-paywall.active::before { background: #FBF8F3; }
+
+    /* Body backdrop — catches anything outside the 480px column */
+    body::after { content: ''; position: fixed; inset: 0; z-index: 0; background: #FBF8F3; pointer-events: none; }
+    body:has(#page-login.active)::after { background: #2A2019; }
+    #app { position: relative; z-index: 1; }
 
     /* ── HEADER ── */
     .hdr { flex-shrink: 0; text-align: center; padding: calc(var(--safe-top) + 14px) 20px 12px; background: var(--cream); border-bottom: 1px solid var(--border); }
