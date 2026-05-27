@@ -201,6 +201,37 @@
     .tip-box { background: var(--cream); border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
 
     /* ══════════════════════════════════════
+       LANGUAGE SWITCHER
+    ══════════════════════════════════════ */
+    .lang-switcher {
+      position: relative; display: inline-block;
+    }
+    .lang-btn {
+      background: none; border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 10px 4px 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px;
+      color: var(--dark); cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .lang-btn:active { background: var(--cream); }
+    .lang-dropdown {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      z-index: 1000; min-width: 140px; display: none;
+    }
+    .lang-dropdown.open { display: block; }
+    .lang-option {
+      padding: 10px 14px; font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; gap: 10px;
+      transition: background .15s; color: var(--dark);
+    }
+    .lang-option:hover { background: var(--cream); }
+    .lang-option.active { color: var(--gold); font-weight: 500; }
+    .lang-flag { font-size: 16px; }
+
+    /* ══════════════════════════════════════
        SCAN / RESULT
     ══════════════════════════════════════ */
     .upload-zone { border: 1.5px dashed var(--border); border-radius: 14px; background: #fff; cursor: pointer; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 16px; margin-bottom: 12px; transition: border-color .2s; overflow: hidden; position: relative; }
@@ -322,8 +353,8 @@
 <div id="page-paywall" class="page">
   <div class="paywall-header">
     <span class="lock-icon">✨</span>
-    <h2>Your free trial has ended</h2>
-    <p>Choose a plan to continue your Ayurvedic journey</p>
+    <h2 data-i18n="trialEnded">Your free trial has ended</h2>
+    <p data-i18n="choosePlan">Choose a plan to continue your Ayurvedic journey</p>
   </div>
 
   <div class="features-list">
@@ -342,7 +373,7 @@
       </div>
     </div>
     <div class="plan-card popular selected" data-plan="quarterly" data-price-id="" onclick="selectPlan(this)">
-      <div class="popular-badge">Most Popular</div>
+      <div class="popular-badge" data-i18n="mostPopular">Most Popular</div>
       <div class="plan-row">
         <div><div class="plan-name">Quarterly</div><div class="plan-sub">Billed every 3 months</div><div class="plan-save">Save 30% vs monthly</div></div>
         <div><div class="plan-price">$6.99<span style="font-size:12px;color:var(--muted)">/mo</span></div><div style="font-size:11px;color:var(--muted);text-align:right">$20.97 total</div></div>
@@ -356,8 +387,8 @@
     </div>
   </div>
 
-  <button class="btn btn-gold" onclick="startCheckout()" id="checkout-btn">Start My Membership ↗</button>
-  <button class="btn btn-outline" onclick="restorePurchase()">Restore Purchase</button>
+  <button class="btn btn-gold" onclick="startCheckout()" id="checkout-btn"><span data-i18n="startMembership">Start My Membership ↗</span></button>
+  <button class="btn btn-outline" onclick="restorePurchase()"><span data-i18n="restorePurchase">Restore Purchase</span></button>
   <p class="guarantee">🔒 Secure payment via Stripe · Cancel anytime</p>
 </div>
 
@@ -378,9 +409,20 @@
 
   <div class="hdr hdr-wrap">
     <span class="hdr-sym">☸ ॐ ☸</span>
-    <h1>Āyurveda Food Compass</h1>
-    <p>Personalized nourishment through ancient wisdom</p>
-    <div class="hdr-right">
+    <h1 data-i18n="appTitle">Āyurveda Food Compass</h1>
+    <p data-i18n="appSubtitle">Personalized nourishment through ancient wisdom</p>
+    <div class="hdr-right" style="display:flex;align-items:center;gap:8px;">
+      <div class="lang-switcher" id="lang-switcher">
+        <button class="lang-btn" onclick="toggleLangMenu()" id="lang-btn-display">🇬🇧 EN</button>
+        <div class="lang-dropdown" id="lang-dropdown">
+          <div class="lang-option" onclick="setLang('en')"><span class="lang-flag">🇬🇧</span> English</div>
+          <div class="lang-option" onclick="setLang('de')"><span class="lang-flag">🇩🇪</span> Deutsch</div>
+          <div class="lang-option" onclick="setLang('fr')"><span class="lang-flag">🇫🇷</span> Français</div>
+          <div class="lang-option" onclick="setLang('es')"><span class="lang-flag">🇪🇸</span> Español</div>
+          <div class="lang-option" onclick="setLang('hi')"><span class="lang-flag">🇮🇳</span> हिन्दी</div>
+          <div class="lang-option" onclick="setLang('uk')"><span class="lang-flag">🇺🇦</span> Українська</div>
+        </div>
+      </div>
       <button class="btn btn-outline btn-sm" onclick="goTab('account')" style="border-radius:20px;padding:6px 12px;font-size:11px;">
         <span id="hdr-avatar">👤</span>
       </button>
@@ -438,30 +480,30 @@
     <!-- SCAN TAB -->
     <div id="tab-scan" class="screen">
       <div id="scan-form">
-        <p class="sect-title">What are you eating?</p>
-        <div class="hint-bar" id="hint-bar">☽ Set your dosha first for personalised guidance</div>
+        <p class="sect-title" data-i18n="whatEating">What are you eating?</p>
+        <div class="hint-bar" id="hint-bar" data-i18n="setDoshaFirst">☽ Set your dosha first for personalised guidance</div>
         <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
-          <div id="upload-ph"><div class="upload-ico">📷</div><div class="upload-lbl">Tap to capture or upload food</div><div class="upload-sub">AI will identify and evaluate your food</div></div>
+          <div id="upload-ph"><div class="upload-ico">📷</div><div class="upload-lbl" data-i18n="tapCapture">Tap to capture or upload food</div><div class="upload-sub" data-i18n="aiWill">AI will identify and evaluate your food</div></div>
           <img id="preview-img" alt="preview">
         </div>
         <input type="file" id="file-input" accept="image/*" capture="environment" onchange="onImagePick(this)">
-        <input type="text" id="food-text" class="text-input" placeholder="Or type food name (e.g. mango, ghee, lentils...)">
-        <button class="btn btn-dark" onclick="runAnalysis()">Evaluate This Food ↗</button>
+        <input type="text" id="food-text" class="text-input" placeholder="Or type food name (e.g. mango, ghee, lentils...)" data-i18n-placeholder="foodNamePlaceholder">
+        <button class="btn btn-dark" onclick="runAnalysis()"><span data-i18n="evaluateFood">Evaluate This Food ↗</span></button>
         <button class="btn btn-outline" onclick="clearScan()">Clear</button>
       </div>
-      <div class="loader" id="loader"><div class="loader-spin">☸</div><div class="loader-txt">Consulting Ayurvedic wisdom...</div><div class="loader-sub">Analysing rasa, vīrya &amp; vipāka</div></div>
+      <div class="loader" id="loader"><div class="loader-spin">☸</div><div class="loader-txt" data-i18n="consulting">Consulting Ayurvedic wisdom...</div><div class="loader-sub" data-i18n="analysing">Analysing rasa, vīrya &amp; vipāka</div></div>
       <div id="result-area" style="display:none;"></div>
     </div>
 
     <!-- JOURNAL TAB -->
     <div id="tab-journal" class="screen">
-      <p class="sect-title">Food journal</p>
+      <p class="sect-title" data-i18n="foodJournal">Food journal</p>
       <div id="journal-list"></div>
     </div>
 
     <!-- ACCOUNT TAB -->
     <div id="tab-account" class="screen">
-      <p class="sect-title">My account</p>
+      <p class="sect-title" data-i18n="myAccount">My account</p>
       <div class="card" style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;">
           <div class="account-avatar" id="acct-avatar">👤</div>
@@ -507,10 +549,10 @@
   </div>
 
   <nav class="bnav">
-    <button class="bnav-btn on" id="nav-dosha" onclick="goTab('dosha')"><span class="ico">🧬</span>Dosha</button>
-    <button class="bnav-btn" id="nav-scan" onclick="goTab('scan')"><span class="ico">🔍</span>Analyse</button>
-    <button class="bnav-btn" id="nav-journal" onclick="goTab('journal')"><span class="ico">📖</span>Journal</button>
-    <button class="bnav-btn" id="nav-account" onclick="goTab('account')"><span class="ico">👤</span>Account</button>
+    <button class="bnav-btn on" id="nav-dosha" onclick="goTab('dosha')"><span class="ico">🧬</span><span data-i18n="navDosha">Dosha</span></button>
+    <button class="bnav-btn" id="nav-scan" onclick="goTab('scan')"><span class="ico">🔍</span><span data-i18n="navAnalyse">Analyse</span></button>
+    <button class="bnav-btn" id="nav-journal" onclick="goTab('journal')"><span class="ico">📖</span><span data-i18n="navJournal">Journal</span></button>
+    <button class="bnav-btn" id="nav-account" onclick="goTab('account')"><span class="ico">👤</span><span data-i18n="navAccount">Account</span></button>
   </nav>
 </div>
 
@@ -518,7 +560,7 @@
 <div id="api-sheet">
   <div class="api-inner">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Anthropic API Key</div>
+    <div class="sheet-title" data-i18n="apiKeyTitle">Anthropic API Key</div>
     <div class="sheet-sub">Required for AI food analysis. Your key is stored only on this device and never shared.</div>
     <input type="password" id="api-input" class="text-input" placeholder="sk-ant-..." autocomplete="off">
     <button class="btn btn-dark" onclick="saveKey()">Save Key ↗</button>
@@ -542,9 +584,9 @@ const CONFIG = {
 
   // 3. Create 3 products in Stripe → copy each Price ID (starts with price_)
   STRIPE_PRICES: {
-    monthly:   'price_1TaxiZ3h8VYXcWowPvZjdKs1',
-    quarterly: 'price_1Taxib3h8VYXcWowf32eg9w0',
-    yearly:    'price_1TaxiY3h8VYXcWowMyeHeiRf',
+    monthly:   'price_1TZTMHKnmQyk1dJTMou2EKKY',
+    quarterly: 'price_1TZTN1KnmQyk1dJTSeoW64M',
+    yearly:    'price_1TZTNyKnmQyk1dJTmES45eY2',
   },
 
   // 4. Your Netlify site URL (for Stripe redirect after payment)
@@ -788,6 +830,8 @@ function showMainApp() {
 
   if (dosha && DOSHA[dosha]) renderDoshaResult({ vata:0, pitta:0, kapha:0, [dosha]:4 });
   renderJournal();
+  // Show API key prompt if not set and server function not available
+  if (!localStorage.getItem('ayur_key')) setTimeout(() => showApiSheet(), 800);
 }
 
 function updateTrialBanner() {
@@ -1099,7 +1143,6 @@ async function runAnalysis() {
   const txt = document.getElementById('food-text').value.trim();
   if (!txt && !imgB64) { alert('Please enter a food name or take a photo.'); return; }
 
-  // Check subscription
   const status = getSubscriptionStatus();
   if (status === 'expired') { showPaywall(); return; }
 
@@ -1115,17 +1158,41 @@ async function runAnalysis() {
 }
 
 async function callClaude(foodName, b64) {
-  // Call our Netlify serverless function — API key stays secret on server
-  const resp = await fetch('/.netlify/functions/analyse', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ foodName, imageB64: b64, dosha })
-  });
-  if (!resp.ok) {
-    const e = await resp.json().catch(() => ({}));
-    throw new Error(e.error || `Server error ${resp.status}`);
+  // Try server function first
+  try {
+    const resp = await fetch('/.netlify/functions/analyse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ foodName, imageB64: b64, dosha })
+    });
+    if (resp.status === 200) {
+      const data = await resp.json();
+      if (data && data.foodName) return data;
+    }
+  } catch(e) {
+    console.log('Server function unavailable:', e.message);
   }
-  return await resp.json();
+
+  // Direct API call fallback
+  const key = localStorage.getItem('ayur_key');
+  if (!key) { showApiSheet(); throw new Error('API key required'); }
+
+  const ctx = dosha ? `User's primary dosha: ${dosha.toUpperCase()} (${DOSHA[dosha].name}). Qualities: ${DOSHA[dosha].qualities.join(', ')}.` : 'No dosha set.';
+  const sys = `You are a classical Ayurvedic nutritionist. ${ctx}
+Return ONLY a JSON object — no markdown:
+{"foodName":"string","emoji":"one emoji","category":"short string","rasa":"Sanskrit taste","virya":"Heating or Cooling","vipaka":"Sweet or Sour or Pungent","tastes":["Sweet"],"season":"best season","vata":{"score":0-100,"effect":"↓|~|↑|↑↑","desc":"one sentence"},"pitta":{"score":0-100,"effect":"↓|~|↑|↑↑","desc":"one sentence"},"kapha":{"score":0-100,"effect":"↓|~|↑|↑↑","desc":"one sentence"},"verdict":"Excellent|Good|Neutral|Caution|Avoid","advice":"1-2 personalised sentences"}`;
+  const content = b64
+    ? [{ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:b64 }},{ type:'text', text: foodName ? `Analyse this food. Label: "${foodName}"` : 'Analyse this food image.' }]
+    : `Analyse "${foodName}" from an Ayurvedic perspective.`;
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+    body: JSON.stringify({ model:'claude-sonnet-4-5', max_tokens:1024, system:sys, messages:[{role:'user',content}] })
+  });
+  if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e.error?.message||`HTTP ${resp.status}`); }
+  const data = await resp.json();
+  const raw = (data.content||[]).map(c=>c.text||'').join('').trim();
+  return JSON.parse(raw.replace(/^```[a-z]*\n?/,'').replace(/\n?```$/,'').trim());
 }
 
 function renderResult(r) {
@@ -1213,6 +1280,529 @@ if ('serviceWorker' in navigator) {
 // ══════════════════════════════════════════
 function show(id) { document.getElementById(id).style.display=''; }
 function hide(id) { document.getElementById(id).style.display='none'; }
+
+// ══════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════
+const LANGS = {
+  en: {
+    flag:'🇬🇧', name:'EN',
+    appTitle:'Āyurveda Food Compass',
+    appSubtitle:'Personalized nourishment through ancient wisdom',
+    // Login
+    welcome:'Welcome',
+    loginSub:'Sign in to access personalised Ayurvedic food evaluation powered by AI.',
+    continueGoogle:'Continue with Google',
+    emailPlaceholder:'Email address',
+    passPlaceholder:'Password',
+    signIn:'Sign In',
+    createAccount:'Create Account',
+    loginTerms:'By continuing you agree to our Terms and Privacy Policy.\n7-day free trial, then from $4.99/month.',
+    // Nav
+    navDosha:'Dosha', navAnalyse:'Analyse', navJournal:'Journal', navAccount:'Account',
+    // Trial
+    trialDays:'days left in free trial', trialTap:'Tap to subscribe', upgrade:'Upgrade',
+    // Paywall
+    trialEnded:'Your free trial has ended',
+    choosePlan:'Choose a plan to continue your Ayurvedic journey',
+    feat1:'AI food recognition from camera',
+    feat2:'Full Ayurvedic analysis (rasa, vīrya, vipāka)',
+    feat3:'Personalised dosha-based scoring',
+    feat4:'Unlimited food journal',
+    feat5:'Cloud sync across devices',
+    monthly:'Monthly', billedMonthly:'Billed every month',
+    quarterly:'Quarterly', billedQuarterly:'Billed every 3 months', saveQ:'Save 30% vs monthly',
+    yearly:'Yearly', billedYearly:'Billed once a year', saveY:'Save 50% — Best value',
+    mostPopular:'Most Popular',
+    startMembership:'Start My Membership ↗',
+    restorePurchase:'Restore Purchase',
+    securePayment:'🔒 Secure payment via Stripe · Cancel anytime',
+    // Dosha
+    prakritiQ:'What is your prakriti?',
+    onceNoticeTitle:'☸ Complete this once — update anytime',
+    onceNoticeText:'Your prakriti (constitution) is determined at birth and stays with you for life. Answer based on your lifelong patterns, not how you feel today.',
+    knowDosha:'Know your dosha already?',
+    fullAssessment:'Or take the full assessment',
+    assessmentSub:"Based on Vasant Lad's Complete Book of Ayurvedic Home Remedies. Answer all 20 questions for best accuracy.",
+    determineDosha:'Determine My Prakriti ↗',
+    minAnswers:'✓ Answer based on lifelong patterns. Minimum 10 answers needed.',
+    yourPrakriti:'Your prakriti',
+    dietaryGuidance:'Dietary guidance',
+    analyseFood:'Analyse a Food ↗',
+    retakeAssessment:'Retake Assessment',
+    basedOn:'Based on', questions:'questions', manuallySelected:'Manually selected',
+    // Dosha data
+    vataGuidance:'Favour warm, moist, and grounding foods. Cooked vegetables, ghee, warm milk, and sweet fruits pacify Vāta. Avoid raw, cold, and dry foods.',
+    pittaGuidance:'Choose cooling, sweet, and bitter foods. Coconut, cucumber, leafy greens, and sweet fruits are beneficial. Avoid spicy, sour, and fermented foods.',
+    kaphaGuidance:'Prioritise light, warm, and pungent foods. Ginger, turmeric, lentils, and greens are ideal. Avoid heavy, oily, sweet, and cold foods.',
+    // Scan
+    whatEating:'What are you eating?',
+    setDoshaFirst:'☽ Set your dosha first for personalised guidance',
+    tapCapture:'Tap to capture or upload food',
+    aiWill:'AI will identify and evaluate your food',
+    foodNamePlaceholder:'Or type food name (e.g. mango, ghee, lentils...)',
+    evaluateFood:'Evaluate This Food ↗',
+    clear:'Clear',
+    consulting:'Consulting Ayurvedic wisdom...',
+    analysing:'Analysing rasa, vīrya & vipāka',
+    analyseAnother:'Analyse Another Food ↗',
+    tastes:'Tastes', impactDoshas:'Impact on doshas',
+    // Journal
+    foodJournal:'Food journal',
+    journalEmpty:'Your evaluated foods will appear here.\nStart by analysing your first meal.',
+    // Account
+    myAccount:'My account',
+    manageSubscription:'Manage Subscription',
+    retakeDosha:'Retake Dosha Assessment',
+    apiKey:'Anthropic API Key',
+    clearJournal:'Clear Food Journal',
+    signOut:'Sign Out',
+    // API Sheet
+    apiKeyTitle:'Anthropic API Key',
+    apiKeyDesc:'Required for AI food analysis. Your key is stored only on this device and never shared.',
+    apiKeyPlaceholder:'sk-ant-...',
+    saveKey:'Save Key ↗',
+    freeKey:'Free key at console.anthropic.com',
+  },
+  de: {
+    flag:'🇩🇪', name:'DE',
+    appTitle:'Āyurveda Ernährungs-Kompass',
+    appSubtitle:'Persönliche Ernährung durch alte Weisheit',
+    welcome:'Willkommen',
+    loginSub:'Melden Sie sich an für personalisierte Ayurvedische Lebensmittelbewertung mit KI.',
+    continueGoogle:'Mit Google fortfahren',
+    emailPlaceholder:'E-Mail-Adresse',
+    passPlaceholder:'Passwort',
+    signIn:'Anmelden',
+    createAccount:'Konto erstellen',
+    loginTerms:'Mit der Fortsetzung stimmen Sie unseren Nutzungsbedingungen zu.\n7-tägige kostenlose Testversion, dann ab 4,99 $/Monat.',
+    navDosha:'Dosha', navAnalyse:'Analysieren', navJournal:'Journal', navAccount:'Konto',
+    trialDays:'Tage verbleiben in der Testversion', trialTap:'Zum Abonnieren tippen', upgrade:'Upgrade',
+    trialEnded:'Ihre kostenlose Testversion ist abgelaufen',
+    choosePlan:'Wählen Sie einen Plan für Ihre Ayurvedische Reise',
+    feat1:'KI-Lebensmittelerkennung per Kamera',
+    feat2:'Vollständige Ayurvedische Analyse (Rasa, Vīrya, Vipāka)',
+    feat3:'Personalisierte Dosha-basierte Bewertung',
+    feat4:'Unbegrenztes Ernährungsjournal',
+    feat5:'Cloud-Synchronisierung über Geräte',
+    monthly:'Monatlich', billedMonthly:'Monatlich abgerechnet',
+    quarterly:'Vierteljährlich', billedQuarterly:'Alle 3 Monate', saveQ:'30% sparen',
+    yearly:'Jährlich', billedYearly:'Einmal jährlich', saveY:'50% sparen — Bester Wert',
+    mostPopular:'Am beliebtesten',
+    startMembership:'Mitgliedschaft starten ↗',
+    restorePurchase:'Kauf wiederherstellen',
+    securePayment:'🔒 Sichere Zahlung via Stripe · Jederzeit kündbar',
+    prakritiQ:'Was ist Ihre Prakriti?',
+    onceNoticeTitle:'☸ Einmal ausfüllen — jederzeit aktualisieren',
+    onceNoticeText:'Ihre Prakriti wird bei der Geburt bestimmt. Antworten Sie basierend auf lebenslangen Mustern.',
+    knowDosha:'Kennen Sie Ihren Dosha bereits?',
+    fullAssessment:'Oder machen Sie die vollständige Bewertung',
+    assessmentSub:'Basierend auf Vasant Lads Buch. Beantworten Sie alle 20 Fragen.',
+    determineDosha:'Meine Prakriti bestimmen ↗',
+    minAnswers:'✓ Basierend auf lebenslangen Mustern. Mindestens 10 Antworten erforderlich.',
+    yourPrakriti:'Ihre Prakriti',
+    dietaryGuidance:'Ernährungsempfehlung',
+    analyseFood:'Lebensmittel analysieren ↗',
+    retakeAssessment:'Bewertung wiederholen',
+    basedOn:'Basierend auf', questions:'Fragen', manuallySelected:'Manuell ausgewählt',
+    vataGuidance:'Bevorzugen Sie warme, feuchte und erdende Lebensmittel. Vermeiden Sie rohe, kalte und trockene Speisen.',
+    pittaGuidance:'Wählen Sie kühlende, süße und bittere Lebensmittel. Vermeiden Sie scharfe, saure und fermentierte Speisen.',
+    kaphaGuidance:'Priorisieren Sie leichte, warme und würzige Lebensmittel. Vermeiden Sie schwere, ölige und süße Speisen.',
+    whatEating:'Was essen Sie gerade?',
+    setDoshaFirst:'☽ Legen Sie zuerst Ihren Dosha fest',
+    tapCapture:'Tippen zum Aufnehmen oder Hochladen',
+    aiWill:'KI identifiziert und bewertet Ihr Essen',
+    foodNamePlaceholder:'Oder Lebensmittelname eingeben...',
+    evaluateFood:'Lebensmittel bewerten ↗',
+    clear:'Löschen',
+    consulting:'Ayurvedische Weisheit wird konsultiert...',
+    analysing:'Analyse von Rasa, Vīrya & Vipāka',
+    analyseAnother:'Weiteres Lebensmittel analysieren ↗',
+    tastes:'Geschmacksrichtungen', impactDoshas:'Auswirkung auf Doshas',
+    foodJournal:'Ernährungsjournal',
+    journalEmpty:'Ihre bewerteten Lebensmittel erscheinen hier.\nBeginnen Sie mit der Analyse Ihrer ersten Mahlzeit.',
+    myAccount:'Mein Konto',
+    manageSubscription:'Abonnement verwalten',
+    retakeDosha:'Dosha-Bewertung wiederholen',
+    apiKey:'Anthropic API-Schlüssel',
+    clearJournal:'Journal leeren',
+    signOut:'Abmelden',
+    apiKeyTitle:'Anthropic API-Schlüssel',
+    apiKeyDesc:'Für die KI-Lebensmittelanalyse erforderlich.',
+    apiKeyPlaceholder:'sk-ant-...',
+    saveKey:'Schlüssel speichern ↗',
+    freeKey:'Kostenloser Schlüssel auf console.anthropic.com',
+  },
+  fr: {
+    flag:'🇫🇷', name:'FR',
+    appTitle:'Boussole Alimentaire Āyurvédique',
+    appSubtitle:'Nutrition personnalisée par la sagesse ancienne',
+    welcome:'Bienvenue',
+    loginSub:'Connectez-vous pour accéder à l\'évaluation alimentaire Ayurvédique personnalisée par IA.',
+    continueGoogle:'Continuer avec Google',
+    emailPlaceholder:'Adresse e-mail',
+    passPlaceholder:'Mot de passe',
+    signIn:'Se connecter',
+    createAccount:'Créer un compte',
+    loginTerms:'En continuant, vous acceptez nos Conditions et Politique de confidentialité.\nEssai gratuit de 7 jours, puis à partir de 4,99 $/mois.',
+    navDosha:'Dosha', navAnalyse:'Analyser', navJournal:'Journal', navAccount:'Compte',
+    trialDays:'jours restants dans l\'essai', trialTap:'Appuyer pour s\'abonner', upgrade:'Passer',
+    trialEnded:'Votre essai gratuit est terminé',
+    choosePlan:'Choisissez un plan pour continuer votre voyage Ayurvédique',
+    feat1:'Reconnaissance alimentaire par IA et caméra',
+    feat2:'Analyse Ayurvédique complète (Rasa, Vīrya, Vipāka)',
+    feat3:'Score personnalisé basé sur votre Dosha',
+    feat4:'Journal alimentaire illimité',
+    feat5:'Synchronisation cloud sur tous vos appareils',
+    monthly:'Mensuel', billedMonthly:'Facturé chaque mois',
+    quarterly:'Trimestriel', billedQuarterly:'Tous les 3 mois', saveQ:'Économisez 30%',
+    yearly:'Annuel', billedYearly:'Facturé une fois par an', saveY:'Économisez 50% — Meilleure valeur',
+    mostPopular:'Le plus populaire',
+    startMembership:'Commencer mon abonnement ↗',
+    restorePurchase:'Restaurer l\'achat',
+    securePayment:'🔒 Paiement sécurisé via Stripe · Annulez à tout moment',
+    prakritiQ:'Quelle est votre Prakriti ?',
+    onceNoticeTitle:'☸ À compléter une fois — mise à jour possible',
+    onceNoticeText:'Votre Prakriti est déterminée à la naissance. Répondez selon vos schémas de vie.',
+    knowDosha:'Connaissez-vous déjà votre Dosha ?',
+    fullAssessment:'Ou faites l\'évaluation complète',
+    assessmentSub:'Basé sur le livre de Vasant Lad. Répondez aux 20 questions.',
+    determineDosha:'Déterminer ma Prakriti ↗',
+    minAnswers:'✓ Répondez selon vos schémas de vie. 10 réponses minimum.',
+    yourPrakriti:'Votre Prakriti',
+    dietaryGuidance:'Conseils alimentaires',
+    analyseFood:'Analyser un aliment ↗',
+    retakeAssessment:'Reprendre l\'évaluation',
+    basedOn:'Basé sur', questions:'questions', manuallySelected:'Sélectionné manuellement',
+    vataGuidance:'Privilégiez les aliments chauds, humides et nourrissants. Évitez les aliments crus, froids et secs.',
+    pittaGuidance:'Choisissez des aliments rafraîchissants, sucrés et amers. Évitez les aliments épicés, acides et fermentés.',
+    kaphaGuidance:'Privilégiez les aliments légers, chauds et piquants. Évitez les aliments lourds, huileux et sucrés.',
+    whatEating:'Que mangez-vous ?',
+    setDoshaFirst:'☽ Définissez d\'abord votre Dosha',
+    tapCapture:'Appuyer pour capturer ou télécharger',
+    aiWill:'L\'IA identifiera et évaluera votre aliment',
+    foodNamePlaceholder:'Ou tapez le nom de l\'aliment...',
+    evaluateFood:'Évaluer cet aliment ↗',
+    clear:'Effacer',
+    consulting:'Consultation de la sagesse Ayurvédique...',
+    analysing:'Analyse du Rasa, Vīrya & Vipāka',
+    analyseAnother:'Analyser un autre aliment ↗',
+    tastes:'Saveurs', impactDoshas:'Impact sur les Doshas',
+    foodJournal:'Journal alimentaire',
+    journalEmpty:'Vos aliments évalués apparaîtront ici.\nCommencez par analyser votre premier repas.',
+    myAccount:'Mon compte',
+    manageSubscription:'Gérer l\'abonnement',
+    retakeDosha:'Reprendre l\'évaluation Dosha',
+    apiKey:'Clé API Anthropic',
+    clearJournal:'Vider le journal',
+    signOut:'Se déconnecter',
+    apiKeyTitle:'Clé API Anthropic',
+    apiKeyDesc:'Nécessaire pour l\'analyse alimentaire par IA.',
+    apiKeyPlaceholder:'sk-ant-...',
+    saveKey:'Enregistrer la clé ↗',
+    freeKey:'Clé gratuite sur console.anthropic.com',
+  },
+  es: {
+    flag:'🇪🇸', name:'ES',
+    appTitle:'Brújula Alimentaria Āyurvédica',
+    appSubtitle:'Nutrición personalizada a través de la sabiduría antigua',
+    welcome:'Bienvenido',
+    loginSub:'Inicia sesión para acceder a la evaluación de alimentos Ayurvédica personalizada con IA.',
+    continueGoogle:'Continuar con Google',
+    emailPlaceholder:'Correo electrónico',
+    passPlaceholder:'Contraseña',
+    signIn:'Iniciar sesión',
+    createAccount:'Crear cuenta',
+    loginTerms:'Al continuar, aceptas nuestros Términos y Política de privacidad.\nPrueba gratuita de 7 días, luego desde $4.99/mes.',
+    navDosha:'Dosha', navAnalyse:'Analizar', navJournal:'Diario', navAccount:'Cuenta',
+    trialDays:'días restantes en prueba', trialTap:'Toca para suscribirte', upgrade:'Mejorar',
+    trialEnded:'Tu prueba gratuita ha terminado',
+    choosePlan:'Elige un plan para continuar tu viaje Ayurvédico',
+    feat1:'Reconocimiento de alimentos con IA y cámara',
+    feat2:'Análisis Ayurvédico completo (Rasa, Vīrya, Vipāka)',
+    feat3:'Puntuación personalizada según tu Dosha',
+    feat4:'Diario alimentario ilimitado',
+    feat5:'Sincronización en la nube entre dispositivos',
+    monthly:'Mensual', billedMonthly:'Facturado cada mes',
+    quarterly:'Trimestral', billedQuarterly:'Cada 3 meses', saveQ:'Ahorra 30%',
+    yearly:'Anual', billedYearly:'Facturado una vez al año', saveY:'Ahorra 50% — Mejor valor',
+    mostPopular:'Más popular',
+    startMembership:'Iniciar mi membresía ↗',
+    restorePurchase:'Restaurar compra',
+    securePayment:'🔒 Pago seguro via Stripe · Cancela cuando quieras',
+    prakritiQ:'¿Cuál es tu Prakriti?',
+    onceNoticeTitle:'☸ Complétalo una vez — actualizable en cualquier momento',
+    onceNoticeText:'Tu Prakriti se determina al nacer. Responde según tus patrones de vida.',
+    knowDosha:'¿Ya conoces tu Dosha?',
+    fullAssessment:'O realiza la evaluación completa',
+    assessmentSub:'Basado en el libro de Vasant Lad. Responde las 20 preguntas.',
+    determineDosha:'Determinar mi Prakriti ↗',
+    minAnswers:'✓ Responde según patrones de vida. Mínimo 10 respuestas.',
+    yourPrakriti:'Tu Prakriti',
+    dietaryGuidance:'Guía alimentaria',
+    analyseFood:'Analizar un alimento ↗',
+    retakeAssessment:'Repetir evaluación',
+    basedOn:'Basado en', questions:'preguntas', manuallySelected:'Seleccionado manualmente',
+    vataGuidance:'Favorece alimentos cálidos, húmedos y nutritivos. Evita alimentos crudos, fríos y secos.',
+    pittaGuidance:'Elige alimentos refrescantes, dulces y amargos. Evita alimentos picantes, ácidos y fermentados.',
+    kaphaGuidance:'Prioriza alimentos ligeros, cálidos y picantes. Evita alimentos pesados, aceitosos y dulces.',
+    whatEating:'¿Qué estás comiendo?',
+    setDoshaFirst:'☽ Configura tu Dosha primero',
+    tapCapture:'Toca para capturar o subir alimento',
+    aiWill:'La IA identificará y evaluará tu alimento',
+    foodNamePlaceholder:'O escribe el nombre del alimento...',
+    evaluateFood:'Evaluar este alimento ↗',
+    clear:'Limpiar',
+    consulting:'Consultando la sabiduría Ayurvédica...',
+    analysing:'Analizando Rasa, Vīrya & Vipāka',
+    analyseAnother:'Analizar otro alimento ↗',
+    tastes:'Sabores', impactDoshas:'Impacto en los Doshas',
+    foodJournal:'Diario alimentario',
+    journalEmpty:'Tus alimentos evaluados aparecerán aquí.\nComienza analizando tu primera comida.',
+    myAccount:'Mi cuenta',
+    manageSubscription:'Gestionar suscripción',
+    retakeDosha:'Repetir evaluación Dosha',
+    apiKey:'Clave API Anthropic',
+    clearJournal:'Limpiar diario',
+    signOut:'Cerrar sesión',
+    apiKeyTitle:'Clave API Anthropic',
+    apiKeyDesc:'Necesaria para el análisis de alimentos con IA.',
+    apiKeyPlaceholder:'sk-ant-...',
+    saveKey:'Guardar clave ↗',
+    freeKey:'Clave gratuita en console.anthropic.com',
+  },
+  hi: {
+    flag:'🇮🇳', name:'HI',
+    appTitle:'आयुर्वेद खाद्य कम्पास',
+    appSubtitle:'प्राचीन ज्ञान से व्यक्तिगत पोषण',
+    welcome:'स्वागत है',
+    loginSub:'AI द्वारा संचालित व्यक्तिगत आयुर्वेदिक खाद्य मूल्यांकन तक पहुँचने के लिए साइन इन करें।',
+    continueGoogle:'Google से जारी रखें',
+    emailPlaceholder:'ईमेल पता',
+    passPlaceholder:'पासवर्ड',
+    signIn:'साइन इन करें',
+    createAccount:'खाता बनाएं',
+    loginTerms:'जारी रखकर आप हमारी शर्तों से सहमत हैं।\n7 दिन का निःशुल्क परीक्षण, फिर $4.99/माह से।',
+    navDosha:'दोष', navAnalyse:'विश्लेषण', navJournal:'जर्नल', navAccount:'खाता',
+    trialDays:'दिन शेष', trialTap:'सदस्यता के लिए टैप करें', upgrade:'अपग्रेड',
+    trialEnded:'आपका निःशुल्क परीक्षण समाप्त हो गया',
+    choosePlan:'अपनी आयुर्वेदिक यात्रा जारी रखने के लिए एक योजना चुनें',
+    feat1:'कैमरे से AI खाद्य पहचान',
+    feat2:'पूर्ण आयुर्वेदिक विश्लेषण (रस, वीर्य, विपाक)',
+    feat3:'व्यक्तिगत दोष-आधारित स्कोरिंग',
+    feat4:'असीमित खाद्य जर्नल',
+    feat5:'सभी उपकरणों पर क्लाउड सिंक',
+    monthly:'मासिक', billedMonthly:'हर महीने बिल',
+    quarterly:'त्रैमासिक', billedQuarterly:'हर 3 महीने', saveQ:'30% बचाएं',
+    yearly:'वार्षिक', billedYearly:'साल में एक बार', saveY:'50% बचाएं — सर्वोत्तम मूल्य',
+    mostPopular:'सबसे लोकप्रिय',
+    startMembership:'सदस्यता शुरू करें ↗',
+    restorePurchase:'खरीदारी पुनर्स्थापित करें',
+    securePayment:'🔒 Stripe के माध्यम से सुरक्षित भुगतान · कभी भी रद्द करें',
+    prakritiQ:'आपकी प्रकृति क्या है?',
+    onceNoticeTitle:'☸ एक बार पूरा करें — कभी भी अपडेट करें',
+    onceNoticeText:'आपकी प्रकृति जन्म से निर्धारित होती है। अपने जीवन भर के पैटर्न के आधार पर उत्तर दें।',
+    knowDosha:'क्या आप अपना दोष जानते हैं?',
+    fullAssessment:'या पूर्ण मूल्यांकन लें',
+    assessmentSub:'वसंत लाड की पुस्तक पर आधारित। सर्वोत्तम सटीकता के लिए सभी 20 प्रश्नों का उत्तर दें।',
+    determineDosha:'मेरी प्रकृति निर्धारित करें ↗',
+    minAnswers:'✓ जीवन भर के पैटर्न के आधार पर उत्तर दें। न्यूनतम 10 उत्तर आवश्यक।',
+    yourPrakriti:'आपकी प्रकृति',
+    dietaryGuidance:'आहार मार्गदर्शन',
+    analyseFood:'खाद्य विश्लेषण करें ↗',
+    retakeAssessment:'पुनः मूल्यांकन करें',
+    basedOn:'पर आधारित', questions:'प्रश्न', manuallySelected:'मैन्युअल रूप से चुना गया',
+    vataGuidance:'गर्म, नम और पौष्टिक खाद्य पदार्थों को प्राथमिकता दें। कच्चे, ठंडे और सूखे खाद्य पदार्थों से बचें।',
+    pittaGuidance:'ठंडे, मीठे और कड़वे खाद्य पदार्थ चुनें। मसालेदार, खट्टे और किण्वित खाद्य पदार्थों से बचें।',
+    kaphaGuidance:'हल्के, गर्म और तीखे खाद्य पदार्थों को प्राथमिकता दें। भारी, तैलीय और मीठे खाद्य पदार्थों से बचें।',
+    whatEating:'आप क्या खा रहे हैं?',
+    setDoshaFirst:'☽ पहले अपना दोष सेट करें',
+    tapCapture:'खाद्य पदार्थ कैप्चर या अपलोड करने के लिए टैप करें',
+    aiWill:'AI आपके खाद्य पदार्थ की पहचान और मूल्यांकन करेगा',
+    foodNamePlaceholder:'या खाद्य पदार्थ का नाम टाइप करें...',
+    evaluateFood:'इस खाद्य पदार्थ का मूल्यांकन करें ↗',
+    clear:'साफ करें',
+    consulting:'आयुर्वेदिक ज्ञान से परामर्श...',
+    analysing:'रस, वीर्य और विपाक का विश्लेषण',
+    analyseAnother:'अन्य खाद्य पदार्थ विश्लेषण करें ↗',
+    tastes:'स्वाद', impactDoshas:'दोषों पर प्रभाव',
+    foodJournal:'खाद्य जर्नल',
+    journalEmpty:'आपके मूल्यांकित खाद्य पदार्थ यहाँ दिखेंगे।\nपहले भोजन का विश्लेषण करके शुरू करें।',
+    myAccount:'मेरा खाता',
+    manageSubscription:'सदस्यता प्रबंधित करें',
+    retakeDosha:'दोष मूल्यांकन दोहराएं',
+    apiKey:'Anthropic API कुंजी',
+    clearJournal:'जर्नल साफ करें',
+    signOut:'साइन आउट करें',
+    apiKeyTitle:'Anthropic API कुंजी',
+    apiKeyDesc:'AI खाद्य विश्लेषण के लिए आवश्यक।',
+    apiKeyPlaceholder:'sk-ant-...',
+    saveKey:'कुंजी सहेजें ↗',
+    freeKey:'console.anthropic.com पर निःशुल्क कुंजी',
+  },
+  uk: {
+    flag:'🇺🇦', name:'UK',
+    appTitle:'Āyurveda Харчовий Компас',
+    appSubtitle:'Персоналізоване харчування через давню мудрість',
+    welcome:'Ласкаво просимо',
+    loginSub:'Увійдіть для доступу до персоналізованої оцінки продуктів харчування на основі Аюрведи та ШІ.',
+    continueGoogle:'Продовжити з Google',
+    emailPlaceholder:'Електронна пошта',
+    passPlaceholder:'Пароль',
+    signIn:'Увійти',
+    createAccount:'Створити акаунт',
+    loginTerms:'Продовжуючи, ви погоджуєтеся з нашими Умовами та Політикою конфіденційності.\n7-денна безкоштовна пробна версія, потім від $4.99/місяць.',
+    navDosha:'Доша', navAnalyse:'Аналіз', navJournal:'Журнал', navAccount:'Акаунт',
+    trialDays:'днів залишилося в пробній версії', trialTap:'Натисніть для підписки', upgrade:'Оновити',
+    trialEnded:'Ваша безкоштовна пробна версія закінчилась',
+    choosePlan:'Виберіть план для продовження вашої Аюрведичної подорожі',
+    feat1:'Розпізнавання їжі за допомогою ШІ та камери',
+    feat2:'Повний Аюрведичний аналіз (Раса, Вірья, Віпака)',
+    feat3:'Персоналізоване оцінювання на основі Доші',
+    feat4:'Необмежений харчовий журнал',
+    feat5:'Хмарна синхронізація між пристроями',
+    monthly:'Щомісяця', billedMonthly:'Щомісячне нарахування',
+    quarterly:'Щоквартально', billedQuarterly:'Кожні 3 місяці', saveQ:'Зекономте 30%',
+    yearly:'Щороку', billedYearly:'Раз на рік', saveY:'Зекономте 50% — Найкраща цінність',
+    mostPopular:'Найпопулярніший',
+    startMembership:'Розпочати членство ↗',
+    restorePurchase:'Відновити покупку',
+    securePayment:'🔒 Безпечна оплата через Stripe · Скасуйте будь-коли',
+    prakritiQ:'Яка ваша Пракріті?',
+    onceNoticeTitle:'☸ Заповніть один раз — оновлюйте будь-коли',
+    onceNoticeText:'Ваша Пракріті визначається при народженні і залишається з вами на все життя. Відповідайте на основі ваших довічних патернів.',
+    knowDosha:'Вже знаєте свою Дошу?',
+    fullAssessment:'Або пройдіть повне оцінювання',
+    assessmentSub:'На основі книги Васанта Лада. Дайте відповідь на всі 20 питань.',
+    determineDosha:'Визначити мою Пракріті ↗',
+    minAnswers:'✓ Відповідайте на основі довічних патернів. Потрібно мінімум 10 відповідей.',
+    yourPrakriti:'Ваша Пракріті',
+    dietaryGuidance:'Харчові рекомендації',
+    analyseFood:'Аналізувати продукт ↗',
+    retakeAssessment:'Повторити оцінювання',
+    basedOn:'На основі', questions:'питань', manuallySelected:'Вибрано вручну',
+    vataGuidance:'Надавайте перевагу теплій, вологій та поживній їжі. Уникайте сирих, холодних та сухих продуктів.',
+    pittaGuidance:'Вибирайте охолоджуючі, солодкі та гіркі продукти. Уникайте гострих, кислих та ферментованих продуктів.',
+    kaphaGuidance:'Надавайте перевагу легким, теплим та пікантним продуктам. Уникайте важких, жирних та солодких продуктів.',
+    whatEating:'Що ви їсте?',
+    setDoshaFirst:'☽ Спочатку встановіть свою Дошу',
+    tapCapture:'Торкніться для зйомки або завантаження їжі',
+    aiWill:'ШІ ідентифікує та оцінить ваш продукт',
+    foodNamePlaceholder:'Або введіть назву продукту (напр. манго, топлене масло)...',
+    evaluateFood:'Оцінити цей продукт ↗',
+    clear:'Очистити',
+    consulting:'Консультація Аюрведичної мудрості...',
+    analysing:'Аналіз Раси, Вірьї та Віпаки',
+    analyseAnother:'Аналізувати інший продукт ↗',
+    tastes:'Смаки', impactDoshas:'Вплив на Доші',
+    foodJournal:'Харчовий журнал',
+    journalEmpty:'Ваші оцінені продукти з\'являться тут.\nПочніть з аналізу першого прийому їжі.',
+    myAccount:'Мій акаунт',
+    manageSubscription:'Керувати підпискою',
+    retakeDosha:'Повторити оцінювання Доші',
+    apiKey:'API ключ Anthropic',
+    clearJournal:'Очистити журнал',
+    signOut:'Вийти',
+    apiKeyTitle:'API ключ Anthropic',
+    apiKeyDesc:'Необхідний для аналізу їжі за допомогою ШІ.',
+    apiKeyPlaceholder:'sk-ant-...',
+    saveKey:'Зберегти ключ ↗',
+    freeKey:'Безкоштовний ключ на console.anthropic.com',
+  },
+};
+
+// ══════════════════════════════════════════
+// LANGUAGE SYSTEM
+// ══════════════════════════════════════════
+let currentLang = 'en';
+
+function detectLang() {
+  const saved = localStorage.getItem('ayur_lang');
+  if (saved && LANGS[saved]) return saved;
+  const browser = (navigator.language || navigator.userLanguage || 'en').substring(0,2).toLowerCase();
+  const map = { de:'de', fr:'fr', es:'es', hi:'hi', uk:'uk', en:'en' };
+  return map[browser] || 'en';
+}
+
+function setLang(lang) {
+  if (!LANGS[lang]) return;
+  currentLang = lang;
+  localStorage.setItem('ayur_lang', lang);
+  applyTranslations();
+  document.getElementById('lang-dropdown').classList.remove('open');
+  // Update active state
+  document.querySelectorAll('.lang-option').forEach((el, i) => {
+    const langs = ['en','de','fr','es','hi','uk'];
+    el.classList.toggle('active', langs[i] === lang);
+  });
+}
+
+function t(key) {
+  return LANGS[currentLang]?.[key] || LANGS.en[key] || key;
+}
+
+function toggleLangMenu() {
+  document.getElementById('lang-dropdown').classList.toggle('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (!document.getElementById('lang-switcher').contains(e.target)) {
+    document.getElementById('lang-dropdown').classList.remove('open');
+  }
+});
+
+function applyTranslations() {
+  const L = LANGS[currentLang];
+  if (!L) return;
+
+  // Update lang button
+  document.getElementById('lang-btn-display').textContent = `${L.flag} ${L.name}`;
+  document.documentElement.lang = currentLang;
+
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (L[key]) el.textContent = L[key];
+  });
+
+  // Update placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (L[key]) el.placeholder = L[key];
+  });
+
+  // Update DOSHA data
+  if (window.DOSHA) {
+    DOSHA.vata.guidance  = L.vataGuidance;
+    DOSHA.pitta.guidance = L.pittaGuidance;
+    DOSHA.kapha.guidance = L.kaphaGuidance;
+  }
+
+  // Re-render dosha result if showing
+  if (dosha && document.getElementById('dosha-res').style.display !== 'none') {
+    const sc = { vata:0, pitta:0, kapha:0 };
+    sc[dosha] = 4;
+    renderDoshaResult(sc);
+  }
+
+  // Re-render journal
+  renderJournal();
+}
+
+// Apply on load
+document.addEventListener('DOMContentLoaded', () => {
+  currentLang = detectLang();
+  applyTranslations();
+  // Set active lang option
+  const langs = ['en','de','fr','es','hi','uk'];
+  document.querySelectorAll('.lang-option').forEach((el, i) => {
+    el.classList.toggle('active', langs[i] === currentLang);
+  });
+});
+</script>
+</body>
+</html>
 function showSpinner(msg) { document.getElementById('spinner').querySelector('p').textContent=msg||'Please wait...'; document.getElementById('spinner').classList.add('show'); }
 function hideSpinner() { document.getElementById('spinner').classList.remove('show'); }
 function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.className='show'; setTimeout(()=>t.className='',2600); }
