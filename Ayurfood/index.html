@@ -892,23 +892,36 @@ function showPaywall() {
 // AUTH
 // ══════════════════════════════════════════
 async function signInGoogle() {
-  if (!supabase) { showError('Supabase keys not configured. Please add them to the CONFIG block in index.html.'); return; }
+  // Debug: check if supabase is ready
+  if (!supabase) {
+    showError('❌ Supabase not connected. Check your SUPABASE_URL and SUPABASE_ANON keys in the CONFIG block.');
+    return;
+  }
+
   showSpinner('Opening Google sign-in...');
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/' }
+      options: {
+        redirectTo: 'https://ayurveda-food.com',
+        scopes: 'email profile'
+      }
     });
+
     if (error) {
       hideSpinner();
-      if (error.message.includes('provider is not enabled') || error.message.includes('not enabled')) {
-        showError('Google login not enabled yet. See setup instructions below.');
-        showGoogleSetupInstructions();
-      } else {
-        showError('Google error: ' + error.message);
-      }
+      showError('Google error: ' + error.message);
+      return;
     }
-    // No error = browser redirects to Google automatically
+
+    if (data?.url) {
+      // Manually redirect if browser didn't do it automatically
+      window.location.href = data.url;
+    } else {
+      hideSpinner();
+      showError('No redirect URL from Google. Is Google provider enabled in Supabase?');
+    }
+
   } catch(e) {
     hideSpinner();
     showError('Google sign-in failed: ' + e.message);
