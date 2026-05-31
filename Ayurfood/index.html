@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#B8882A">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AyurFood">
+  <title>Āyurveda Food Compass</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Supabase — async with fallback -->
+  <script>
+  (function() {
+    var cdns = [
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js',
+      'https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js'
+    ];
+    var idx = 0;
+    function tryLoad() {
+      if (idx >= cdns.length) return;
+      var s = document.createElement('script');
+      s.src = cdns[idx++];
+      s.onerror = tryLoad;
+      document.head.appendChild(s);
+    }
+    tryLoad();
+  })();
+  </script>
+  <!-- Stripe -->
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --cream: #FBF8F3; --dark: #2A2019; --muted: #7A6B58;
+      --border: rgba(42,32,25,0.12); --gold: #B8882A;
+      --vata: #C17F3A; --vata-light: #FDF3E7;
+      --pitta: #C94A2A; --pitta-light: #FDF0EC;
+      --kapha: #2E7D5E; --kapha-light: #EAF5F0;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%;
+      background: #FBF8F3;
+      color: var(--dark);
+      font-family: 'DM Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Nuclear background fix */
+    html { background: #FBF8F3 !important; }
+    body { background: #FBF8F3 !important; position: relative; }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: #FBF8F3;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ── APP SHELL ── */
+    #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; max-width: 480px; margin: 0 auto; background: #FBF8F3; box-shadow: 0 0 60px rgba(0,0,0,0.1); overflow: hidden; position: relative; z-index: 1; isolation: isolate; }
+
+    /* ── PAGES (full-screen overlays) ── */
+    .page { position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column; background: #FBF8F3; overflow-y: auto; max-width: 480px; margin: 0 auto; isolation: isolate; }
+    .page.active { display: flex; }
+
+    /* ── HEADER ── */
+    .hdr { flex-shrink: 0; text-align: center; padding: calc(var(--safe-top) + 14px) 20px 12px; background: var(--cream); border-bottom: 1px solid var(--border); }
+    .hdr-sym { display: block; font-size: 18px; color: var(--gold); letter-spacing: 8px; margin-bottom: 4px; }
+    .hdr h1 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 400; }
+    .hdr p { font-size: 11px; color: var(--muted); font-weight: 300; margin-top: 2px; }
+    .hdr-right { position: absolute; right: 16px; top: calc(var(--safe-top) + 14px); }
+    .hdr-wrap { position: relative; }
+
+    /* ── SCROLL ── */
+    #content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--cream); }
+    .screen { display: none; padding: 18px 16px calc(18px + var(--safe-bottom)); }
+    .screen.active { display: block; }
+
+    /* ── BOTTOM NAV ── */
+    .bnav { flex-shrink: 0; display: flex; background: #fff; border-top: 1px solid var(--border); padding-bottom: var(--safe-bottom); }
+    .bnav-btn { flex: 1; border: none; background: none; cursor: pointer; padding: 10px 8px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); transition: color .2s; }
+    .bnav-btn .ico { font-size: 22px; line-height: 1; }
+    .bnav-btn.on { color: var(--gold); }
+
+    /* ── BUTTONS ── */
+    .btn { display: block; width: 100%; padding: 13px; border-radius: 10px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.3px; transition: opacity .15s, transform .1s; }
+    .btn:active { transform: scale(0.985); opacity: .85; }
+    .btn-dark { background: var(--dark); color: var(--cream); margin-top: 8px; }
+    .btn-gold { background: var(--gold); color: #fff; margin-top: 8px; }
+    .btn-outline { background: #fff; color: var(--dark); border: 1px solid var(--border); margin-top: 8px; }
+    .btn-google { background: #fff; color: #3c4043; border: 1px solid #dadce0; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 500; }
+    .btn-google svg { flex-shrink: 0; }
+    .btn-sm { width: auto; padding: 7px 14px; font-size: 12px; margin-top: 0; }
+
+    /* ── CARD ── */
+    .card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+
+    /* ── TYPOGRAPHY ── */
+    .sect-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 400; font-style: italic; margin-bottom: 14px; color: var(--dark); }
+    .tip-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 500; margin-bottom: 5px; }
+    .tip-text { font-size: 12px; line-height: 1.6; font-style: italic; }
+
+    /* ── TEXT INPUT ── */
+    .text-input { width: 100%; padding: 13px 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--dark); background: #fff; -webkit-appearance: none; }
+    .text-input:focus { outline: none; border-color: var(--gold); }
+
+    /* ══════════════════════════════════════
+       LOGIN PAGE
+    ══════════════════════════════════════ */
+    #page-login { background: #2A2019; justify-content: center; align-items: center; padding: 32px 24px; }
+    .login-logo { text-align: center; margin-bottom: 32px; }
+    .login-logo .sym { font-size: 40px; color: var(--gold); letter-spacing: 8px; display: block; margin-bottom: 12px; }
+    .login-logo h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: #FBF8F3; }
+    .login-logo p { font-size: 13px; color: rgba(251,248,243,0.6); margin-top: 6px; font-weight: 300; }
+    .login-card { background: #FBF8F3; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 360px; }
+    .login-card h2 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; margin-bottom: 6px; }
+    .login-card p { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+    .divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+    .divider span { font-size: 12px; color: var(--muted); }
+    .login-terms { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; line-height: 1.5; }
+    .login-terms a { color: var(--gold); text-decoration: none; }
+
+    /* ══════════════════════════════════════
+       TRIAL BANNER
+    ══════════════════════════════════════ */
+    #trial-banner { flex-shrink: 0; background: linear-gradient(135deg, #B8882A, #C94A2A); color: #fff; padding: 10px 16px; display: none; align-items: center; justify-content: space-between; font-size: 12px; cursor: pointer; }
+    #trial-banner.show { display: flex; }
+    #trial-banner strong { font-size: 13px; }
+    #trial-banner .upgrade-link { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+
+    /* ══════════════════════════════════════
+       PAYWALL PAGE
+    ══════════════════════════════════════ */
+    #page-paywall { padding: calc(var(--safe-top) + 20px) 20px calc(20px + var(--safe-bottom)); }
+    .paywall-header { text-align: center; margin-bottom: 28px; }
+    .paywall-header .lock-icon { font-size: 40px; display: block; margin-bottom: 12px; }
+    .paywall-header h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+    .paywall-header p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .features-list { margin-bottom: 24px; }
+    .feature-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; }
+    .feature-row .fi { font-size: 16px; }
+    .plan-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .plan-card { border: 2px solid var(--border); border-radius: 14px; padding: 14px 16px; cursor: pointer; background: #fff; transition: all .2s; position: relative; }
+    .plan-card.selected { border-color: var(--gold); background: #FFFDF5; }
+    .plan-card.popular { border-color: var(--kapha); }
+    .popular-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--kapha); color: #fff; font-size: 10px; font-weight: 600; padding: 3px 12px; border-radius: 20px; white-space: nowrap; letter-spacing: 0.5px; text-transform: uppercase; }
+    .plan-row { display: flex; align-items: center; justify-content: space-between; }
+    .plan-name { font-size: 15px; font-weight: 500; }
+    .plan-price { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); }
+    .plan-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .plan-save { font-size: 11px; color: var(--kapha); font-weight: 500; margin-top: 2px; }
+    .guarantee { text-align: center; font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    /* ══════════════════════════════════════
+       ACCOUNT PAGE
+    ══════════════════════════════════════ */
+    .account-avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); margin-right: 14px; background: var(--vata-light); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; overflow: hidden; }
+    .account-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .sub-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-top: 8px; }
+    .sub-badge.trial { background: var(--vata-light); color: var(--vata); }
+    .sub-badge.active { background: var(--kapha-light); color: var(--kapha); }
+    .sub-badge.expired { background: var(--pitta-light); color: var(--pitta); }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px; cursor: pointer; }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-icon { font-size: 20px; width: 28px; text-align: center; }
+    .menu-label { flex: 1; }
+    .menu-arrow { color: var(--muted); font-size: 18px; }
+
+    /* ══════════════════════════════════════
+       DOSHA / QUIZ
+    ══════════════════════════════════════ */
+    .dosha-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
+    .dchoice { border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 8px; background: #fff; text-align: center; cursor: pointer; transition: all .2s; }
+    .dchoice:active { transform: scale(0.96); }
+    .dchoice .dico { font-size: 26px; display: block; margin-bottom: 5px; }
+    .dchoice .dname { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 400; }
+    .dchoice .dele { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .dchoice .dtr { font-size: 9px; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+    .dchoice.on-vata { border-color: var(--vata); background: var(--vata-light); }
+    .dchoice.on-pitta { border-color: var(--pitta); background: var(--pitta-light); }
+    .dchoice.on-kapha { border-color: var(--kapha); background: var(--kapha-light); }
+    .dchoice.on-vata .dname { color: var(--vata); }
+    .dchoice.on-pitta .dname { color: var(--pitta); }
+    .dchoice.on-kapha .dname { color: var(--kapha); }
+    .qblock { margin-bottom: 16px; }
+    .qlabel { font-size: 13px; font-weight: 500; margin-bottom: 8px; line-height: 1.5; }
+    .qopts { display: flex; flex-direction: column; gap: 6px; }
+    .qopt { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 13px; line-height: 1.4; transition: all .15s; color: var(--dark); }
+    .qopt.sv { border-color: var(--vata); background: var(--vata-light); color: var(--vata); }
+    .qopt.sp { border-color: var(--pitta); background: var(--pitta-light); color: var(--pitta); }
+    .qopt.sk { border-color: var(--kapha); background: var(--kapha-light); color: var(--kapha); }
+    .qdot { flex-shrink: 0; margin-top: 1px; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; }
+    .qdot-fill { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: none; }
+    .qopt.sv .qdot-fill, .qopt.sp .qdot-fill, .qopt.sk .qdot-fill { display: block; }
+
+    /* DOSHA RESULT */
+    .dres-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .dres-icon { width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+    .dres-name { font-family: 'Playfair Display', serif; font-size: 18px; }
+    .dres-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .bar-row { margin-bottom: 9px; }
+    .bar-lbl { display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+    .bar-track { height: 6px; background: rgba(42,32,25,.08); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+    .tip-box { background: var(--cream); border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+
+    /* ══════════════════════════════════════
+       SCAN / RESULT
+    ══════════════════════════════════════ */
+    .upload-zone { border: 1.5px dashed var(--border); border-radius: 14px; background: #fff; cursor: pointer; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 16px; margin-bottom: 12px; transition: border-color .2s; overflow: hidden; position: relative; }
+    .upload-zone:active { border-color: var(--gold); background: #fffdf9; }
+    .upload-zone img { max-width: 100%; max-height: 200px; border-radius: 10px; object-fit: cover; display: none; }
+    .upload-ico { font-size: 42px; margin-bottom: 8px; }
+    .upload-lbl { font-size: 14px; color: var(--muted); }
+    .upload-sub { font-size: 11px; color: var(--muted); opacity: .7; margin-top: 3px; }
+    #file-input { display: none; }
+    .hint-bar { background: var(--vata-light); border: 1px solid var(--vata); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; color: var(--vata); text-align: center; display: none; }
+    .loader { text-align: center; padding: 52px 16px; display: none; }
+    .loader-spin { font-size: 40px; display: inline-block; animation: spin 3s linear infinite; margin-bottom: 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-txt { font-size: 14px; color: var(--muted); font-style: italic; }
+    .loader-sub { font-size: 11px; color: var(--muted); margin-top: 5px; opacity: .7; }
+    .res-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .res-emoji { font-size: 38px; flex-shrink: 0; }
+    .res-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; }
+    .res-cat { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+    .score-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1.5px solid; margin-bottom: 14px; }
+    .score-circ { width: 58px; height: 58px; border-radius: 50%; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid; }
+    .score-num { font-family: 'Playfair Display', serif; font-size: 22px; line-height: 1; }
+    .score-of { font-size: 9px; font-weight: 300; text-transform: uppercase; letter-spacing: .5px; }
+    .score-verd { font-size: 15px; font-weight: 500; }
+    .score-adv { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+    .props-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .prop { background: var(--cream); border-radius: 8px; padding: 10px 12px; }
+    .prop-l { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 3px; }
+    .prop-v { font-size: 13px; font-weight: 500; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .chip { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid; }
+    .impact-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 500; margin-bottom: 8px; }
+    .impact-row { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border); background: #fff; margin-bottom: 6px; }
+    .impact-row.hl { border-width: 1.5px; }
+    .impact-row.hl-vata { border-color: var(--vata); background: var(--vata-light); }
+    .impact-row.hl-pitta { border-color: var(--pitta); background: var(--pitta-light); }
+    .impact-row.hl-kapha { border-color: var(--kapha); background: var(--kapha-light); }
+    .imp-name { font-size: 12px; font-weight: 500; min-width: 46px; }
+    .imp-fx { font-size: 14px; font-weight: 600; min-width: 24px; text-align: center; }
+    .imp-desc { font-size: 11px; color: var(--muted); flex: 1; line-height: 1.4; }
+    .imp-score { font-size: 12px; font-weight: 500; min-width: 28px; text-align: right; }
+
+    /* HISTORY */
+    .hist-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #fff; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+    .hist-emo { font-size: 30px; flex-shrink: 0; }
+    .hist-name { font-size: 14px; font-weight: 500; }
+    .hist-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .hist-score { text-align: right; }
+    .hist-num { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; }
+    .hist-vrd { font-size: 10px; font-weight: 500; margin-top: 1px; }
+    .empty { text-align: center; padding: 52px 16px; color: var(--muted); }
+    .empty-ico { font-size: 40px; display: block; margin-bottom: 12px; }
+    .empty-txt { font-size: 13px; line-height: 1.6; }
+
+    /* INSTALL BANNER */
+    #install-banner { display: none; flex-shrink: 0; background: var(--dark); color: #fff; padding: 11px 16px; align-items: center; justify-content: center; gap: 10px; font-size: 13px; }
+    #install-banner.show { display: flex; }
+    #install-banner button { background: var(--gold); color: #fff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+    #install-banner .dismiss { background: none; color: rgba(255,255,255,.6); font-size: 20px; padding: 0 4px; border: none; cursor: pointer; }
+
+    /* API KEY INPUT */
+    #api-sheet { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(42,32,25,.8); align-items: flex-end; justify-content: center; }
+    #api-sheet.show { display: flex; }
+    .api-inner { background: var(--cream); border-radius: 20px 20px 0 0; padding: 20px 20px calc(20px + var(--safe-bottom)); width: 100%; max-width: 480px; }
+    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
+    .sheet-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 8px; }
+    .sheet-sub { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
+    .sheet-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; line-height: 1.5; }
+    .sheet-note a { color: var(--gold); }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; display: none; z-index: 500; white-space: nowrap; }
+    #toast.show { display: block; animation: fadeInOut 2.5s forwards; }
+    @keyframes fadeInOut { 0%{opacity:0;transform:translateX(-50%) translateY(10px)} 15%{opacity:1;transform:translateX(-50%) translateY(0)} 75%{opacity:1} 100%{opacity:0} }
+
+    /* SPINNER OVERLAY */
+    #spinner { position: fixed; inset: 0; background: rgba(251,248,243,.8); z-index: 400; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+    #spinner.show { display: flex; }
+    #spinner .spin { font-size: 36px; animation: spin 2s linear infinite; }
+    #spinner p { font-size: 13px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Spinner -->
+<div id="spinner"><div class="spin">☸</div><p>Please wait...</p></div>
+
+<!-- ════════════════════════════════════
+     LOGIN PAGE
+════════════════════════════════════ -->
+<div id="page-login" class="page active">
+  <div class="login-logo">
+    <span class="sym">☸ ॐ ☸</span>
+    <h1>Āyurveda Food Compass</h1>
+    <p>Ancient wisdom for modern nourishment</p>
+  </div>
+  <div class="login-card">
+    <h2>Welcome</h2>
+    <p>Sign in to access personalised Ayurvedic food evaluation powered by AI.</p>
+    <button class="btn btn-google" onclick="signInGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+      Continue with Google
+    </button>
+    <div class="divider"><hr><span>or</span><hr></div>
+    <input type="email" id="email-input" class="text-input" placeholder="Email address">
+    <input type="password" id="pass-input" class="text-input" placeholder="Password">
+    <button class="btn btn-dark" onclick="signInEmail()" id="email-btn">Sign In</button>
+    <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
+    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>7-day free trial, then from $4.99/month.</p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.0.8</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAYWALL PAGE
+════════════════════════════════════ -->
+<div id="page-paywall" class="page">
+  <div class="paywall-header">
+    <span class="lock-icon">✨</span>
+    <h2>Your free trial has ended</h2>
+    <p>Choose a plan to continue your Ayurvedic journey</p>
+  </div>
+
+  <div class="features-list">
+    <div class="feature-row"><span class="fi">📷</span> AI food recognition from camera</div>
+    <div class="feature-row"><span class="fi">☸</span> Full Ayurvedic analysis (rasa, vīrya, vipāka)</div>
+    <div class="feature-row"><span class="fi">🧬</span> Personalised dosha-based scoring</div>
+    <div class="feature-row"><span class="fi">📖</span> Unlimited food journal</div>
+    <div class="feature-row"><span class="fi">☁️</span> Cloud sync across devices</div>
+  </div>
+
+  <div class="plan-cards" id="plan-cards">
+    <div class="plan-card" data-plan="monthly" data-price-id="" onclick="selectPlan(this)">
+      <div class="plan-row">
+        <div><div class="plan-name">Monthly</div><div class="plan-sub">Billed every month</div></div>
+        <div><div class="plan-price">$9.99<span style="font-size:12px;color:var(--muted)">/mo</span></div></div>
+      </div>
+    </div>
+    <div class="plan-card popular selected" data-plan="quarterly" data-price-id="" onclick="selectPlan(this)">
+      <div class="popular-badge">Most Popular</div>
+      <div class="plan-row">
+        <div><div class="plan-name">Quarterly</div><div class="plan-sub">Billed every 3 months</div><div class="plan-save">Save 30% vs monthly</div></div>
+        <div><div class="plan-price">$6.99<span style="font-size:12px;color:var(--muted)">/mo</span></div><div style="font-size:11px;color:var(--muted);text-align:right">$20.97 total</div></div>
+      </div>
+    </div>
+    <div class="plan-card" data-plan="yearly" data-price-id="" onclick="selectPlan(this)">
+      <div class="plan-row">
+        <div><div class="plan-name">Yearly</div><div class="plan-sub">Billed once a year</div><div class="plan-save">Save 50% — Best value</div></div>
+        <div><div class="plan-price">$4.99<span style="font-size:12px;color:var(--muted)">/mo</span></div><div style="font-size:11px;color:var(--muted);text-align:right">$59.88 total</div></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-gold" onclick="startCheckout()" id="checkout-btn">Start My Membership ↗</button>
+  <button class="btn btn-outline" onclick="restorePurchase()">Restore Purchase</button>
+  <p class="guarantee">🔒 Secure payment via Stripe · Cancel anytime</p>
+</div>
+
+<!-- ════════════════════════════════════
+     MAIN APP
+════════════════════════════════════ -->
+<div id="app" style="display:none;">
+  <div id="install-banner">
+    <span>📲 Add AyurFood to your home screen</span>
+    <button onclick="doInstall()">Install</button>
+    <button class="dismiss" onclick="dismissInstall()">×</button>
+  </div>
+
+  <div id="trial-banner" onclick="showPaywall()">
+    <div><strong id="trial-days-text">7 days left in trial</strong><br><span style="opacity:.8">Tap to subscribe</span></div>
+    <span class="upgrade-link">Upgrade ↗</span>
+  </div>
+
+  <div class="hdr hdr-wrap">
+    <span class="hdr-sym">☸ ॐ ☸</span>
+    <h1>Āyurveda Food Compass</h1>
+    <p>Personalized nourishment through ancient wisdom</p>
+    <div class="hdr-right">
+      <button class="btn btn-outline btn-sm" onclick="goTab('account')" style="border-radius:20px;padding:6px 12px;font-size:11px;">
+        <span id="hdr-avatar">👤</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="content">
+    <!-- DOSHA TAB -->
+    <div id="tab-dosha" class="screen active">
+      <div id="dosha-sel">
+        <div style="background:#FDF3E7;border:1px solid #C17F3A;border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+          <div style="font-size:13px;font-weight:500;color:#C17F3A;margin-bottom:4px;">☸ Complete this once — update anytime</div>
+          <div style="font-size:12px;color:#7A6B58;line-height:1.6;">Your prakriti (constitution) is determined at birth and stays with you for life. Answer based on your <em>lifelong patterns</em>, not how you feel today.</div>
+        </div>
+        <p class="sect-title">Know your dosha already?</p>
+        <div class="dosha-grid">
+          <div class="dchoice" id="dc-vata" onclick="pickDosha('vata')"><span class="dico">🌬️</span><div class="dname" style="color:var(--vata)">Vāta</div><div class="dele">Air · Ether</div><div class="dtr">Light · Dry · Mobile</div></div>
+          <div class="dchoice" id="dc-pitta" onclick="pickDosha('pitta')"><span class="dico">🔥</span><div class="dname" style="color:var(--pitta)">Pitta</div><div class="dele">Fire · Water</div><div class="dtr">Sharp · Hot · Intense</div></div>
+          <div class="dchoice" id="dc-kapha" onclick="pickDosha('kapha')"><span class="dico">🌿</span><div class="dname" style="color:var(--kapha)">Kapha</div><div class="dele">Earth · Water</div><div class="dtr">Heavy · Stable · Calm</div></div>
+        </div>
+        <p class="sect-title" style="margin-top:4px;">Or take the full assessment</p>
+        <div style="font-size:12px;color:#7A6B58;margin-bottom:16px;line-height:1.5;">Based on Vasant Lad's <em>Complete Book of Ayurvedic Home Remedies</em>. Answer all 20 questions for best accuracy.</div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#B8882A;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(184,136,42,0.2);">Body &amp; Appearance</div>
+        <div class="qblock"><div class="qlabel">1. Body frame &amp; build</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,0,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Thin, light, bony — difficulty gaining weight</div><div class="qopt" onclick="pickOpt(this,0,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Medium, symmetrical — moderate muscle development</div><div class="qopt" onclick="pickOpt(this,0,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Large, broad, well-built — tendency to gain weight</div></div></div>
+        <div class="qblock"><div class="qlabel">2. Skin texture</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,1,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Dry, rough, thin — tends to crack in cold weather</div><div class="qopt" onclick="pickOpt(this,1,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Soft, oily, warm — prone to rashes, freckles, acne</div><div class="qopt" onclick="pickOpt(this,1,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Thick, moist, cool, pale — smooth and lustrous</div></div></div>
+        <div class="qblock"><div class="qlabel">3. Hair</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,2,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Dry, brittle, frizzy — breaks easily</div><div class="qopt" onclick="pickOpt(this,2,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Fine, straight, oily — premature graying or thinning</div><div class="qopt" onclick="pickOpt(this,2,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Thick, wavy, lustrous — abundant and strong</div></div></div>
+        <div class="qblock"><div class="qlabel">4. Eyes</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,3,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Small, active, dry — dart around, poor night vision</div><div class="qopt" onclick="pickOpt(this,3,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Medium, sharp, penetrating — light-sensitive, reddish</div><div class="qopt" onclick="pickOpt(this,3,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Large, beautiful, calm — dense lashes, white sclera</div></div></div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#B8882A;font-weight:600;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(184,136,42,0.2);">Digestion &amp; Energy</div>
+        <div class="qblock"><div class="qlabel">5. Appetite &amp; digestion</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,4,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Variable — sometimes ravenous, sometimes no appetite</div><div class="qopt" onclick="pickOpt(this,4,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Strong — irritable if meals are skipped; heartburn</div><div class="qopt" onclick="pickOpt(this,4,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Slow but steady — rarely very hungry; feel heavy after eating</div></div></div>
+        <div class="qblock"><div class="qlabel">6. Bowel movements</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,5,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Irregular, tendency to constipation, dry or hard stools</div><div class="qopt" onclick="pickOpt(this,5,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Regular, loose or soft — diarrhea when stressed</div><div class="qopt" onclick="pickOpt(this,5,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Regular, slow, heavy — may skip a day without discomfort</div></div></div>
+        <div class="qblock"><div class="qlabel">7. Energy &amp; activity</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,6,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Bursts of energy followed by fatigue — tires quickly</div><div class="qopt" onclick="pickOpt(this,6,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Strong, purposeful — drives hard but can burn out</div><div class="qopt" onclick="pickOpt(this,6,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Steady, sustained — slow to start but long endurance</div></div></div>
+        <div class="qblock"><div class="qlabel">8. Sleep patterns</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,7,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Light, interrupted — difficulty falling asleep; active dreams</div><div class="qopt" onclick="pickOpt(this,7,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Moderate — fall asleep easily but wake if disturbed</div><div class="qopt" onclick="pickOpt(this,7,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Deep, long — difficulty waking; groggy in the morning</div></div></div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#B8882A;font-weight:600;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(184,136,42,0.2);">Temperature &amp; Climate</div>
+        <div class="qblock"><div class="qlabel">9. Temperature preference</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,8,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Love warmth — hands and feet often cold; dislike wind</div><div class="qopt" onclick="pickOpt(this,8,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Prefer cool — feel hot easily; dislike heat and direct sun</div><div class="qopt" onclick="pickOpt(this,8,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Prefer warmth but tolerate most climates; dislike cold and damp</div></div></div>
+        <div class="qblock"><div class="qlabel">10. Perspiration</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,9,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Minimal sweating — skin tends to be dry</div><div class="qopt" onclick="pickOpt(this,9,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Profuse sweating — even with mild exertion; body odor</div><div class="qopt" onclick="pickOpt(this,9,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Moderate, cool sweating — skin stays moist</div></div></div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#B8882A;font-weight:600;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(184,136,42,0.2);">Mind &amp; Emotions</div>
+        <div class="qblock"><div class="qlabel">11. Mental activity</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,10,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Quick, restless — many ideas, easily distracted</div><div class="qopt" onclick="pickOpt(this,10,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Sharp, focused — analytical, critical, good concentration</div><div class="qopt" onclick="pickOpt(this,10,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Calm, methodical — slow but thorough; excellent long-term memory</div></div></div>
+        <div class="qblock"><div class="qlabel">12. Memory</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,11,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Quick to learn, quick to forget — short-term better</div><div class="qopt" onclick="pickOpt(this,11,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Sharp recall — retains and retrieves well</div><div class="qopt" onclick="pickOpt(this,11,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Slow to learn, never forgets — excellent retention</div></div></div>
+        <div class="qblock"><div class="qlabel">13. Stress response</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,12,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Anxiety, fear, nervousness — worry and overthink</div><div class="qopt" onclick="pickOpt(this,12,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Irritability, anger, frustration — become sharp or controlling</div><div class="qopt" onclick="pickOpt(this,12,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Withdrawal, stubbornness — become quiet and resistant</div></div></div>
+        <div class="qblock"><div class="qlabel">14. Personality</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,13,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Enthusiastic, talkative, creative — love novelty and change</div><div class="qopt" onclick="pickOpt(this,13,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Confident, ambitious, decisive — natural leader</div><div class="qopt" onclick="pickOpt(this,13,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Calm, caring, loyal — prefer routine and stability</div></div></div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#B8882A;font-weight:600;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(184,136,42,0.2);">Speech, Movement &amp; Lifestyle</div>
+        <div class="qblock"><div class="qlabel">15. Speech pattern</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,14,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Fast, talkative, jumps topics</div><div class="qopt" onclick="pickOpt(this,14,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Clear, precise, persuasive — can be argumentative</div><div class="qopt" onclick="pickOpt(this,14,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Slow, measured, melodious — takes time to respond</div></div></div>
+        <div class="qblock"><div class="qlabel">16. Walk &amp; movement</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,15,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Quick, light, sometimes unsteady</div><div class="qopt" onclick="pickOpt(this,15,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Purposeful, medium pace — efficient</div><div class="qopt" onclick="pickOpt(this,15,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Slow, graceful, steady — deliberate</div></div></div>
+        <div class="qblock"><div class="qlabel">17. Financial habits</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,16,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Spends impulsively — money comes and goes</div><div class="qopt" onclick="pickOpt(this,16,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Spends on quality and luxury — controlled</div><div class="qopt" onclick="pickOpt(this,16,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Saves carefully — cautious spender</div></div></div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#B8882A;font-weight:600;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(184,136,42,0.2);">Health Tendencies</div>
+        <div class="qblock"><div class="qlabel">18. Common health issues</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,17,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Dry skin, constipation, gas, anxiety, insomnia</div><div class="qopt" onclick="pickOpt(this,17,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Inflammation, acne, heartburn, fever, irritability</div><div class="qopt" onclick="pickOpt(this,17,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Weight gain, mucus, congestion, lethargy</div></div></div>
+        <div class="qblock"><div class="qlabel">19. Response to illness</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,18,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Frequent but brief — recover quickly with rest</div><div class="qopt" onclick="pickOpt(this,18,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Intense symptoms — recover with focused treatment</div><div class="qopt" onclick="pickOpt(this,18,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Slow to get sick, slow to recover — chronic conditions</div></div></div>
+        <div class="qblock"><div class="qlabel">20. Food cravings</div><div class="qopts"><div class="qopt" onclick="pickOpt(this,19,'v')"><div class="qdot"><div class="qdot-fill"></div></div>Crave sweet, sour, salty — love warm, moist, oily foods</div><div class="qopt" onclick="pickOpt(this,19,'p')"><div class="qdot"><div class="qdot-fill"></div></div>Crave sweet, bitter, astringent — love cool, refreshing foods</div><div class="qopt" onclick="pickOpt(this,19,'k')"><div class="qdot"><div class="qdot-fill"></div></div>Crave pungent, bitter — drawn to heavy, sweet comfort foods</div></div></div>
+        <div style="background:#EAF5F0;border:1px solid #2E7D5E;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#2E7D5E;line-height:1.5;">✓ Answer based on lifelong patterns. Minimum 10 answers needed.</div>
+        <button class="btn btn-dark" onclick="calcDosha()">Determine My Prakriti ↗</button>
+      </div>
+      <div id="dosha-res" style="display:none;"></div>
+    </div>
+
+    <!-- SCAN TAB -->
+    <div id="tab-scan" class="screen">
+      <div id="scan-form">
+        <p class="sect-title">What are you eating?</p>
+        <div class="hint-bar" id="hint-bar">☽ Set your dosha first for personalised guidance</div>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <div id="upload-ph"><div class="upload-ico">📷</div><div class="upload-lbl">Tap to capture or upload food</div><div class="upload-sub">AI will identify and evaluate your food</div></div>
+          <img id="preview-img" alt="preview">
+        </div>
+        <input type="file" id="file-input" accept="image/*" capture="environment" onchange="onImagePick(this)">
+        <input type="text" id="food-text" class="text-input" placeholder="Or type food name (e.g. mango, ghee, lentils...)">
+        <button class="btn btn-dark" onclick="runAnalysis()">Evaluate This Food ↗</button>
+        <button class="btn btn-outline" onclick="clearScan()">Clear</button>
+      </div>
+      <div class="loader" id="loader"><div class="loader-spin">☸</div><div class="loader-txt">Consulting Ayurvedic wisdom...</div><div class="loader-sub">Analysing rasa, vīrya &amp; vipāka</div></div>
+      <div id="result-area" style="display:none;"></div>
+    </div>
+
+    <!-- JOURNAL TAB -->
+    <div id="tab-journal" class="screen">
+      <p class="sect-title">Food journal</p>
+      <div id="journal-list"></div>
+    </div>
+
+    <!-- ACCOUNT TAB -->
+    <div id="tab-account" class="screen">
+      <p class="sect-title">My account</p>
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;">
+          <div class="account-avatar" id="acct-avatar">👤</div>
+          <div>
+            <div style="font-size:15px;font-weight:500;" id="acct-name">—</div>
+            <div style="font-size:12px;color:var(--muted);" id="acct-email">—</div>
+            <div id="acct-badge"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="menu-item" onclick="showPaywall()">
+          <span class="menu-icon">⭐</span>
+          <span class="menu-label">Manage Subscription</span>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="goTab('dosha');resetDosha()">
+          <span class="menu-icon">🧬</span>
+          <span class="menu-label">Retake Dosha Assessment</span>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="clearJournal()">
+          <span class="menu-icon">🗑️</span>
+          <span class="menu-label">Clear Food Journal</span>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" onclick="signOut()" style="color:var(--pitta);">
+          <span class="menu-icon">↩️</span>
+          <span class="menu-label" style="color:var(--pitta);">Sign Out</span>
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px;">
+        AyurFood v3.0 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bnav">
+    <button class="bnav-btn on" id="nav-dosha" onclick="goTab('dosha')"><span class="ico">🧬</span>Dosha</button>
+    <button class="bnav-btn" id="nav-scan" onclick="goTab('scan')"><span class="ico">🔍</span>Analyse</button>
+    <button class="bnav-btn" id="nav-journal" onclick="goTab('journal')"><span class="ico">📖</span>Journal</button>
+    <button class="bnav-btn" id="nav-account" onclick="goTab('account')"><span class="ico">👤</span>Account</button>
+  </nav>
+</div>
+
+<!-- API Key Sheet -->
+<div id="api-sheet">
+  <div class="api-inner">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Anthropic API Key</div>
+    <div class="sheet-sub">Required for AI food analysis. Your key is stored only on this device and never shared.</div>
+    <input type="password" id="api-input" class="text-input" placeholder="sk-ant-..." autocomplete="off">
+    <button class="btn btn-dark" onclick="saveKey()">Save Key ↗</button>
+    <p class="sheet-note">Free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════
+// ⚙️  CONFIGURATION — REPLACE THESE VALUES
+// ══════════════════════════════════════════
+const CONFIG = {
+  // 1. Get from supabase.com → your project → Settings → API
+  SUPABASE_URL:  'https://dxecdzdwybzdnuqiufeo.supabase.co',
+  SUPABASE_ANON: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4ZWNkemR3eWJ6ZG51cWl1ZmVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNDgxMDMsImV4cCI6MjA5NDkyNDEwM30.PD5oXk3ntVb5cvCJQM-KEUjzRUDlXYrFCVBqPoNcoyg',
+
+  // 2. Get from stripe.com → Developers → API keys
+  STRIPE_PK: 'pk_test_51TZTG6KnmQyk1dJTeIgdLcCila2Nl8lR6psl8KN3Asenz3ME3kJNARcARoALdBPTUclHhmtTFjV1RXHaW9OYbSvK00CB7fF8gW',
+
+  // 3. Create 3 products in Stripe → copy each Price ID (starts with price_)
+  STRIPE_PRICES: {
+    monthly:   'price_1TZTMHKnmQyk1dJTMou2EKKY',
+    quarterly: 'price_1TZTN1KnmQyk1dJTSeoW64M',
+    yearly:    'price_1TZTNyKnmQyk1dJTmES45eY2',
+  },
+
+  // 4. Your Netlify site URL (for Stripe redirect after payment)
+  SITE_URL: 'https://ayurveda-food.com',
+
+  // 5. Trial length in days
+  TRIAL_DAYS: 7,
+};
+
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const DOSHA = {
+  vata:  { name:'Vāta',  icon:'🌬️', color:'#C17F3A', bg:'#FDF3E7', element:'Air & Ether',  qualities:['Light','Dry','Cold','Mobile'],  guidance:'Favour warm, moist, and grounding foods. Cooked vegetables, ghee, warm milk, and sweet fruits pacify Vāta. Avoid raw, cold, and dry foods.' },
+  pitta: { name:'Pitta', icon:'🔥',  color:'#C94A2A', bg:'#FDF0EC', element:'Fire & Water', qualities:['Hot','Sharp','Light','Oily'],    guidance:'Choose cooling, sweet, and bitter foods. Coconut, cucumber, leafy greens, and sweet fruits are beneficial. Avoid spicy, sour, and fermented foods.' },
+  kapha: { name:'Kapha', icon:'🌿',  color:'#2E7D5E', bg:'#EAF5F0', element:'Earth & Water',qualities:['Heavy','Slow','Cold','Moist'],  guidance:'Prioritise light, warm, and pungent foods. Ginger, turmeric, lentils, and greens are ideal. Avoid heavy, oily, sweet, and cold foods.' },
+};
+const VS = { Excellent:{bg:'#EAF5F0',color:'#2E7D5E'}, Good:{bg:'#EAF5F0',color:'#2E7D5E'}, Neutral:{bg:'#FDF3E7',color:'#C17F3A'}, Caution:{bg:'#FDF0EC',color:'#C94A2A'}, Avoid:{bg:'#FDF0EC',color:'#C94A2A'} };
+const TC = { Sweet:'#C17F3A', Sour:'#C94A2A', Salty:'#2E7D5E', Pungent:'#8B4A8B', Bitter:'#5A7A8B', Astringent:'#6B7C5A' };
+const DC = { vata:'#C17F3A', pitta:'#C94A2A', kapha:'#2E7D5E' };
+const DN = { vata:'Vāta', pitta:'Pitta', kapha:'Kapha' };
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let supabase = null;
+let stripe   = null;
+let user     = null;
+let profile  = null; // { dosha, trial_start, subscription_status, subscription_end }
+let dosha    = null;
+let quizAns  = new Array(20).fill(null);
+let imgB64   = null;
+let history  = [];
+let apiKey   = '';
+let installPrompt = null;
+let selectedPlan  = 'quarterly';
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load local state
+  apiKey  = localStorage.getItem('ayur_key') || '';
+  history = JSON.parse(localStorage.getItem('ayur_hist') || '[]');
+
+  // Init Stripe
+  try {
+    if (CONFIG.STRIPE_PK && !CONFIG.STRIPE_PK.startsWith('YOUR_') && window.Stripe) {
+      stripe = Stripe(CONFIG.STRIPE_PK);
+    }
+  } catch(e) {}
+
+  // Update price IDs in plan cards
+  document.querySelectorAll('.plan-card').forEach(el => {
+    const plan = el.dataset.plan;
+    if (CONFIG.STRIPE_PRICES[plan]) el.dataset.priceId = CONFIG.STRIPE_PRICES[plan];
+  });
+
+  // Check Stripe payment redirect
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    // Mark subscription active in localStorage immediately
+    localStorage.setItem('ayur_payment_success', 'true');
+    window.history.replaceState({}, '', '/');
+  }
+
+  // No Supabase configured — demo mode
+  if (!CONFIG.SUPABASE_URL || CONFIG.SUPABASE_URL.startsWith('YOUR_')) {
+    document.getElementById('app').style.display = 'flex';
+    dosha = localStorage.getItem('ayur_dosha') || null;
+    if (dosha && DOSHA[dosha]) { const saved = JSON.parse(localStorage.getItem('ayur_dosha_scores') || 'null'); renderDoshaResult(saved || { vata:0, pitta:0, kapha:0, [dosha]:4 }); }
+    renderJournal();
+    return;
+  }
+
+  // Wait for Supabase CDN (up to 5 seconds)
+  let waited = 0;
+  while (!window.supabase?.createClient && waited < 5000) {
+    await new Promise(r => setTimeout(r, 100));
+    waited += 100;
+  }
+  if (!window.supabase?.createClient) {
+    showLoginStatus('⚠️ Auth library failed to load. Please refresh.', '#C94A2A');
+    showPage('login');
+    return;
+  }
+
+  // Init Supabase
+  try {
+    supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON, {
+      auth: { detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+    });
+  } catch(e) {
+    showLoginStatus('❌ ' + e.message, '#C94A2A');
+    showPage('login');
+    return;
+  }
+
+  let authHandled = false;
+
+  // Set up listener FIRST — catches OAuth callback events
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log('Auth event:', event, !!session);
+    if (event === 'SIGNED_IN' && session && !authHandled) {
+      authHandled = true;
+      await onSignedIn(session.user);
+    }
+    if (event === 'SIGNED_OUT') {
+      authHandled = false;
+      user = null; profile = null;
+      document.getElementById('app').style.display = 'none';
+      showPage('login');
+    }
+  });
+
+  // Then check existing session
+  try {
+    showSpinner('Checking account...');
+    await new Promise(r => setTimeout(r, 400));
+    const { data: { session }, error } = await supabase.auth.getSession();
+    hideSpinner();
+    if (session && !authHandled) {
+      authHandled = true;
+      await onSignedIn(session.user);
+    } else if (!session && !authHandled) {
+      showPage('login');
+    }
+  } catch(e) {
+    hideSpinner();
+    showPage('login');
+  }
+});
+
+async function onSignedIn(u) {
+  user = u;
+  hideSpinner();
+
+  const trialKey = 'ayur_trial_' + u.id;
+  const subKey   = 'ayur_sub_'   + u.id;
+  if (!localStorage.getItem(trialKey)) {
+    localStorage.setItem(trialKey, new Date().toISOString());
+  }
+
+  // Check if just returned from successful Stripe payment
+  const justPaid = localStorage.getItem('ayur_payment_success') === 'true';
+  if (justPaid) {
+    localStorage.setItem(subKey, 'active');
+    localStorage.removeItem('ayur_payment_success');
+    // Update Supabase
+    if (supabase) {
+      supabase.from('profiles').update({
+        subscription_status: 'active',
+        subscription_end: new Date(Date.now() + 366*24*60*60*1000).toISOString()
+      }).eq('id', u.id).then(() => {}).catch(() => {});
+    }
+    showToast('🎉 Welcome to AyurFood! Your subscription is now active.');
+  }
+
+  profile = {
+    id:                  u.id,
+    email:               u.email,
+    name:                u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || 'User',
+    avatar_url:          u.user_metadata?.avatar_url || null,
+    dosha:               localStorage.getItem('ayur_dosha') || null,
+    trial_start:         localStorage.getItem(trialKey),
+    subscription_status: localStorage.getItem(subKey) || 'trial',
+    food_journal:        JSON.parse(localStorage.getItem('ayur_hist') || '[]'),
+  };
+
+  apiKey  = localStorage.getItem('ayur_key') || '';
+  history = profile.food_journal;
+  dosha   = profile.dosha;
+
+  // Open app immediately
+  const status = getSubscriptionStatus();
+  if (status === 'active' || status === 'trial') {
+    showMainApp();
+    updateTrialBanner();
+  } else {
+    showPage('paywall');
+  }
+
+  // Sync with DB in background — check real subscription status from Supabase
+  if (supabase) {
+    supabase.from('profiles').select('*').eq('id', u.id).single()
+      .then(({ data }) => {
+        if (data) {
+          // Update local cache with real DB values
+          if (data.subscription_status) {
+            localStorage.setItem(subKey, data.subscription_status);
+            profile.subscription_status = data.subscription_status;
+          }
+          if (data.trial_start) {
+            localStorage.setItem(trialKey, data.trial_start);
+            profile.trial_start = data.trial_start;
+          }
+          if (data.dosha) {
+            localStorage.setItem('ayur_dosha', data.dosha);
+            dosha = data.dosha;
+          }
+          profile = { ...profile, ...data };
+          history = profile.food_journal || history;
+
+          // If DB shows active but we showed paywall — open app now
+          const realStatus = getSubscriptionStatus();
+          if ((realStatus === 'active' || realStatus === 'trial') &&
+              document.getElementById('page-paywall')?.classList.contains('active')) {
+            showMainApp();
+          }
+          // If DB shows expired but we showed app — show paywall
+          if (realStatus === 'expired' &&
+              document.getElementById('app')?.style.display !== 'none') {
+            document.getElementById('app').style.display = 'none';
+            showPage('paywall');
+          }
+          renderJournal();
+        } else {
+          // No profile in DB — create one
+          supabase.from('profiles').insert({
+            id: u.id, email: u.email, name: profile.name,
+            avatar_url: profile.avatar_url, dosha: dosha,
+            trial_start: profile.trial_start,
+            subscription_status: profile.subscription_status,
+            food_journal: [],
+          }).catch(() => {});
+        }
+      }).catch(() => {});
+  }
+}
+
+function getSubscriptionStatus() {
+  if (!profile) return 'none';
+  if (profile.subscription_status === 'active') {
+    if (profile.subscription_end && new Date(profile.subscription_end) < new Date()) return 'expired';
+    return 'active';
+  }
+  // Trial check
+  if (profile.trial_start) {
+    const start = new Date(profile.trial_start);
+    const now   = new Date();
+    const days  = (now - start) / (1000 * 60 * 60 * 24);
+    if (days <= CONFIG.TRIAL_DAYS) return 'trial';
+  }
+  return 'expired';
+}
+
+function getTrialDaysLeft() {
+  if (!profile?.trial_start) return 0;
+  const start = new Date(profile.trial_start);
+  const now   = new Date();
+  const days  = CONFIG.TRIAL_DAYS - Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  return Math.max(0, days);
+}
+
+function showMainApp() {
+  document.getElementById('app').style.display = 'flex';
+  hidePage('login'); hidePage('paywall');
+
+  // Update account UI — use profile first, fall back to user metadata
+  if (user) {
+    const name  = profile?.name
+               || user.user_metadata?.full_name
+               || user.user_metadata?.name
+               || user.email?.split('@')[0]
+               || 'User';
+    const email = user.email || profile?.email || '';
+    const avatar = profile?.avatar_url || user.user_metadata?.avatar_url;
+
+    document.getElementById('acct-name').textContent  = name;
+    document.getElementById('acct-email').textContent = email;
+
+    if (avatar) {
+      document.getElementById('acct-avatar').innerHTML =
+        `<img src="${avatar}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+      // Show initial letter
+      document.getElementById('acct-avatar').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('acct-avatar').style.cssText += ';display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500;background:var(--vata-light);color:var(--vata);';
+    }
+
+    document.getElementById('hdr-avatar').textContent = name.charAt(0).toUpperCase();
+
+    const status = getSubscriptionStatus();
+    const badge  = document.getElementById('acct-badge');
+    if (status === 'trial') {
+      const d = getTrialDaysLeft();
+      badge.innerHTML = `<span class="sub-badge trial">⏳ Trial — ${d} day${d!==1?'s':''} left</span>`;
+    } else if (status === 'active') {
+      badge.innerHTML = `<span class="sub-badge active">✓ Active Member</span>`;
+    } else {
+      badge.innerHTML = `<span class="sub-badge expired">⚠️ Trial ended — upgrade to continue</span>`;
+    }
+  }
+
+  if (dosha && DOSHA[dosha]) { const saved = JSON.parse(localStorage.getItem('ayur_dosha_scores') || 'null'); renderDoshaResult(saved || { vata:0, pitta:0, kapha:0, [dosha]:4 }); }
+  renderJournal();
+}
+
+function updateTrialBanner() {
+  const days = getTrialDaysLeft();
+  if (days > 0 && !localStorage.getItem('trial_banner_dismissed')) {
+    document.getElementById('trial-days-text').textContent = `${days} day${days!==1?'s':''} left in free trial`;
+    document.getElementById('trial-banner').classList.add('show');
+  }
+}
+
+// ══════════════════════════════════════════
+// PAGES
+// ══════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (id) document.getElementById('page-' + id)?.classList.add('active');
+}
+function hidePage(id) {
+  document.getElementById('page-' + id)?.classList.remove('active');
+}
+function showPaywall() {
+  showPage('paywall');
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+async function signInGoogle() {
+  if (!supabase) { showError('Supabase not connected. Check your CONFIG keys.'); return; }
+  showSpinner('Opening Google sign-in...');
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://ayurveda-food.com',
+        skipBrowserRedirect: true
+      }
+    });
+    hideSpinner();
+    if (error) { showError('Google error: ' + error.message); return; }
+    if (data?.url) { window.location.assign(data.url); }
+  } catch(e) {
+    hideSpinner();
+    showError('Google sign-in failed: ' + e.message);
+  }
+}
+
+function showGoogleSetupInstructions() {
+  let el = document.getElementById('google-instructions');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'google-instructions';
+    el.style.cssText = 'padding:12px 14px;border-radius:10px;font-size:11px;line-height:1.6;margin-top:10px;background:#FDF3E7;color:#C17F3A;border:1px solid #C17F3A;';
+    el.innerHTML = `<strong>To enable Google login:</strong><br>
+1. Supabase → Authentication → Sign In / Providers → Google → Enable<br>
+2. Add Client ID & Secret from Google Cloud Console<br>
+3. Add <strong>${CONFIG.SITE_URL}</strong> as authorized redirect URI<br><br>
+For now, use <strong>email & password</strong> to sign in.`;
+    document.querySelector('.login-card').appendChild(el);
+  }
+  el.style.display = 'block';
+}
+
+async function signInEmail() {
+  if (!supabase) { showError('Supabase keys not configured. Please add them to the CONFIG block in index.html.'); return; }
+  const email = document.getElementById('email-input').value.trim();
+  const pass  = document.getElementById('pass-input').value;
+  if (!email) { showError('Please enter your email address.'); return; }
+  if (!pass)  { showError('Please enter your password.'); return; }
+  showSpinner('Signing in...');
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  hideSpinner();
+  if (error) {
+    if (error.message.includes('Invalid login')) showError('Incorrect email or password. Try again or create an account.');
+    else if (error.message.includes('Email not confirmed')) showError('Please check your email inbox and click the confirmation link first.');
+    else showError(error.message);
+  }
+}
+
+async function signUpEmail() {
+  if (!supabase) { showError('Supabase keys not configured. Please add them to the CONFIG block in index.html.'); return; }
+  const email = document.getElementById('email-input').value.trim();
+  const pass  = document.getElementById('pass-input').value;
+  if (!email) { showError('Please enter your email address.'); return; }
+  if (!pass)  { showError('Please enter a password.'); return; }
+  if (pass.length < 6) { showError('Password must be at least 6 characters.'); return; }
+  showSpinner('Creating your account...');
+
+  // Sign up — email confirmation disabled in Supabase dashboard for instant access
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: pass,
+    options: { emailRedirectTo: CONFIG.SITE_URL }
+  });
+  hideSpinner();
+
+  if (error) {
+    if (error.message.includes('already registered') || error.message.includes('already been registered')) {
+      showError('This email is already registered. Use Sign In instead.');
+    } else {
+      showError(error.message);
+    }
+    return;
+  }
+
+  // If session exists immediately — email confirmation is disabled (good)
+  if (data?.session) {
+    // onAuthStateChange will handle the rest
+    return;
+  }
+
+  // Confirmation email required
+  showError('✉️ Check your email! Click the confirmation link then come back and Sign In.', '#2E7D5E');
+}
+
+async function signOut() {
+  if (supabase) await supabase.auth.signOut();
+  localStorage.removeItem('ayur_dosha');
+  user = null; profile = null; dosha = null;
+  document.getElementById('app').style.display = 'none';
+  showPage('login');
+}
+
+// ══════════════════════════════════════════
+// PAYMENTS
+// ══════════════════════════════════════════
+function selectPlan(el) {
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlan = el.dataset.plan;
+}
+
+async function startCheckout() {
+  // Init Stripe lazily in case async CDN wasn't ready at startup
+  if (!stripe && window.Stripe && CONFIG.STRIPE_PK && !CONFIG.STRIPE_PK.startsWith('YOUR_')) {
+    stripe = Stripe(CONFIG.STRIPE_PK);
+  }
+  if (!stripe) { showToast('Payment system loading — please try again in a moment'); return; }
+  if (!user)   { showToast('Please sign in first'); return; }
+
+  const priceId = CONFIG.STRIPE_PRICES[selectedPlan];
+  if (!priceId || priceId.startsWith('YOUR_')) {
+    showToast('Stripe price IDs not configured yet');
+    return;
+  }
+
+  showSpinner('Preparing checkout...');
+
+  try {
+    // Create checkout session server-side via Netlify function
+    const resp = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        priceId,
+        email:   user.email,
+        userId:  user.id,
+        siteUrl: CONFIG.SITE_URL,
+      }),
+    });
+
+    const data = await resp.json();
+    hideSpinner();
+
+    if (!resp.ok || data.error) {
+      showToast('Checkout error: ' + (data.error || 'Unknown error'));
+      return;
+    }
+
+    // Redirect to Stripe Checkout page
+    window.location.href = data.url;
+
+  } catch (err) {
+    hideSpinner();
+    showToast('Checkout failed: ' + err.message);
+  }
+}
+
+async function restorePurchase() {
+  if (!supabase || !user) {
+    showToast('Please sign in first');
+    return;
+  }
+  showSpinner('Checking subscription...');
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('subscription_status, trial_start, subscription_end')
+      .eq('id', user.id)
+      .single();
+    hideSpinner();
+
+    if (data?.subscription_status === 'active') {
+      // Update local cache
+      const subKey = 'ayur_sub_' + user.id;
+      localStorage.setItem(subKey, 'active');
+      profile.subscription_status = 'active';
+      showMainApp();
+      showToast('✓ Subscription restored!');
+    } else {
+      // Also check if paid locally
+      const subKey = 'ayur_sub_' + user.id;
+      const localSub = localStorage.getItem(subKey);
+      if (localSub === 'active') {
+        profile.subscription_status = 'active';
+        showMainApp();
+        showToast('✓ Subscription restored from local data!');
+      } else {
+        showToast('No active subscription found. Please subscribe at ayurveda-food.com');
+      }
+    }
+  } catch(e) {
+    hideSpinner();
+    showToast('Could not check subscription — ' + e.message);
+  }
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function goTab(id) {
+  ['dosha','scan','journal','account'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === id);
+    document.getElementById('nav-' + t).classList.toggle('on', t === id);
+  });
+  document.getElementById('content').scrollTop = 0;
+  if (id === 'scan') {
+    document.getElementById('hint-bar').style.display = dosha ? 'none' : 'block';
+    hide('result-area'); show('scan-form'); hide('loader');
+  }
+  if (id === 'journal') renderJournal();
+}
+
+// ══════════════════════════════════════════
+// DOSHA
+// ══════════════════════════════════════════
+function pickDosha(d) {
+  dosha = d;
+  saveDosha(d);
+  ['vata','pitta','kapha'].forEach(x => document.getElementById('dc-'+x).className = 'dchoice' + (x===d ? ' on-'+d : ''));
+  localStorage.setItem('ayur_dosha_scores', JSON.stringify({ vata:0, pitta:0, kapha:0, [d]:4 })); setTimeout(() => renderDoshaResult({ vata:0, pitta:0, kapha:0, [d]:4 }), 250);
+}
+
+function pickOpt(el, qi, d) {
+  el.closest('.qopts').querySelectorAll('.qopt').forEach(o => o.className = 'qopt');
+  el.className = 'qopt s' + d;
+  quizAns[qi] = d;
+}
+
+function calcDosha() {
+  const filled = quizAns.filter(Boolean);
+  if (filled.length < 10) { alert(`Please answer at least 10 questions (${filled.length}/20 answered).`); return; }
+  const sc = { vata:0, pitta:0, kapha:0 };
+  filled.forEach(a => { if(a==='v') sc.vata++; else if(a==='p') sc.pitta++; else sc.kapha++; });
+  dosha = Object.keys(sc).reduce((a,b) => sc[a]>=sc[b]?a:b);
+  // Save real scores to localStorage
+  localStorage.setItem('ayur_dosha_scores', JSON.stringify(sc));
+  saveDosha(dosha);
+  renderDoshaResult(sc);
+}
+
+async function saveDosha(d) {
+  localStorage.setItem('ayur_dosha', d);
+  if (supabase && user) {
+    await supabase.from('profiles').update({ dosha: d }).eq('id', user.id);
+    if (profile) profile.dosha = d;
+  }
+}
+
+function renderDoshaResult(sc) {
+  const total = (sc.vata+sc.pitta+sc.kapha) || 1;
+  let pct = { vata:Math.round(sc.vata/total*100), pitta:Math.round(sc.pitta/total*100), kapha:Math.round(sc.kapha/total*100) };
+  const diff = 100-pct.vata-pct.pitta-pct.kapha;
+  if (diff && dosha) pct[dosha] = Math.max(0, pct[dosha]+diff);
+  const d = DOSHA[dosha];
+  const bars = ['vata','pitta','kapha'].map(x => `<div class="bar-row"><div class="bar-lbl"><span style="color:${DC[x]}">${DN[x]}</span><span style="color:#7A6B58">${pct[x]}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct[x]}%;background:${DC[x]}"></div></div></div>`).join('');
+  const answered = quizAns.filter(Boolean).length;
+  document.getElementById('dosha-res').innerHTML = `
+    <p class="sect-title">Your prakriti</p>
+    <div class="card">
+      <div class="dres-head">
+        <div class="dres-icon" style="background:${d.bg};border:2px solid ${d.color}">${d.icon}</div>
+        <div>
+          <div class="dres-name" style="color:${d.color}">${d.name} Prakriti</div>
+          <div class="dres-sub">${d.element} · ${d.qualities.join(', ')}</div>
+          <div style="font-size:10px;color:#7A6B58;margin-top:3px;">${answered>0?'Based on '+answered+'/20 questions':'Manually selected'}</div>
+        </div>
+      </div>
+      ${bars}
+      <div class="tip-box"><div class="tip-lbl">Dietary guidance</div><div class="tip-text">${d.guidance}</div></div>
+    </div>
+    <button class="btn btn-dark" onclick="goTab('scan')">Analyse a Food ↗</button>
+    <button class="btn btn-outline" onclick="resetDosha()">Retake Assessment</button>`;
+  show('dosha-res'); hide('dosha-sel');
+}
+
+function resetDosha() {
+  dosha = null; quizAns = new Array(20).fill(null);
+  localStorage.removeItem('ayur_dosha');
+  document.querySelectorAll('.qopt').forEach(o => o.className='qopt');
+  ['vata','pitta','kapha'].forEach(x => document.getElementById('dc-'+x).className='dchoice');
+  hide('dosha-res'); show('dosha-sel');
+  document.getElementById('content').scrollTop = 0;
+}
+
+// ══════════════════════════════════════════
+// SCAN
+// ══════════════════════════════════════════
+function onImagePick(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img2 = new Image();
+    img2.onload = () => {
+      const MAX=1024; let w=img2.width, h=img2.height;
+      if(w>h&&w>MAX){h=Math.round(h*MAX/w);w=MAX;}else if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img2,0,0,w,h);
+      const compressed=canvas.toDataURL('image/jpeg',0.82);
+      imgB64=compressed.split(',')[1];
+      const prev=document.getElementById('preview-img');
+      prev.src=compressed; prev.style.display='block'; hide('upload-ph');
+    };
+    img2.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearScan() {
+  imgB64=null; document.getElementById('food-text').value=''; document.getElementById('file-input').value='';
+  const img=document.getElementById('preview-img'); img.style.display='none'; img.src='';
+  show('upload-ph'); hide('result-area'); show('scan-form'); hide('loader');
+}
+
+async function runAnalysis() {
+  const txt = document.getElementById('food-text').value.trim();
+  if (!txt && !imgB64) { alert('Please enter a food name or take a photo.'); return; }
+
+  // Check subscription
+  const status = getSubscriptionStatus();
+  if (status === 'expired') { showPaywall(); return; }
+
+  hide('scan-form'); show('loader'); hide('result-area');
+  try {
+    const res = await callClaude(txt, imgB64);
+    renderResult(res);
+    await saveToJournal(res);
+  } catch(e) {
+    hide('loader'); show('scan-form');
+    alert('Analysis failed. Please try again.\n\n' + (e.message||String(e)));
+  }
+}
+
+async function callClaude(foodName, b64) {
+  // Call our Netlify serverless function — API key stays secret on server
+  const resp = await fetch('/.netlify/functions/analyse', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ foodName, imageB64: b64, dosha })
+  });
+  if (!resp.ok) {
+    const e = await resp.json().catch(() => ({}));
+    throw new Error(e.error || `Server error ${resp.status}`);
+  }
+  return await resp.json();
+}
+
+function renderResult(r) {
+  hide('loader');
+  const vata=r.vata||{score:50,effect:'~',desc:''}; const pitta=r.pitta||{score:50,effect:'~',desc:''}; const kapha=r.kapha||{score:50,effect:'~',desc:''};
+  const myScore = dosha ? (r[dosha]||{score:50}).score : Math.round((vata.score+pitta.score+kapha.score)/3);
+  const verdict = r.verdict||'Neutral'; const vs2 = VS[verdict]||VS.Neutral;
+  const chips = (r.tastes||[]).map(t=>`<span class="chip" style="color:${TC[t]||'#888'};border-color:${TC[t]||'#888'};background:${TC[t]||'#888'}18">${t}</span>`).join('');
+  const order = dosha ? [dosha,...['vata','pitta','kapha'].filter(x=>x!==dosha)] : ['vata','pitta','kapha'];
+  const dmap = {vata,pitta,kapha};
+  const impacts = order.map(x => { const info=dmap[x]; const hl=x===dosha?`hl hl-${x}`:''; const fx=info.effect||'~'; const ec=fx.includes('↓')?'#2E7D5E':fx.includes('↑')?'#C94A2A':'#C17F3A'; return `<div class="impact-row ${hl}"><span class="imp-name" style="color:${DC[x]}">${DN[x]}</span><span class="imp-fx" style="color:${ec}">${fx}</span><span class="imp-desc">${info.desc||''}</span><span class="imp-score" style="color:${ec}">${info.score??50}</span></div>`; }).join('');
+  document.getElementById('result-area').innerHTML = `
+    <div class="card">
+      <div class="res-header"><span class="res-emoji">${r.emoji||'🍽️'}</span><div><div class="res-name">${r.foodName||'Food'}</div><div class="res-cat">${r.category||''}</div></div></div>
+      <div class="score-row" style="background:${vs2.bg};border-color:${vs2.color}">
+        <div class="score-circ" style="border-color:${vs2.color};background:${vs2.color}18"><span class="score-num" style="color:${vs2.color}">${myScore}</span><span class="score-of" style="color:${vs2.color}">/100</span></div>
+        <div><div class="score-verd" style="color:${vs2.color}">${verdict}${dosha?' for '+DOSHA[dosha].name:''}</div><div class="score-adv">${r.advice||''}</div></div>
+      </div>
+      ${chips?`<div class="tip-lbl" style="margin-bottom:8px">Tastes</div><div class="chips">${chips}</div>`:''}
+      <div class="props-grid"><div class="prop"><div class="prop-l">Rasa</div><div class="prop-v">${r.rasa||'—'}</div></div><div class="prop"><div class="prop-l">Vīrya</div><div class="prop-v">${r.virya||'—'}</div></div><div class="prop"><div class="prop-l">Vipāka</div><div class="prop-v">${r.vipaka||'—'}</div></div><div class="prop"><div class="prop-l">Season</div><div class="prop-v">${r.season||'—'}</div></div></div>
+      <div class="impact-lbl">Impact on doshas</div>${impacts}
+    </div>
+    <button class="btn btn-dark" onclick="clearScan();goTab('scan')">Analyse Another Food ↗</button>`;
+  show('result-area'); document.getElementById('content').scrollTop=0;
+}
+
+// ══════════════════════════════════════════
+// JOURNAL
+// ══════════════════════════════════════════
+async function saveToJournal(r) {
+  const vata=r.vata||{score:50}; const pitta=r.pitta||{score:50}; const kapha=r.kapha||{score:50};
+  const score = dosha ? (r[dosha]||{score:50}).score : Math.round((vata.score+pitta.score+kapha.score)/3);
+  const entry = {
+    food:r.foodName||'Food', emoji:r.emoji||'🍽️', category:r.category||'',
+    score, verdict:r.verdict||'Neutral', dosha, ts:Date.now(),
+    // Save full result for journal detail view
+    full: r
+  };
+  history.unshift(entry);
+  if (history.length > 60) history.length = 60;
+  localStorage.setItem('ayur_hist', JSON.stringify(history));
+  if (supabase && user) {
+    await supabase.from('profiles').update({ food_journal: history }).eq('id', user.id);
+  }
+}
+
+function renderJournal() {
+  const el = document.getElementById('journal-list');
+  if (!history.length) {
+    el.innerHTML = `<div class="empty"><span class="empty-ico">📿</span><div class="empty-txt">Your evaluated foods will appear here.<br>Start by analysing your first meal.</div></div>`;
+    return;
+  }
+  el.innerHTML = history.map((h, i) => {
+    const vs2 = VS[h.verdict] || VS.Neutral;
+    const date = h.ts ? new Date(h.ts).toLocaleDateString(undefined, { day:'numeric', month:'short' }) : '';
+    return `
+      <div class="hist-item" onclick="showJournalDetail(${i})" style="cursor:pointer;position:relative;">
+        <span class="hist-emo">${h.emoji}</span>
+        <div style="flex:1">
+          <div class="hist-name">${h.food}</div>
+          <div class="hist-sub">${h.category}${h.dosha?' · '+DOSHA[h.dosha].name:''}${date?' · '+date:''}</div>
+        </div>
+        <div class="hist-score" style="margin-right:8px;">
+          <div class="hist-num" style="color:${vs2.color}">${h.score}</div>
+          <div class="hist-vrd" style="color:${vs2.color}">${h.verdict}</div>
+        </div>
+        <button onclick="event.stopPropagation();deleteJournalItem(${i})"
+          style="background:none;border:none;cursor:pointer;padding:6px;color:#C94A2A;font-size:18px;flex-shrink:0;line-height:1;border-radius:6px;"
+          title="Delete">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function showJournalDetail(i) {
+  const h = history[i];
+  if (!h) return;
+  if (h.full) {
+    // Show full Ayurvedic result in scan tab
+    goTab('scan');
+    hide('scan-form'); hide('loader');
+    renderResult(h.full);
+  } else {
+    // No full data saved — show basic info sheet
+    showJournalBasic(h);
+  }
+}
+
+function showJournalBasic(h) {
+  const vs2 = VS[h.verdict] || VS.Neutral;
+  const date = h.ts ? new Date(h.ts).toLocaleString() : '';
+  // Show in a simple overlay
+  let overlay = document.getElementById('journal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'journal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(42,32,25,.7);display:flex;align-items:flex-end;justify-content:center;';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `
+    <div style="background:var(--cream);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;padding-bottom:calc(20px + env(safe-area-inset-bottom));">
+      <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="font-size:40px;">${h.emoji}</span>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;">${h.food}</div>
+          <div style="font-size:12px;color:var(--muted);">${h.category}${h.dosha?' · '+DOSHA[h.dosha].name:''}</div>
+          <div style="font-size:11px;color:var(--muted);">${date}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:${vs2.color}18;border:1.5px solid ${vs2.color};margin-bottom:12px;">
+        <div style="width:52px;height:52px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid ${vs2.color};">
+          <span style="font-family:'Playfair Display',serif;font-size:20px;color:${vs2.color};">${h.score}</span>
+          <span style="font-size:9px;color:${vs2.color};">/100</span>
+        </div>
+        <div style="font-size:15px;font-weight:500;color:${vs2.color};">${h.verdict}</div>
+      </div>
+      <button onclick="document.getElementById('journal-overlay').remove()"
+        style="width:100%;padding:13px;border-radius:10px;border:1px solid var(--border);background:#fff;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;">Close</button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+let _deleteIndex = -1;
+
+function deleteJournalItem(i) {
+  _deleteIndex = i;
+  const name = history[i]?.food || 'this entry';
+
+  let dlg = document.getElementById('delete-confirm-dlg');
+  if (!dlg) {
+    dlg = document.createElement('div');
+    dlg.id = 'delete-confirm-dlg';
+    dlg.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(42,32,25,.7);display:flex;align-items:center;justify-content:center;padding:24px;';
+    document.body.appendChild(dlg);
+  }
+  dlg.style.display = 'flex';
+  dlg.innerHTML = `
+    <div style="background:#FBF8F3;border-radius:16px;padding:24px;width:100%;max-width:320px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:12px;">🗑️</div>
+      <div style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:8px;">Delete entry?</div>
+      <div style="font-size:13px;color:#7A6B58;margin-bottom:20px;">"${name}" will be permanently removed from your journal.</div>
+      <div style="display:flex;gap:10px;">
+        <button id="dlg-cancel-btn"
+          style="flex:1;padding:12px;border-radius:10px;border:1px solid #e0d8cf;background:#fff;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;">
+          Cancel
+        </button>
+        <button id="dlg-delete-btn"
+          style="flex:1;padding:12px;border-radius:10px;border:none;background:#C94A2A;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">
+          Delete
+        </button>
+      </div>
+    </div>`;
+
+  document.getElementById('dlg-cancel-btn').onclick = () => {
+    dlg.style.display = 'none';
+    _deleteIndex = -1;
+  };
+  document.getElementById('dlg-delete-btn').onclick = () => {
+    dlg.style.display = 'none';
+    if (_deleteIndex < 0) return;
+    history.splice(_deleteIndex, 1);
+    _deleteIndex = -1;
+    localStorage.setItem('ayur_hist', JSON.stringify(history));
+    if (supabase && user) {
+      supabase.from('profiles').update({ food_journal: history }).eq('id', user.id).catch(() => {});
+    }
+    renderJournal();
+    showToast('Entry deleted');
+  };
+}
+
+async function clearJournal() {
+  if (!confirm('Clear all journal entries?')) return;
+  history = [];
+  localStorage.removeItem('ayur_hist');
+  if (supabase && user) await supabase.from('profiles').update({ food_journal: [] }).eq('id', user.id);
+  renderJournal();
+  showToast('Journal cleared');
+}
+
+// ══════════════════════════════════════════
+// API KEY
+// ══════════════════════════════════════════
+function showApiSheet() { document.getElementById('api-sheet').classList.add('show'); }
+function saveKey() {
+  const k = document.getElementById('api-input').value.trim();
+  if (!k.startsWith('sk-ant-')) { alert('Please enter a valid Anthropic API key (starts with sk-ant-)'); return; }
+  apiKey = k; localStorage.setItem('ayur_key', k);
+  document.getElementById('api-sheet').classList.remove('show');
+  showToast('API key saved ✓');
+}
+
+// ══════════════════════════════════════════
+// INSTALL PWA
+// ══════════════════════════════════════════
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt=e; if (!localStorage.getItem('install_no')) document.getElementById('install-banner').classList.add('show'); });
+function doInstall() { if(!installPrompt) return; installPrompt.prompt(); installPrompt.userChoice.then(()=>{ installPrompt=null; document.getElementById('install-banner').classList.remove('show'); }); }
+function dismissInstall() { localStorage.setItem('install_no','1'); document.getElementById('install-banner').classList.remove('show'); }
+
+// ══════════════════════════════════════════
+// SERVICE WORKER
+// ══════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function show(id) { document.getElementById(id).style.display=''; }
+function hide(id) { document.getElementById(id).style.display='none'; }
+function showSpinner(msg) { document.getElementById('spinner').querySelector('p').textContent=msg||'Please wait...'; document.getElementById('spinner').classList.add('show'); }
+function hideSpinner() { document.getElementById('spinner').classList.remove('show'); }
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.className='show'; setTimeout(()=>t.className='',2600); }
+function showLoginStatus(msg, color) {
+  // Show a persistent status message inside the login card
+  let el = document.getElementById('login-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'login-status';
+    el.style.cssText = 'padding:10px 14px;border-radius:10px;font-size:12px;line-height:1.5;margin-top:10px;text-align:center;word-break:break-word;';
+    const card = document.querySelector('.login-card');
+    if (card) card.appendChild(el);
+  }
+  el.style.background = (color||'#C94A2A') + '18';
+  el.style.color = color||'#C94A2A';
+  el.style.border = '1px solid ' + (color||'#C94A2A');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function showError(msg, color) {
+  showLoginStatus(msg, color);
+}
+</script>
+</body>
+</html>
