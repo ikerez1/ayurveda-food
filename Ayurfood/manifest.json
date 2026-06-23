@@ -6,6 +6,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#FBF8F3",
   "theme_color": "#B8882A",
@@ -20,33 +21,48 @@
       "url": "https://ayurveda-food.com/manifest.json"
     }
   ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "edge_side_panel": {
+    "preferred_width": 480
+  },
   "screenshots": [
     {
       "src": "screenshot-narrow-1.png",
       "sizes": "360x640",
       "type": "image/png",
-      "platform": "narrow",
+      "form_factor": "narrow",
       "label": "Prakriti Assessment — Determine your Ayurvedic constitution"
     },
     {
       "src": "screenshot-narrow-2.png",
       "sizes": "360x640",
       "type": "image/png",
-      "platform": "narrow",
+      "form_factor": "narrow",
       "label": "Food Analysis — Instant Ayurvedic evaluation with dosha scores"
     },
     {
       "src": "screenshot-wide-1.png",
       "sizes": "1280x720",
       "type": "image/png",
-      "platform": "wide",
+      "form_factor": "wide",
       "label": "Dosha Quiz and Food Results — Full app overview"
     },
     {
       "src": "screenshot-wide-2.png",
       "sizes": "1280x720",
       "type": "image/png",
-      "platform": "wide",
+      "form_factor": "wide",
       "label": "Ayurvedic Food Journal — Track your daily food evaluations"
     }
   ],
