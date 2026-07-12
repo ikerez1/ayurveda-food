@@ -1453,5 +1453,19 @@ function showError(msg, color) {
   showLoginStatus(msg, color);
 }
 </script>
+  <script>
+  (function () {
+    try {
+      if (sessionStorage.getItem('visit_alerted')) return;
+      sessionStorage.setItem('visit_alerted', '1');
+    } catch (_) {}
+    fetch('/visit-alert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page: location.pathname || '/' }),
+      keepalive: true
+    }).catch(function () {});
+  })();
+</script>
 </body>
 </html>
