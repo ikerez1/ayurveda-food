@@ -14,6 +14,34 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
+
+  <!-- ===== Google Ads: Consent Mode v2 (MUST load before gtag.js) ===== -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+      wait_for_update: 500
+    });
+    if (localStorage.getItem('afc_ads_consent') === 'granted') {
+      gtag('consent', 'update', {
+        ad_storage: 'granted',
+        ad_user_data: 'granted',
+        ad_personalization: 'granted',
+        analytics_storage: 'granted'
+      });
+    }
+  </script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18337228944"></script>
+  <script>
+    gtag('js', new Date());
+    gtag('config', 'AW-18337228944');
+  </script>
+
   <!-- Supabase — async with fallback -->
   <script>
   (function() {
@@ -379,7 +407,7 @@
     <button class="btn btn-dark" onclick="signInEmail()" id="email-btn">Sign In</button>
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
     <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>7-day free trial, then from $4.99/month.</p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.0.8</p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.1.0</p>
   </div>
 </div>
 
@@ -691,6 +719,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (params.get('payment') === 'success') {
     // Mark subscription active in localStorage immediately
     localStorage.setItem('ayur_payment_success', 'true');
+
+    /* ===== Google Ads: purchase conversion (deduped by Stripe session id) ===== */
+    try {
+      const afcSid = params.get('session_id') || '';
+      const afcKey = 'afc_purchase_tracked_' + afcSid;
+      if (typeof gtag === 'function' && !localStorage.getItem(afcKey)) {
+        const afcValues = { monthly: 9.99, quarterly: 20.97, yearly: 59.88 };
+        const afcPlan = localStorage.getItem('afc_pending_plan') || 'quarterly';
+        gtag('event', 'conversion', {
+          send_to: 'AW-18337228944/CnwKCJiGm9QcEJDR76dE',
+          value: afcValues[afcPlan] || 20.97,
+          currency: 'USD',
+          transaction_id: afcSid
+        });
+        localStorage.setItem(afcKey, '1');
+        localStorage.removeItem('afc_pending_plan');
+      }
+    } catch (e) {}
+
     window.history.replaceState({}, '', '/');
   }
 
@@ -845,7 +892,8 @@ async function onSignedIn(u) {
           }
           renderJournal();
         } else {
-          // No profile in DB — create one
+          // No profile in DB — create one (genuinely new user => track trial signup)
+          afcTrackTrialSignup();
           supabase.from('profiles').insert({
             id: u.id, email: u.email, name: profile.name,
             avatar_url: profile.avatar_url, dosha: dosha,
@@ -1056,6 +1104,19 @@ function selectPlan(el) {
   selectedPlan = el.dataset.plan;
 }
 
+
+/* ===== Google Ads conversion tracking ===== */
+function afcTrackTrialSignup() {
+  try {
+    if (typeof gtag !== 'function') return;
+    if (localStorage.getItem('afc_trial_tracked')) return; // dedupe
+    gtag('event', 'conversion', {
+      send_to: 'AW-18337228944/RbE1CIfAzdMcEJDR76dE'
+    });
+    localStorage.setItem('afc_trial_tracked', '1');
+  } catch (e) {}
+}
+
 async function startCheckout() {
   // Init Stripe lazily in case async CDN wasn't ready at startup
   if (!stripe && window.Stripe && CONFIG.STRIPE_PK && !CONFIG.STRIPE_PK.startsWith('YOUR_')) {
@@ -1093,7 +1154,8 @@ async function startCheckout() {
       return;
     }
 
-    // Redirect to Stripe Checkout page
+    // Remember plan for conversion value on return, then redirect to Stripe Checkout
+    try { localStorage.setItem('afc_pending_plan', selectedPlan); } catch (e) {}
     window.location.href = data.url;
 
   } catch (err) {
@@ -1817,6 +1879,42 @@ function renderResults(){
   return { open: openProgram, reset: resetProgram };
 })();
 
+</script>
+
+<!-- ===== Google Ads consent banner ===== -->
+<div id="afcConsentBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#2d2a26;color:#f5f0e8;padding:14px 16px;font-size:14px;line-height:1.5;box-shadow:0 -2px 12px rgba(0,0,0,.25);">
+  <div style="max-width:720px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+    <span style="flex:1 1 280px;">We use cookies to measure how our ads perform. No health data is ever shared.</span>
+    <span style="display:flex;gap:8px;">
+      <button id="afcConsentDecline" style="padding:8px 16px;border:1px solid #f5f0e8;background:transparent;color:#f5f0e8;border-radius:6px;cursor:pointer;font-family:inherit;">Decline</button>
+      <button id="afcConsentAccept" style="padding:8px 16px;border:none;background:#B8882A;color:#fff;border-radius:6px;cursor:pointer;font-weight:600;font-family:inherit;">Accept</button>
+    </span>
+  </div>
+</div>
+<script>
+(function CBanner() {
+  var KEY = 'afc_ads_consent';
+  if (localStorage.getItem(KEY)) return;
+  var banner = document.getElementById('afcConsentBanner');
+  if (!banner) return;
+  banner.style.display = 'block';
+  document.getElementById('afcConsentAccept').addEventListener('click', function () {
+    localStorage.setItem(KEY, 'granted');
+    if (typeof gtag === 'function') {
+      gtag('consent', 'update', {
+        ad_storage: 'granted',
+        ad_user_data: 'granted',
+        ad_personalization: 'granted',
+        analytics_storage: 'granted'
+      });
+    }
+    banner.style.display = 'none';
+  });
+  document.getElementById('afcConsentDecline').addEventListener('click', function () {
+    localStorage.setItem(KEY, 'denied');
+    banner.style.display = 'none';
+  });
+})();
 </script>
 </body>
 </html>
