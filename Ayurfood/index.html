@@ -382,6 +382,27 @@
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- ===== Install-app banner (PWA) ===== -->
+<div id="installBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:350;background:#2A2019;color:#FBF8F3;padding:calc(env(safe-area-inset-top, 0px) + 10px) 14px 10px;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.25);font-size:13.5px;line-height:1.4;">
+  <span style="font-size:20px;">☸</span>
+  <span style="flex:1;">Get Āyurveda Food Compass on your phone — works offline, one tap from your home screen.</span>
+  <button id="installBtn" style="padding:7px 14px;border:none;background:#B8882A;color:#fff;border-radius:16px;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;">Install</button>
+  <button id="installClose" style="padding:4px 8px;border:none;background:transparent;color:rgba(251,248,243,.6);font-size:16px;cursor:pointer;">✕</button>
+</div>
+
+<!-- iOS install instructions sheet -->
+<div id="iosInstallSheet" style="display:none;position:fixed;inset:0;z-index:360;background:rgba(0,0,0,.5);align-items:flex-end;justify-content:center;" onclick="this.style.display='none'">
+  <div style="background:#FBF8F3;color:#2A2019;border-radius:18px 18px 0 0;padding:22px 20px calc(env(safe-area-inset-bottom, 0px) + 22px);max-width:480px;width:100%;" onclick="event.stopPropagation()">
+    <div style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:12px;">Install on your iPhone</div>
+    <ol style="margin:0 0 14px 18px;padding:0;font-size:14px;line-height:1.7;color:#4a4038;">
+      <li>Tap the <strong>Share</strong> button <span style="display:inline-block;border:1.5px solid #4a4038;border-radius:4px;padding:0 5px;font-size:12px;">⇧</span> in Safari’s toolbar</li>
+      <li>Scroll and choose <strong>“Add to Home Screen”</strong></li>
+      <li>Tap <strong>Add</strong> — done! The app appears on your home screen</li>
+    </ol>
+    <button onclick="document.getElementById('iosInstallSheet').style.display='none'" style="width:100%;padding:12px;border:none;background:#B8882A;color:#fff;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;">Got it</button>
+  </div>
+</div>
+
 <!-- Spinner -->
 <div id="spinner"><div class="spin">☸</div><p>Please wait...</p></div>
 
@@ -408,7 +429,7 @@
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
     <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · 7-day full trial · then from $1.67/month.</p>
     <p style="text-align:center;margin-top:12px;"><a href="#" onclick="enterGuestMode();return false;" style="font-size:13px;color:rgba(251,248,243,0.65);text-decoration:underline;">← Back to the free dosha quiz</a></p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.3.2</p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.4.0</p>
   </div>
 </div>
 
@@ -1616,6 +1637,55 @@ function dismissInstall() { localStorage.setItem('install_no','1'); document.get
 // ══════════════════════════════════════════
 // SERVICE WORKER
 // ══════════════════════════════════════════
+// ══ PWA install prompt ══
+(function InstallPrompt() {
+  var KEY = 'afc_install_dismissed';
+  var banner = document.getElementById('installBanner');
+  var btn = document.getElementById('installBtn');
+  var closeBtn = document.getElementById('installClose');
+  if (!banner) return;
+
+  var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                   || window.navigator.standalone === true;
+  if (standalone || localStorage.getItem(KEY)) return; // already installed or dismissed
+
+  var deferredPrompt = null;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+  function showBanner() { banner.style.display = 'flex'; }
+  function hideBanner(remember) {
+    banner.style.display = 'none';
+    if (remember) localStorage.setItem(KEY, '1');
+  }
+
+  // Android / Chromium: real install prompt
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    showBanner();
+  });
+
+  // iOS Safari: no event exists — show banner with instructions
+  if (isIOS) showBanner();
+
+  btn.addEventListener('click', function () {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function (choice) {
+        deferredPrompt = null;
+        hideBanner(choice && choice.outcome === 'accepted');
+      });
+    } else if (isIOS) {
+      document.getElementById('iosInstallSheet').style.display = 'flex';
+    }
+  });
+
+  closeBtn.addEventListener('click', function () { hideBanner(true); });
+
+  // Hide banner permanently once installed
+  window.addEventListener('appinstalled', function () { hideBanner(true); });
+})();
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
