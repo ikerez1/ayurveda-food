@@ -395,8 +395,8 @@
     <p>Ancient wisdom for modern nourishment</p>
   </div>
   <div class="login-card">
-    <h2>Welcome</h2>
-    <p>Sign in to access personalised Ayurvedic food evaluation powered by AI.</p>
+    <h2>Start your free 7-day trial</h2>
+    <p>Create a free account to unlock AI food analysis, your journal, and the full Prakriti Program.</p>
     <button class="btn btn-google" onclick="signInGoogle()">
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
       Continue with Google
@@ -406,8 +406,9 @@
     <input type="password" id="pass-input" class="text-input" placeholder="Password">
     <button class="btn btn-dark" onclick="signInEmail()" id="email-btn">Sign In</button>
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
-    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>7-day free trial, then from $4.99/month.</p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.1.0</p>
+    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · 7-day full trial · then from $1.67/month.</p>
+    <p style="text-align:center;margin-top:12px;"><a href="#" onclick="enterGuestMode();return false;" style="font-size:13px;color:rgba(251,248,243,0.65);text-decoration:underline;">← Back to the free dosha quiz</a></p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.3.2</p>
   </div>
 </div>
 
@@ -417,8 +418,23 @@
 <div id="page-paywall" class="page">
   <div class="paywall-header">
     <span class="lock-icon">✨</span>
-    <h2>Your free trial has ended</h2>
-    <p>Choose a plan to continue your Ayurvedic journey</p>
+    <h2 id="paywall-title">Go beyond your dosha</h2>
+    <p id="paywall-sub">Your prakriti check is free forever. Unlock the full experience:</p>
+  </div>
+
+  <div class="paywall-benefits" style="margin:0 0 20px;display:flex;flex-direction:column;gap:12px;">
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
+      <span style="font-size:18px;">🧬</span>
+      <span>Discover which foods <strong>balance your unique body type</strong> — and which throw it off. AI-powered Ayurvedic food wisdom in your pocket.</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
+      <span style="font-size:18px;">📷</span>
+      <span><strong>Photograph any food</strong> and instantly see its Ayurvedic effect on your dosha. Ancient wisdom, modern AI.</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
+      <span style="font-size:18px;">🌿</span>
+      <span>Eat in harmony with nature — every meal, every season.</span>
+    </div>
   </div>
 
   <div class="features-list">
@@ -433,26 +449,27 @@
     <div class="plan-card" data-plan="monthly" data-price-id="" onclick="selectPlan(this)">
       <div class="plan-row">
         <div><div class="plan-name">Monthly</div><div class="plan-sub">Billed every month</div></div>
-        <div><div class="plan-price">$9.99<span style="font-size:12px;color:var(--muted)">/mo</span></div></div>
+        <div><div class="plan-price">$3.00<span style="font-size:12px;color:var(--muted)">/mo</span></div></div>
       </div>
     </div>
     <div class="plan-card popular selected" data-plan="quarterly" data-price-id="" onclick="selectPlan(this)">
       <div class="popular-badge">Most Popular</div>
       <div class="plan-row">
-        <div><div class="plan-name">Quarterly</div><div class="plan-sub">Billed every 3 months</div><div class="plan-save">Save 30% vs monthly</div></div>
-        <div><div class="plan-price">$6.99<span style="font-size:12px;color:var(--muted)">/mo</span></div><div style="font-size:11px;color:var(--muted);text-align:right">$20.97 total</div></div>
+        <div><div class="plan-name">Quarterly</div><div class="plan-sub">Billed every 3 months</div><div class="plan-save">Save 22% vs monthly</div></div>
+        <div><div class="plan-price">$2.33<span style="font-size:12px;color:var(--muted)">/mo</span></div><div style="font-size:11px;color:var(--muted);text-align:right">$7.00 total</div></div>
       </div>
     </div>
     <div class="plan-card" data-plan="yearly" data-price-id="" onclick="selectPlan(this)">
       <div class="plan-row">
-        <div><div class="plan-name">Yearly</div><div class="plan-sub">Billed once a year</div><div class="plan-save">Save 50% — Best value</div></div>
-        <div><div class="plan-price">$4.99<span style="font-size:12px;color:var(--muted)">/mo</span></div><div style="font-size:11px;color:var(--muted);text-align:right">$59.88 total</div></div>
+        <div><div class="plan-name">Yearly</div><div class="plan-sub">Billed once a year</div><div class="plan-save">Save 44% — Best value</div></div>
+        <div><div class="plan-price">$1.67<span style="font-size:12px;color:var(--muted)">/mo</span></div><div style="font-size:11px;color:var(--muted);text-align:right">$20.00 total</div></div>
       </div>
     </div>
   </div>
 
   <button class="btn btn-gold" onclick="startCheckout()" id="checkout-btn">Start My Membership ↗</button>
   <button class="btn btn-outline" onclick="restorePurchase()">Restore Purchase</button>
+  <p style="text-align:center;margin-top:14px;"><a href="#" onclick="closePaywall();return false;" style="font-size:13px;color:var(--muted,#7A6B58);text-decoration:underline;">Not now — continue with my free dosha quiz</a></p>
   <p class="guarantee">🔒 Secure payment via Stripe · Cancel anytime</p>
 </div>
 
@@ -725,11 +742,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const afcSid = params.get('session_id') || '';
       const afcKey = 'afc_purchase_tracked_' + afcSid;
       if (typeof gtag === 'function' && !localStorage.getItem(afcKey)) {
-        const afcValues = { monthly: 9.99, quarterly: 20.97, yearly: 59.88 };
+        const afcValues = { monthly: 3.00, quarterly: 7.00, yearly: 20.00 };
         const afcPlan = localStorage.getItem('afc_pending_plan') || 'quarterly';
         gtag('event', 'conversion', {
           send_to: 'AW-18337228944/CnwKCJiGm9QcEJDR76dE',
-          value: afcValues[afcPlan] || 20.97,
+          value: afcValues[afcPlan] || 7.00,
           currency: 'USD',
           transaction_id: afcSid
         });
@@ -784,9 +801,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (event === 'SIGNED_OUT') {
       authHandled = false;
-      user = null; profile = null;
-      document.getElementById('app').style.display = 'none';
-      showPage('login');
+      enterGuestMode();
     }
   });
 
@@ -800,7 +815,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       authHandled = true;
       await onSignedIn(session.user);
     } else if (!session && !authHandled) {
-      showPage('login');
+      enterGuestMode();
     }
   } catch(e) {
     hideSpinner();
@@ -848,14 +863,11 @@ async function onSignedIn(u) {
   history = profile.food_journal;
   dosha   = profile.dosha;
 
-  // Open app immediately
+  // Open app immediately — the dosha/prakriti quiz is free forever.
+  // Premium features (AI analysis, journal, program) are gated in goTab/runAnalysis/openProgram.
+  showMainApp();
   const status = getSubscriptionStatus();
-  if (status === 'active' || status === 'trial') {
-    showMainApp();
-    updateTrialBanner();
-  } else {
-    showPage('paywall');
-  }
+  if (status === 'trial') updateTrialBanner();
 
   // Sync with DB in background — check real subscription status from Supabase
   if (supabase) {
@@ -884,12 +896,8 @@ async function onSignedIn(u) {
               document.getElementById('page-paywall')?.classList.contains('active')) {
             showMainApp();
           }
-          // If DB shows expired but we showed app — show paywall
-          if (realStatus === 'expired' &&
-              document.getElementById('app')?.style.display !== 'none') {
-            document.getElementById('app').style.display = 'none';
-            showPage('paywall');
-          }
+          // Expired users keep free access to the dosha quiz;
+          // premium features are gated per-feature (goTab / runAnalysis / openProgram).
           renderJournal();
         } else {
           // No profile in DB — create one (genuinely new user => track trial signup)
@@ -974,6 +982,26 @@ function showMainApp() {
   renderJournal();
 }
 
+// ══════════════════════════════════════════
+// GUEST MODE — quiz-first, no account needed
+// ══════════════════════════════════════════
+function enterGuestMode() {
+  user = null; profile = null;
+  hidePage('login'); hidePage('paywall');
+  document.getElementById('app').style.display = 'flex';
+  // Guest header/account placeholders
+  try {
+    document.getElementById('hdr-avatar').textContent = '☸';
+  } catch (e) {}
+  // Restore a previously taken quiz result from this device
+  dosha = localStorage.getItem('ayur_dosha') || null;
+  if (dosha && DOSHA[dosha]) {
+    const saved = JSON.parse(localStorage.getItem('ayur_dosha_scores') || 'null');
+    renderDoshaResult(saved || { vata:0, pitta:0, kapha:0, [dosha]:4 });
+  }
+  goTab('dosha');
+}
+
 function updateTrialBanner() {
   const days = getTrialDaysLeft();
   if (days > 0 && !localStorage.getItem('trial_banner_dismissed')) {
@@ -993,7 +1021,26 @@ function hidePage(id) {
   document.getElementById('page-' + id)?.classList.remove('active');
 }
 function showPaywall() {
+  // Contextual headline: lapsed trialists vs. free-tier users
+  try {
+    const t = document.getElementById('paywall-title');
+    const s = document.getElementById('paywall-sub');
+    if (t && s) {
+      if (getSubscriptionStatus() === 'expired' && profile?.trial_start) {
+        t.textContent = 'Your free trial has ended';
+        s.textContent = 'Your dosha quiz stays free forever — keep the full experience going:';
+      } else {
+        t.textContent = 'Go beyond your dosha';
+        s.textContent = 'Your prakriti check is free forever. Unlock the full experience:';
+      }
+    }
+  } catch (e) {}
   showPage('paywall');
+}
+function closePaywall() {
+  hidePage('paywall');
+  document.getElementById('app').style.display = 'flex';
+  goTab('dosha');
 }
 
 // ══════════════════════════════════════════
@@ -1207,6 +1254,17 @@ async function restorePurchase() {
 // NAVIGATION
 // ══════════════════════════════════════════
 function goTab(id) {
+  // Guests: quiz only; premium tabs and account lead to sign-in (7-day trial).
+  // Expired members: quiz + account stay; premium tabs lead to the paywall.
+  const st = getSubscriptionStatus();
+  if (!user && (id === 'scan' || id === 'journal' || id === 'account')) {
+    showPage('login');
+    return;
+  }
+  if ((id === 'scan' || id === 'journal') && st === 'expired') {
+    showPaywall();
+    return;
+  }
   ['dosha','scan','journal','account'].forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('active', t === id);
     document.getElementById('nav-' + t).classList.toggle('on', t === id);
@@ -1277,7 +1335,10 @@ function renderDoshaResult(sc) {
       ${bars}
       <div class="tip-box"><div class="tip-lbl">Dietary guidance</div><div class="tip-text">${d.guidance}</div></div>
     </div>
-    <button class="btn btn-dark" onclick="goTab('scan')">Analyse a Food ↗</button>
+    ${user
+      ? `<button class="btn btn-dark" onclick="goTab('scan')">Analyse a Food ↗</button>`
+      : `<div style="text-align:center;font-size:12.5px;color:#7A6B58;margin:4px 0 10px;line-height:1.5;">Now put your prakriti to work — photograph any food and see its Ayurvedic effect on <em>your</em> dosha.</div>
+         <button class="btn btn-gold" onclick="showPage('login')">Start Free 7-Day Trial ↗</button>`}
     <button class="btn btn-outline" onclick="resetDosha()">Retake Assessment</button>`;
   show('dosha-res'); hide('dosha-sel');
 }
@@ -1324,7 +1385,8 @@ async function runAnalysis() {
   const txt = document.getElementById('food-text').value.trim();
   if (!txt && !imgB64) { alert('Please enter a food name or take a photo.'); return; }
 
-  // Check subscription
+  // Check auth + subscription
+  if (!user) { showPage('login'); return; }
   const status = getSubscriptionStatus();
   if (status === 'expired') { showPaywall(); return; }
 
@@ -1604,6 +1666,7 @@ function showError(msg, color) {
 // 3-WEEK PROGRAM — entry / gate
 // ══════════════════════════════════════════
 function openProgram(){
+  if (!user) { showPage('login'); return; }
   const status = getSubscriptionStatus();
   if(status !== 'trial' && status !== 'active'){
     showPaywall();
