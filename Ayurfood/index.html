@@ -19,12 +19,21 @@
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
+    // Region-scoped defaults: consent required in EEA + UK + CH (GDPR/PECR),
+    // granted elsewhere (e.g. US) where no prior-consent law applies.
     gtag('consent', 'default', {
       ad_storage: 'denied',
       ad_user_data: 'denied',
       ad_personalization: 'denied',
       analytics_storage: 'denied',
-      wait_for_update: 500
+      wait_for_update: 500,
+      region: ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB','CH']
+    });
+    gtag('consent', 'default', {
+      ad_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted',
+      analytics_storage: 'granted'
     });
     if (localStorage.getItem('afc_ads_consent') === 'granted') {
       gtag('consent', 'update', {
@@ -385,7 +394,7 @@
 <!-- ===== Install-app banner (PWA) ===== -->
 <div id="installBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:350;background:#2A2019;color:#FBF8F3;padding:calc(env(safe-area-inset-top, 0px) + 10px) 14px 10px;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.25);font-size:13.5px;line-height:1.4;">
   <span style="font-size:20px;">☸</span>
-  <span style="flex:1;">Get Āyurveda Food Compass on your phone — works offline, one tap from your home screen.</span>
+  <span style="flex:1;">Get Āyurveda Food Compass on your phone — ad-free, works offline, one tap from your home screen.</span>
   <button id="installBtn" style="padding:7px 14px;border:none;background:#B8882A;color:#fff;border-radius:16px;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;">Install</button>
   <button id="installClose" style="padding:4px 8px;border:none;background:transparent;color:rgba(251,248,243,.6);font-size:16px;cursor:pointer;">✕</button>
 </div>
@@ -427,9 +436,9 @@
     <input type="password" id="pass-input" class="text-input" placeholder="Password">
     <button class="btn btn-dark" onclick="signInEmail()" id="email-btn">Sign In</button>
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
-    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · 7-day full trial · then from $1.67/month.</p>
+    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · No ads · 7-day full trial · then from $1.67/month.</p>
     <p style="text-align:center;margin-top:12px;"><a href="#" onclick="enterGuestMode();return false;" style="font-size:13px;color:rgba(251,248,243,0.65);text-decoration:underline;">← Back to the free dosha quiz</a></p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.4.0</p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.5.1</p>
   </div>
 </div>
 
@@ -455,6 +464,10 @@
     <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
       <span style="font-size:18px;">🌿</span>
       <span>Eat in harmony with nature — every meal, every season.</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
+      <span style="font-size:18px;">🚫</span>
+      <span><strong>No ads — ever.</strong> Your practice, undisturbed.</span>
     </div>
   </div>
 
@@ -589,6 +602,7 @@
     <!-- JOURNAL TAB -->
     <div id="tab-journal" class="screen">
       <p class="sect-title">Food journal</p>
+      <div id="journal-week"></div>
       <div id="journal-list"></div>
     </div>
 
@@ -1486,15 +1500,47 @@ function renderJournal() {
     el.innerHTML = `<div class="empty"><span class="empty-ico">📿</span><div class="empty-txt">Your evaluated foods will appear here.<br>Start by analysing your first meal.</div></div>`;
     return;
   }
-  el.innerHTML = history.map((h, i) => {
-    const vs2 = VS[h.verdict] || VS.Neutral;
-    const date = h.ts ? new Date(h.ts).toLocaleDateString(undefined, { day:'numeric', month:'short' }) : '';
-    return `
+
+  // ── Group entries by calendar day (newest day first, mornings first within a day) ──
+  const dayKey = ts => { const d = new Date(ts || 0); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  const todayKey = dayKey(Date.now());
+  const yesterKey = dayKey(Date.now() - 864e5);
+
+  function dayLabel(key, ts) {
+    if (key === todayKey) return 'Today';
+    if (key === yesterKey) return 'Yesterday';
+    const d = new Date(ts);
+    const opts = { day:'numeric', month:'long' };
+    if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
+    return d.toLocaleDateString(undefined, opts);
+  }
+
+  // history is stored newest-first; carry original index for detail/delete handlers
+  const groups = [];
+  const byKey = {};
+  history.forEach((h, i) => {
+    const k = dayKey(h.ts);
+    if (!byKey[k]) { byKey[k] = { key:k, ts:h.ts||0, items:[] }; groups.push(byKey[k]); }
+    byKey[k].items.push({ h, i });
+  });
+  groups.forEach(g => g.items.sort((a,b) => (a.h.ts||0) - (b.h.ts||0))); // within a day: morning → evening
+
+  renderJournalWeek();
+
+  const GOODV = { Excellent: 1, Good: 1 };
+  el.innerHTML = groups.map(g => {
+    const good = g.items.filter(x => GOODV[x.h.verdict]).length;
+    const n = g.items.length;
+    const summary = n + (n===1 ? ' entry' : ' entries') + (good ? ' · ' + good + ' ✓' : '');
+    const rows = g.items.map(({h, i}) => {
+      const vs2 = VS[h.verdict] || VS.Neutral;
+      const time = h.ts ? new Date(h.ts).toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' }) : '';
+      return `
       <div class="hist-item" onclick="showJournalDetail(${i})" style="cursor:pointer;position:relative;">
         <span class="hist-emo">${h.emoji}</span>
         <div style="flex:1">
           <div class="hist-name">${h.food}</div>
-          <div class="hist-sub">${h.category}${h.dosha?' · '+DOSHA[h.dosha].name:''}${date?' · '+date:''}</div>
+          <div class="hist-sub">${time?time+' · ':''}${h.category}${h.dosha?' · '+DOSHA[h.dosha].name:''}</div>
         </div>
         <div class="hist-score" style="margin-right:8px;">
           <div class="hist-num" style="color:${vs2.color}">${h.score}</div>
@@ -1504,7 +1550,71 @@ function renderJournal() {
           style="background:none;border:none;cursor:pointer;padding:6px;color:#C94A2A;font-size:18px;flex-shrink:0;line-height:1;border-radius:6px;"
           title="Delete">✕</button>
       </div>`;
+    }).join('');
+    return `
+      <div class="journal-day" style="display:flex;align-items:baseline;gap:8px;margin:18px 2px 8px;">
+        <span style="font-family:'Playfair Display',serif;font-size:15px;color:var(--ink,#2d2a26);">${dayLabel(g.key, g.ts)}</span>
+        <span style="flex:1;border-bottom:1px solid rgba(122,107,88,.25);"></span>
+        <span style="font-size:11px;color:var(--muted,#7A6B58);white-space:nowrap;">${summary}</span>
+      </div>
+      ${rows}`;
   }).join('');
+}
+
+// ── Weekly journal report: last 7 days at a glance ──
+function renderJournalWeek() {
+  const el = document.getElementById('journal-week');
+  if (!el) return;
+  const GOODV = { Excellent: 1, Good: 1 };
+  const startOfDay = t => { const d = new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+  const today0 = startOfDay(Date.now());
+  const weekStart = today0 - 6 * 864e5; // rolling 7 days incl. today
+
+  const week = history.filter(h => (h.ts || 0) >= weekStart);
+  if (!week.length) { el.innerHTML = ''; return; }
+
+  const total = week.length;
+  const good = week.filter(h => GOODV[h.verdict]).length;
+  const pct = Math.round(good / total * 100);
+  const avgScore = Math.round(week.reduce((s,h) => s + (Number(h.score)||0), 0) / total);
+  const pctColor = pct >= 70 ? '#2E7D5E' : pct >= 40 ? '#C17F3A' : '#C94A2A';
+
+  // 7 day dots, oldest → today
+  const daysWith = new Set(week.map(h => startOfDay(h.ts)));
+  let dots = '';
+  for (let k = 6; k >= 0; k--) {
+    const t = today0 - k * 864e5;
+    const has = daysWith.has(t);
+    const isToday = k === 0;
+    dots += `<span title="${new Date(t).toLocaleDateString(undefined,{weekday:'short'})}" style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;background:${has ? '#B8882A' : 'rgba(122,107,88,.2)'};${isToday ? 'outline:1.5px solid #B8882A;outline-offset:1.5px;' : ''}"></span>`;
+  }
+
+  const line = pct >= 70 ? 'Beautifully in tune with your dosha this week.'
+             : pct >= 40 ? 'A balanced week — room to lean into your dosha’s friends.'
+             : 'A challenging week — your dosha would love a little more support.';
+
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,#2A2019,#3A2D22);color:#FBF8F3;border-radius:14px;padding:16px 16px 14px;margin-bottom:16px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-family:'Playfair Display',serif;font-size:15px;">This week</span>
+        <span>${dots}</span>
+      </div>
+      <div style="display:flex;gap:18px;align-items:center;">
+        <div style="text-align:center;">
+          <div style="font-size:26px;font-weight:600;color:${pctColor};line-height:1;">${pct}%</div>
+          <div style="font-size:10.5px;color:rgba(251,248,243,.65);margin-top:3px;">aligned</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:26px;font-weight:600;line-height:1;">${total}</div>
+          <div style="font-size:10.5px;color:rgba(251,248,243,.65);margin-top:3px;">meal${total===1?'':'s'}</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:26px;font-weight:600;line-height:1;">${avgScore}</div>
+          <div style="font-size:10.5px;color:rgba(251,248,243,.65);margin-top:3px;">avg score</div>
+        </div>
+        <div style="flex:1;font-size:12px;line-height:1.5;color:rgba(251,248,243,.85);">${line}</div>
+      </div>
+    </div>`;
 }
 
 function showJournalDetail(i) {
