@@ -438,7 +438,7 @@
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
     <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · No ads · 7-day full trial · then from $1.67/month.</p>
     <p style="text-align:center;margin-top:12px;"><a href="#" onclick="enterGuestMode();return false;" style="font-size:13px;color:rgba(251,248,243,0.65);text-decoration:underline;">← Back to the free dosha quiz</a></p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.5.1</p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.6.1</p>
   </div>
 </div>
 
@@ -505,6 +505,12 @@
   <button class="btn btn-outline" onclick="restorePurchase()">Restore Purchase</button>
   <p style="text-align:center;margin-top:14px;"><a href="#" onclick="closePaywall();return false;" style="font-size:13px;color:var(--muted,#7A6B58);text-decoration:underline;">Not now — continue with my free dosha quiz</a></p>
   <p class="guarantee">🔒 Secure payment via Stripe · Cancel anytime</p>
+  <p class="guarantee" style="margin-top:6px;font-size:11px;line-height:1.5;">
+    Subscriptions renew automatically until cancelled. Cancel in one tap from
+    Account → Cancel Subscription — no email or phone call needed. Access continues
+    to the end of the period you have already paid for.<br>
+    Questions? <a href="mailto:info@ayurveda-food.com" style="color:var(--gold);">info@ayurveda-food.com</a>
+  </p>
 </div>
 
 <!-- ════════════════════════════════════
@@ -616,6 +622,7 @@
             <div style="font-size:15px;font-weight:500;" id="acct-name">—</div>
             <div style="font-size:12px;color:var(--muted);" id="acct-email">—</div>
             <div id="acct-badge"></div>
+            <div id="acct-sub-detail" style="font-size:11px;color:var(--muted);margin-top:6px;"></div>
           </div>
         </div>
       </div>
@@ -626,9 +633,14 @@
           <span class="menu-label">3-Week Prakriti Program</span>
           <span class="menu-arrow">›</span>
         </div>
-        <div class="menu-item" onclick="showPaywall()">
+        <div class="menu-item" onclick="manageSubscription()">
           <span class="menu-icon">⭐</span>
           <span class="menu-label">Manage Subscription</span>
+          <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item" id="menu-cancel-sub" style="display:none;" onclick="cancelSubscription()">
+          <span class="menu-icon">🚫</span>
+          <span class="menu-label">Cancel Subscription</span>
           <span class="menu-arrow">›</span>
         </div>
         <div class="menu-item" onclick="goTab('dosha');resetDosha()">
@@ -648,7 +660,10 @@
       </div>
 
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px;">
-        AyurFood v3.0 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
+        AyurFood v4.6.1 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
+        <div style="margin-top:8px;">
+          Need help? <a href="mailto:info@ayurveda-food.com" style="color:var(--gold);">info@ayurveda-food.com</a>
+        </div>
       </div>
     </div>
   </div>
@@ -955,6 +970,12 @@ function getSubscriptionStatus() {
     if (profile.subscription_end && new Date(profile.subscription_end) < new Date()) return 'expired';
     return 'active';
   }
+  // A subscription that has actually ended must not fall through to the
+  // trial branch — otherwise a cancelled user inside their original 7-day
+  // window would be handed access back.
+  if (profile.subscription_status === 'cancelled' || profile.subscription_status === 'canceled') {
+    return 'expired';
+  }
   // Trial check
   if (profile.trial_start) {
     const start = new Date(profile.trial_start);
@@ -1011,6 +1032,7 @@ function showMainApp() {
     } else {
       badge.innerHTML = `<span class="sub-badge expired">⚠️ Trial ended — upgrade to continue</span>`;
     }
+    renderSubscriptionDetail(status);
   }
 
   if (dosha && DOSHA[dosha]) { const saved = JSON.parse(localStorage.getItem('ayur_dosha_scores') || 'null'); renderDoshaResult(saved || { vata:0, pitta:0, kapha:0, [dosha]:4 }); }
@@ -1243,6 +1265,114 @@ async function startCheckout() {
   } catch (err) {
     hideSpinner();
     showToast('Checkout failed: ' + err.message);
+  }
+}
+
+// ══════════════════════════════════════════
+// SUBSCRIPTION MANAGEMENT + CANCELLATION
+// ══════════════════════════════════════════
+
+// Shows plan status and, once cancelled, the date access ends.
+// Also controls visibility of the Cancel Subscription row.
+function renderSubscriptionDetail(status) {
+  const detail = document.getElementById('acct-sub-detail');
+  const row    = document.getElementById('menu-cancel-sub');
+  if (!detail || !row) return;
+
+  const cancelled = profile?.cancel_at_period_end === true
+                 || localStorage.getItem('afc_sub_cancelled_' + (user?.id || '')) === '1';
+
+  let endsOn = null;
+  if (profile?.subscription_end) {
+    const d = new Date(profile.subscription_end);
+    if (!isNaN(d)) endsOn = d.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+  }
+
+  if (status === 'active' || status === 'trial') {
+    if (cancelled) {
+      detail.textContent = endsOn
+        ? 'Cancelled — access continues until ' + endsOn
+        : 'Cancelled — access continues to the end of your paid period';
+      row.style.display = 'none';
+    } else {
+      detail.textContent = endsOn ? 'Renews automatically on ' + endsOn : 'Renews automatically';
+      row.style.display = 'flex';
+    }
+  } else {
+    detail.textContent = '';
+    row.style.display = 'none';
+  }
+}
+
+function manageSubscription() {
+  const status = getSubscriptionStatus();
+  if (status === 'active' || status === 'trial') {
+    // Already subscribed — the paywall would be meaningless here.
+    const detail = document.getElementById('acct-sub-detail');
+    showToast(detail && detail.textContent ? detail.textContent : 'Your membership is active');
+    return;
+  }
+  showPaywall();
+}
+
+async function cancelSubscription() {
+  if (!supabase || !user) { showToast('Please sign in first'); return; }
+
+  const ok = confirm(
+    'Cancel your subscription?\n\n' +
+    'You will keep full access until the end of the period you have already paid for. ' +
+    'You will not be charged again.'
+  );
+  if (!ok) return;
+
+  showSpinner('Cancelling subscription...');
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { hideSpinner(); showToast('Session expired — please sign in again'); return; }
+
+    const resp = await fetch('/.netlify/functions/cancel-subscription', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + session.access_token },
+    });
+    const data = await resp.json().catch(() => ({}));
+    hideSpinner();
+
+    if (!resp.ok || !data.ok) {
+      const code = data.error || 'cancel_failed';
+      if (code === 'no_customer' || code === 'no_subscription') {
+        showToast('No active subscription found — email info@ayurveda-food.com');
+      } else {
+        showToast('Could not cancel — email info@ayurveda-food.com');
+      }
+      return;
+    }
+
+    // Record locally so the UI reflects the cancellation immediately.
+    try { localStorage.setItem('afc_sub_cancelled_' + user.id, '1'); } catch (e) {}
+    if (profile) {
+      profile.cancel_at_period_end = true;
+      if (data.access_until) profile.subscription_end = data.access_until;
+    }
+
+    // Best-effort sync to Supabase; failure here must not break the UI.
+    try {
+      await supabase.from('profiles')
+        .update({ subscription_end: data.access_until || profile?.subscription_end || null })
+        .eq('id', user.id);
+    } catch (e) {}
+
+    renderSubscriptionDetail(getSubscriptionStatus());
+
+    const until = data.access_until
+      ? new Date(data.access_until).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })
+      : null;
+    showToast(data.already
+      ? ('Already cancelled' + (until ? ' — access until ' + until : ''))
+      : ('✓ Cancelled' + (until ? ' — access until ' + until : '')));
+
+  } catch (err) {
+    hideSpinner();
+    showToast('Could not cancel — email info@ayurveda-food.com');
   }
 }
 
