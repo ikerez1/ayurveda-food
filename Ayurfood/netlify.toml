@@ -2,12 +2,17 @@
   functions = "netlify/functions"
   publish = "."
 
-# Astro's fingerprinted CSS and JS. Must be proxied too, or /food/ pages
-# load their markup from the content site and their stylesheet from the PWA,
-# which doesn't have one.
 [[redirects]]
   from = "/_astro/*"
   to = "https://ayurveda-content.netlify.app/_astro/:splat"
+  status = 200
+  force = true
+
+# Open Graph cards. Scrapers fetch these directly, so they must resolve on the
+# canonical domain — a 404 here means every link preview falls back to bare text.
+[[redirects]]
+  from = "/og/*"
+  to = "https://ayurveda-content.netlify.app/og/:splat"
   status = 200
   force = true
 
