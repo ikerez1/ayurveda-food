@@ -2,9 +2,15 @@
   functions = "netlify/functions"
   publish = "."
 
-# The /food/* section is a separate Astro site, proxied in with status 200.
-# A rewrite, not a redirect: visitors and Googlebot both see
-# ayurveda-food.com/food/..., which is what makes the canonical URLs true.
+# Astro's fingerprinted CSS and JS. Must be proxied too, or /food/ pages
+# load their markup from the content site and their stylesheet from the PWA,
+# which doesn't have one.
+[[redirects]]
+  from = "/_astro/*"
+  to = "https://ayurveda-content.netlify.app/_astro/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/food/*"
   to = "https://ayurveda-content.netlify.app/food/:splat"
