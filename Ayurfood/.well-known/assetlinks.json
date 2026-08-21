@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.ayurvedafood.compass",
+      "sha256_cert_fingerprints": [
+        "7C:A1:7F:88:63:D9:46:36:53:E6:3D:51:31:E6:A8:3F:69:EC:94:E4:70:01:46:A1:A5:19:07:00:70:3B:B9:F6",
+        "D4:95:20:3F:51:48:20:E8:EB:80:D4:6C:BF:74:BF:BE:F5:6F:A3:CB:B7:4C:0F:1D:80:E8:9F:B3:A3:7D:3B:17"
+      ]
+    }
+  }
+]
