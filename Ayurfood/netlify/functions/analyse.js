@@ -39,6 +39,47 @@ const HASH_SALT  = process.env.ANALYSE_HASH_SALT || '';
 const LEGACY_TRIAL_CUTOFF = '2026-08-04T09:42:05Z';
 const LEGACY_TRIAL_DAYS   = 7;
 
+// ── Health claim validator ────────────────────────────────────────────────
+// Regulation (EC) 1924/2006: saying a food affects a bodily function or a
+// disease is a health claim and needs authorisation; describing a tradition is
+// not. The prompt states the rule, and this catches what slips through. Any
+// user-visible string that trips it is dropped on the way out — the scores and
+// the classical properties are data and always survive.
+//
+// Deliberately no retry here: analyse is the paid path and a second round trip
+// on every slip would double its cost and its latency. guide.js, whose whole
+// value is the prose, does retry.
+const AFC_CLAIM_PATTERNS = [
+  /\b(cure|cures|cured|curing|heals?|healing|remed(y|ies))\b/i,
+  /\btreatment\s+for\b|\btreats?\s+\w+\s+(disease|condition|symptoms?|illness)\b/i,
+  /\b(prevent|prevents|preventing|protects? against|reduces? the risk)\b/i,
+  /\b(boost|boosts|boosting|strengthens?|improves?|enhances?|supports?)\s+(your\s+)?(immunity|immune|metabolism|digestion|liver|heart|brain|memory|energy levels)\b/i,
+  /\b(detox|detoxif\w*|cleanse|cleansing)\b/i,
+  /\b(weight loss|lose weight|burns? fat|slimming)\b/i,
+  /\b(lowers?|reduces?|raises?)\s+(blood\s+)?(sugar|pressure|cholesterol|inflammation|glucose)\b/i,
+  /\b(diabet\w*|cancer|arthritis|depression|anxiety disorder|ibs|crohn\w*|hypertension)\b/i,
+  /\b(indigestion|bloating|constipation|acid reflux|heartburn|nausea|insomnia|migraines?|headaches?)\b/i,
+  /\b(anti-?inflammatory|antioxidant|immune[- ]boosting|medicinal|therapeutic)\b/i,
+  /\b(diagnos\w+|prescrib\w+|dosage)\b|\d\s*(mg|g|ml)\b/i,
+];
+
+function afcClaimHit(text) {
+  const s = String(text || '');
+  for (let i = 0; i < AFC_CLAIM_PATTERNS.length; i++) {
+    const m = s.match(AFC_CLAIM_PATTERNS[i]);
+    if (m) return m[0];
+  }
+  return null;
+}
+
+/** Returns the string, or the fallback when it carries a claim. */
+function afcSafeText(text, fallback, label) {
+  const hit = afcClaimHit(text);
+  if (!hit) return String(text == null ? '' : text);
+  console.warn('analyse: dropped ' + label + ' on health-claim wording:', hit);
+  return fallback;
+}
+
 const DOSHA_NAMES = { vata: 'Vāta', pitta: 'Pitta', kapha: 'Kapha' };
 const DOSHA_Q = {
   vata:  ['Light', 'Dry', 'Cold', 'Mobile'],
@@ -365,7 +406,14 @@ Each "desc" must name the specific quality driving that score, in 12 words or fe
 
 Set "verdict" from the score for the user's own constitution: 80+ Excellent, 65-79 Good, 45-64 Neutral, 25-44 Caution, below 25 Avoid.
 
-Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoji":"emoji","category":"string","rasa":"string","virya":"Heating or Cooling","vipaka":"Sweet or Sour or Pungent","tastes":["Sweet"],"season":"string","vata":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"pitta":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"kapha":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"verdict":"Excellent|Good|Neutral|Caution|Avoid","advice":"string"}`;
+"why" — 3 to 5 short reasons for the score the user's own constitution received, each naming the actual property responsible: one of the six tastes, the virya, the vipaka, the method of preparation, the temperature it is eaten at, or a food-combining problem. Twelve words or fewer each. No restatement of the score, and nothing generic.
+
+"improve" — how to make THIS SAME dish suit THIS person better. "tips" holds 2 to 4 concrete physical adjustments a person could make in their own kitchen or when ordering: temperature, added fat, a spice, portion size, method of preparation, or the time of day to eat it. Do not substitute ingredients until it is a different dish. "target" is the score the dish would honestly reach for this constitution with every tip applied: never above 88, and never more than 35 points above the score you gave for their constitution. If the food already suits them (65 or above), return "tips":[] and set "target" to the same score.
+
+LANGUAGE — this is a legal requirement, not a style note.
+This text is shown to EU consumers and is governed by Regulation (EC) 1924/2006. Describe traditional practice and the qualities of the food. NEVER state or imply that a food affects a bodily function or treats, prevents or reduces the risk of any condition. Do not write that something aids digestion, boosts immunity, detoxifies, reduces inflammation, lowers blood sugar or causes weight loss. Do not name a disease or a symptom. Do not give a dosage. Write "Ayurveda treats ginger as warming and takes it before a meal", never "ginger aids digestion".
+
+Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoji":"emoji","category":"string","rasa":"string","virya":"Heating or Cooling","vipaka":"Sweet or Sour or Pungent","tastes":["Sweet"],"season":"string","vata":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"pitta":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"kapha":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"verdict":"Excellent|Good|Neutral|Caution|Avoid","advice":"string","why":["string"],"improve":{"target":0-100,"tips":["string"]}}`;
 
     const content = imageB64
       ? [{ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:imageB64 }},
@@ -380,7 +428,7 @@ Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoj
 
     const requestBody = JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1400,
+      max_tokens: 1900,
       system: systemPrompt,
       messages: [{ role: 'user', content }]
     });
@@ -430,8 +478,46 @@ Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoj
         const n = Math.round(Number(obj && obj[k] && obj[k].score));
         if (obj && obj[k] && typeof obj[k] === 'object') {
           obj[k].score = Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 50;
+          obj[k].desc = afcSafeText(obj[k].desc, '', k + '.desc');
         }
       });
+
+      obj.advice = afcSafeText(obj.advice, 'Judge this one on its qualities above.', 'advice');
+
+      // "why": at most five short reasons, each clean. A dropped reason leaves
+      // the rest standing — a partial explanation beats none, and the client
+      // falls back to its own derivation when the array comes back empty.
+      obj.why = (Array.isArray(obj.why) ? obj.why : [])
+        .map(w => String(w == null ? '' : w).trim().slice(0, 110))
+        .filter(w => w && !afcClaimHit(w))
+        .slice(0, 5);
+
+      // "improve": the target is bounded against the score actually given for
+      // this constitution, so the model cannot promise a transformation.
+      if (obj.improve && typeof obj.improve === 'object') {
+        const tips = (Array.isArray(obj.improve.tips) ? obj.improve.tips : [])
+          .map(t => String(t == null ? '' : t).trim().slice(0, 90))
+          .filter(t => t && !afcClaimHit(t))
+          .slice(0, 4);
+
+        const mine = String(dosha || '').split('-').filter(k => DOSHA_NAMES[k]);
+        const keys = mine.length ? mine : ['vata', 'pitta', 'kapha'];
+        const base = Math.round(keys.reduce((a, k) =>
+          a + ((obj[k] && typeof obj[k].score === 'number') ? obj[k].score : 50), 0) / keys.length);
+
+        let target = Math.round(Number(obj.improve.target));
+        if (!Number.isFinite(target)) target = base;
+        // Never below what the food already scores, never more than 35 points
+        // of improvement, and never past 88 — unless the food is already
+        // better than that, in which case there is nothing to promise.
+        const upper = Math.max(base, Math.min(88, base + 35));
+        target = Math.min(upper, Math.max(base, target));
+
+        obj.improve = tips.length ? { target: target, tips: tips } : null;
+      } else {
+        obj.improve = null;
+      }
+
       out = JSON.stringify(obj);
     } catch (e) {
       console.warn('analyse: score normalisation skipped —', e.message);

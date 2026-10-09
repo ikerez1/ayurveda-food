@@ -198,7 +198,7 @@
     /* ══════════════════════════════════════
        LOGIN PAGE
     ══════════════════════════════════════ */
-    #page-login { background: #2A2019; justify-content: center; align-items: center; padding: 32px 24px; }
+    #page-login { background: #2A2019; justify-content: center; justify-content: safe center; align-items: center; padding: 32px 24px; }
     .login-logo { text-align: center; margin-bottom: 32px; }
     .login-logo .sym { font-size: 40px; color: var(--gold); letter-spacing: 8px; display: block; margin-bottom: 12px; }
     .login-logo h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; color: #FBF8F3; }
@@ -211,6 +211,130 @@
     .divider span { font-size: 12px; color: var(--muted); }
     .login-terms { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; line-height: 1.5; }
     .login-terms a { color: var(--gold); text-decoration: none; }
+
+    /* ── Food reference teaser (login page, open to everyone) ── */
+    .login-ref { display: block; width: 100%; max-width: 360px; margin: 0 auto 20px;
+      padding: 20px 22px 18px; text-align: center; text-decoration: none;
+      background: linear-gradient(160deg, rgba(184,136,42,0.15), rgba(184,136,42,0.035));
+      border: 1px solid rgba(184,136,42,0.38); border-radius: 18px;
+      transition: border-color .25s ease, transform .12s ease; }
+    .login-ref:hover { border-color: rgba(184,136,42,0.78); }
+    .login-ref:active { transform: scale(.99); }
+    .login-ref-eyebrow { display: block; font-size: 9.5px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 2.2px;
+      color: rgba(184,136,42,0.92); margin-bottom: 10px; }
+    .login-ref-title { display: block; font-family: 'Playfair Display', serif;
+      font-style: italic; font-weight: 400; font-size: 21px; line-height: 1.28;
+      letter-spacing: 0.2px; color: #FBF8F3; }
+    .login-ref-sub { display: block; font-size: 12.5px; line-height: 1.6;
+      letter-spacing: 0.3px; color: rgba(251,248,243,0.6); margin-top: 9px; }
+    .login-ref-sub em { font-style: italic; color: rgba(251,248,243,0.88); }
+    .login-ref-cta { display: inline-block; margin-top: 14px; font-size: 11px;
+      font-weight: 500; text-transform: uppercase; letter-spacing: 1.6px;
+      color: var(--gold); border-bottom: 1px solid rgba(184,136,42,0.45);
+      padding-bottom: 3px; }
+
+
+    /* ══════════════════════════════════════
+       v5 · TODAY / GUIDE / INSIGHTS
+    ══════════════════════════════════════ */
+    .t-hello { font-family: 'Playfair Display', serif; font-size: 23px; line-height: 1.25; color: var(--dark); margin: 2px 0 5px; }
+    .t-lead { font-size: 13px; line-height: 1.6; color: var(--muted); margin-bottom: 18px; }
+    .t-card-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; color: var(--gold); margin-bottom: 10px; }
+
+    .t-balance { background: linear-gradient(160deg, #FFFDF8, #FBF6EC); }
+    .t-bal-row { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+    .t-bal-row:last-child { border-bottom: none; }
+    .t-bal-name { font-family: 'Playfair Display', serif; font-size: 16px; min-width: 62px; }
+    .t-bal-arrow { font-size: 16px; width: 16px; text-align: center; }
+    .t-bal-state { font-size: 12.5px; letter-spacing: .2px; }
+
+    .t-pick { display: flex; align-items: center; gap: 11px; padding: 11px 0; cursor: pointer; }
+    .t-pick + .t-pick { border-top: 1px solid var(--border); }
+    .t-pick:active { opacity: .6; }
+    .t-pick-emoji { font-size: 22px; flex-shrink: 0; }
+    .t-pick-body { flex: 1; min-width: 0; }
+    .t-pick-name { display: block; font-size: 14px; line-height: 1.35; color: var(--dark); }
+    .t-pick-why { display: block; font-size: 11.5px; color: var(--muted); margin-top: 3px; letter-spacing: .2px; }
+    .t-pick-score { flex-shrink: 0; font-size: 14px; font-weight: 600; border-radius: 9px; padding: 5px 9px; min-width: 38px; text-align: center; }
+    .t-pick-empty { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+    .t-avoid { display: flex; flex-wrap: wrap; gap: 7px; }
+    .t-avoid-chip { font-size: 11.5px; color: #C94A2A; background: #FDF0EC; border: 1px solid rgba(201,74,42,.28); border-radius: 20px; padding: 5px 11px; }
+    .t-why { font-size: 12px; line-height: 1.6; color: var(--muted); margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .t-why strong { color: var(--dark); }
+    .t-cta { font-size: 15px; padding: 15px; }
+    .t-allow { text-align: center; font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+
+    .t-part { display: flex; align-items: center; gap: 8px; padding: 9px 0; text-decoration: none; }
+    .t-part + .t-part { border-top: 1px solid var(--border); }
+    .t-part-name { font-size: 13.5px; color: var(--dark); flex-shrink: 0; }
+    .t-part-props { flex: 1; font-size: 11px; color: var(--muted); text-align: right; }
+    .t-part-arrow { color: var(--gold); font-size: 12px; }
+
+    .ask-row { display: flex; gap: 7px; flex-wrap: wrap; }
+    .ask-row-wrap { margin-bottom: 6px; }
+    .ask-chip { font-family: 'DM Sans', sans-serif; font-size: 12.5px; padding: 8px 13px; border-radius: 20px; border: 1px solid var(--border); background: #fff; color: var(--dark); cursor: pointer; transition: all .15s; }
+    .ask-chip.on { border-color: var(--gold); background: #FFFBF0; color: var(--gold); font-weight: 500; }
+    .ask-chip:active { transform: scale(.97); }
+    .ask-chip-wide { text-align: left; line-height: 1.4; }
+    .guide-line { font-size: 13px; line-height: 1.6; color: var(--dark); margin-bottom: 12px; }
+    .guide-note { font-size: 11px; line-height: 1.65; color: var(--muted); margin: 22px 2px 0; }
+
+    /* Free-text guide */
+    .ask-box { width: 100%; min-height: 76px; resize: vertical; padding: 13px 14px; border: 1px solid var(--border);
+      border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.5;
+      color: var(--dark); background: #fff; -webkit-appearance: none; }
+    .ask-box:focus { outline: none; border-color: var(--gold); }
+    .ask-seed { font-size: 11.5px; color: var(--muted); border: 1px dashed var(--border); background: transparent;
+      border-radius: 20px; padding: 6px 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; text-align: left; }
+    .ask-seed:active { opacity: .6; }
+    .ask-answer { font-size: 14px; line-height: 1.65; color: var(--dark); white-space: pre-wrap; }
+    .ask-meta { font-size: 10.5px; color: var(--muted); margin-top: 12px; line-height: 1.5; }
+    .ask-thinking { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); padding: 6px 0; }
+    .ask-thinking span.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); animation: askpulse 1.1s infinite ease-in-out; }
+    .ask-thinking span.dot:nth-child(2) { animation-delay: .18s; }
+    .ask-thinking span.dot:nth-child(3) { animation-delay: .36s; }
+    @keyframes askpulse { 0%,100% { opacity:.25; transform:scale(.8);} 50% { opacity:1; transform:scale(1);} }
+
+    .ins-hero { text-align: center; background: linear-gradient(135deg, #2A2019, #3A2D22); border-color: #2A2019; padding: 22px 16px 18px; }
+    .ins-score { font-family: 'Playfair Display', serif; font-size: 46px; line-height: 1; }
+    .ins-score span { font-size: 17px; opacity: .55; }
+    .ins-score-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 1.6px; color: rgba(251,248,243,.6); margin-top: 7px; }
+    .ins-delta { display: inline-block; font-size: 12px; margin-top: 9px; color: rgba(251,248,243,.75); }
+    .ins-band { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--dark); padding: 5px 0; }
+    .ins-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .ins-issue { border-left: 3px solid #C94A2A; }
+    .ins-habit { border-left: 3px solid #2E7D5E; }
+    .ins-next  { border-left: 3px solid var(--gold); background: #FFFDF7; }
+    .ins-issue-t { font-family: 'Playfair Display', serif; font-size: 17px; color: #C94A2A; margin-bottom: 6px; }
+    .ins-issue-d { font-size: 12.5px; line-height: 1.65; color: var(--muted); }
+
+    /* Why this score / make it better */
+    .why-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; color: var(--gold); margin: 18px 0 9px; }
+    .why-row { display: flex; gap: 9px; align-items: flex-start; font-size: 12.5px; line-height: 1.55; padding: 5px 0; color: var(--dark); }
+    .why-mark { flex-shrink: 0; width: 14px; text-align: center; font-size: 11px; }
+    .fix-box { margin-top: 16px; border: 1px solid rgba(46,125,94,.35); background: #F4FAF7; border-radius: 13px; padding: 14px 15px; }
+    .fix-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .fix-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: 16px; color: #2E7D5E; }
+    .fix-target { font-size: 19px; font-weight: 600; color: #2E7D5E; }
+    .fix-row { display: flex; gap: 8px; font-size: 12.5px; line-height: 1.55; padding: 4px 0; color: var(--dark); }
+    .fix-note { font-size: 10.5px; color: var(--muted); margin-top: 9px; line-height: 1.5; }
+
+    /* Free vs paid comparison on the paywall */
+    .cmp { display: grid; grid-template-columns: 1fr auto auto; gap: 0; border: 1px solid var(--border); border-radius: 13px; overflow: hidden; margin-bottom: 20px; background: #fff;
+      /* The paywall is a flex column; overflow:hidden disables the automatic
+         minimum size, so without this the grid collapses to its borders. */
+      flex-shrink: 0; }
+    .cmp div { padding: 9px 10px; font-size: 12.5px; border-bottom: 1px solid var(--border); }
+    .cmp .cmp-h { background: #FBF6EC; font-size: 9px; text-transform: uppercase; letter-spacing: .6px; color: var(--gold); font-weight: 600; text-align: center; padding: 9px 4px; white-space: nowrap; }
+    .cmp .cmp-h:first-child { text-align: left; }
+    .cmp .cmp-c { text-align: center; width: 68px; }
+    .cmp div:nth-last-child(-n+3) { border-bottom: none; }
+
+    /* Generic sheet */
+    #afc-sheet { display: none; position: fixed; inset: 0; z-index: 300; background: rgba(42,32,25,.8); align-items: flex-end; justify-content: center; }
+    #afc-sheet.show { display: flex; }
 
     /* ══════════════════════════════════════
        TRIAL BANNER
@@ -473,11 +597,19 @@
   <div class="login-logo">
     <span class="sym">☸ ॐ ☸</span>
     <h1>Āyurveda Food Compass</h1>
-    <p>Ancient wisdom for modern nourishment</p>
+    <p>Know what to eat today</p>
   </div>
+  <!-- Food reference teaser — public, no account required -->
+  <a href="/food/" target="_blank" rel="noopener" class="login-ref">
+    <span class="login-ref-eyebrow">Open to everyone · no account</span>
+    <span class="login-ref-title">Browse the Ayurvedic food reference</span>
+    <span class="login-ref-sub">136 foods — <em>rasa</em>, <em>vīrya</em> and <em>vipāka</em> explained</span>
+    <span class="login-ref-cta">Begin reading ↗</span>
+  </a>
+
   <div class="login-card">
     <h2>Create your free account</h2>
-    <p>Everything is open for your first 7 days — no account, no card. An account is what lets you <strong>save</strong> your analyses to the journal and keep them across devices. After 7 days, an account and a subscription are needed to continue.</p>
+    <p>Find your constitution, then photograph a meal and see how it sits with it. Three analyses and seven days are open with no card — an account is what lets you <strong>save</strong> them and watch the pattern build week by week.</p>
     <button class="btn btn-google" onclick="signInGoogle()">
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
       Continue with Google
@@ -487,9 +619,9 @@
     <input type="password" id="pass-input" class="text-input" placeholder="Password">
     <button class="btn btn-dark" onclick="signInEmail()" id="email-btn">Sign In</button>
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
-    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · No ads · 7 days of full access without an account · then $9.99/month or $59.99/year. Cancel any time.</p>
+    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · 3 free food analyses · No ads · then $9.99/month or $59.99/year. Cancel any time.</p>
     <p style="text-align:center;margin-top:12px;"><a href="#" onclick="enterGuestMode();return false;" style="font-size:13px;color:rgba(251,248,243,0.65);text-decoration:underline;">← Keep looking around without an account</a></p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v4.10.2</p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v5.2.0</p>
   </div>
 </div>
 
@@ -505,16 +637,16 @@
 
   <div class="paywall-benefits" style="margin:0 0 20px;display:flex;flex-direction:column;gap:12px;">
     <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
-      <span style="font-size:18px;">🧬</span>
-      <span>Discover which foods <strong>balance your unique body type</strong> — and which throw it off. AI-powered Ayurvedic food wisdom in your pocket.</span>
+      <span style="font-size:18px;">☀️</span>
+      <span><strong>One answer at every meal.</strong> What suits you today, read from your constitution, the season and what you ate yesterday.</span>
     </div>
     <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
       <span style="font-size:18px;">📷</span>
-      <span><strong>Photograph any food</strong> and instantly see its Ayurvedic effect on your dosha. Ancient wisdom, modern AI.</span>
+      <span><strong>Photograph any food</strong> — and see not only the score, but why it scored that way and how to make the same dish suit you better.</span>
     </div>
     <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
-      <span style="font-size:18px;">🌿</span>
-      <span>Eat in harmony with nature — every meal, every season.</span>
+      <span style="font-size:18px;">📈</span>
+      <span><strong>A week that teaches you something.</strong> The pattern behind your meals, and one concrete thing to change next week.</span>
     </div>
     <div style="display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink,#2d2a26);">
       <span style="font-size:18px;">🚫</span>
@@ -522,13 +654,17 @@
     </div>
   </div>
 
-  <div class="features-list">
-    <div class="feature-row"><span class="fi">📷</span> AI food recognition from camera</div>
-    <div class="feature-row"><span class="fi">☸</span> Full Ayurvedic analysis (rasa, vīrya, vipāka)</div>
-    <div class="feature-row"><span class="fi">🧬</span> Personalised dosha-based scoring</div>
-    <div class="feature-row"><span class="fi">🌿</span> The full 3-Week Prakriti Program</div>
-    <div class="feature-row"><span class="fi">📖</span> Unlimited food journal</div>
-    <div class="feature-row"><span class="fi">☁️</span> Cloud sync across devices</div>
+  <div class="cmp">
+    <div class="cmp-h">&nbsp;</div><div class="cmp-h cmp-c">Free</div><div class="cmp-h cmp-c">Compass+</div>
+    <div>Dosha assessment</div><div class="cmp-c">✓</div><div class="cmp-c">✓</div>
+    <div>Ayurvedic food library — 136 foods</div><div class="cmp-c">✓</div><div class="cmp-c">✓</div>
+    <div>Food analyses</div><div class="cmp-c">3</div><div class="cmp-c">∞</div>
+    <div>Daily “what to eat today”</div><div class="cmp-c">7 days</div><div class="cmp-c">✓</div>
+    <div>“What should I eat now?”</div><div class="cmp-c">7 days</div><div class="cmp-c">✓</div>
+    <div>Weekly insight &amp; patterns</div><div class="cmp-c">7 days</div><div class="cmp-c">✓</div>
+    <div>Meal history across devices</div><div class="cmp-c">—</div><div class="cmp-c">✓</div>
+    <div>The 3-Week Prakriti Program</div><div class="cmp-c">—</div><div class="cmp-c">✓</div>
+    <div>No ads, ever</div><div class="cmp-c">✓</div><div class="cmp-c">✓</div>
   </div>
 
   <div class="plan-cards" id="plan-cards">
@@ -592,18 +728,22 @@
   <div class="hdr hdr-wrap">
     <span class="hdr-sym">☸ ॐ ☸</span>
     <h1>Āyurveda Food Compass</h1>
-    <p>Personalized nourishment through ancient wisdom</p>
+    <p>Know what to eat today</p>
     <div class="hdr-right">
-      <button class="btn btn-outline btn-sm" onclick="goTab('account')" style="border-radius:20px;padding:6px 12px;font-size:11px;">
-        <span id="hdr-avatar">👤</span>
+      <button class="btn btn-outline btn-sm" onclick="goTab('account')" aria-label="Settings" style="border-radius:20px;padding:6px 11px;font-size:13px;">
+        <span id="hdr-avatar">⚙︎</span>
       </button>
     </div>
   </div>
 
   <div id="content">
-    <!-- DOSHA TAB -->
-    <div id="tab-dosha" class="screen active">
-      <div id="daily-hint"></div>
+    <!-- TODAY TAB -->
+    <div id="tab-today" class="screen active">
+      <div id="today-body"></div>
+    </div>
+
+    <!-- DOSHA (reached from TODAY, and from settings to retake) -->
+    <div id="tab-dosha" class="screen">
       <div id="dosha-sel">
         <div style="background:#FDF3E7;border:1px solid #C17F3A;border-radius:12px;padding:14px 16px;margin-bottom:18px;">
           <div style="font-size:13px;font-weight:500;color:#C17F3A;margin-bottom:4px;">☸ Complete this once — update anytime</div>
@@ -660,6 +800,7 @@
     <div id="tab-scan" class="screen">
       <div id="scan-form">
         <p class="sect-title">What are you eating?</p>
+        <div id="scan-allow" style="display:none;font-size:11.5px;color:var(--muted);margin:-8px 0 12px;"></div>
         <div class="hint-bar" id="hint-bar">☽ Set your dosha first for personalised guidance</div>
         <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
           <div id="upload-ph"><div class="upload-ico">📷</div><div class="upload-lbl">Tap to capture or upload food</div><div class="upload-sub">AI will identify and evaluate your food</div></div>
@@ -670,19 +811,23 @@
         <button class="btn btn-dark" onclick="runAnalysis()">Evaluate This Food ↗</button>
         <button class="btn btn-outline" onclick="clearScan()">Clear</button>
         <div style="margin-top:36px;padding-top:22px;border-top:1px solid var(--border);text-align:center;">
-          <a href="/food/" target="_blank" rel="noopener" style="font-family:'Playfair Display',serif;font-style:italic;font-size:17px;line-height:1.45;color:var(--gold);text-decoration:none;display:inline-block;">Browse the Ayurvedic food reference ↗</a>
-          <div style="font-size:11.5px;color:var(--muted);margin-top:7px;letter-spacing:0.2px;">136 foods — rasa, vīrya and vipāka explained</div>
+          <div style="font-size:9.5px;font-weight:500;text-transform:uppercase;letter-spacing:2.2px;color:rgba(184,136,42,0.9);margin-bottom:9px;">Open to everyone</div>
+          <a href="/food/" target="_blank" rel="noopener" style="font-family:'Playfair Display',serif;font-style:italic;font-size:20px;line-height:1.3;letter-spacing:0.2px;color:var(--gold);text-decoration:none;display:inline-block;">Browse the Ayurvedic food reference ↗</a>
+          <div style="font-size:12.5px;line-height:1.6;letter-spacing:0.3px;color:var(--muted);margin-top:9px;">136 foods — <em>rasa</em>, <em>vīrya</em> and <em>vipāka</em> explained</div>
         </div>
       </div>
       <div class="loader" id="loader"><div class="loader-spin">☸</div><div class="loader-txt">Consulting Ayurvedic wisdom...</div><div class="loader-sub">Analysing rasa, vīrya &amp; vipāka</div></div>
       <div id="result-area" style="display:none;"></div>
     </div>
 
-    <!-- JOURNAL TAB -->
-    <div id="tab-journal" class="screen">
-      <p class="sect-title">Food journal</p>
-      <div id="journal-week"></div>
-      <div id="journal-list"></div>
+    <!-- INSIGHTS TAB -->
+    <div id="tab-insights" class="screen">
+      <div id="insights-body"></div>
+    </div>
+
+    <!-- GUIDE TAB -->
+    <div id="tab-guide" class="screen">
+      <div id="guide-body"></div>
     </div>
 
     <!-- ACCOUNT TAB -->
@@ -746,8 +891,13 @@
         </div>
       </div>
 
+      <div class="card" style="margin-top:16px;">
+        <div class="t-card-lbl">Funnel on this device</div>
+        <div id="acct-funnel"></div>
+      </div>
+
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px;">
-        AyurFood v4.10.2 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
+        AyurFood v5.2.0 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
         <div style="margin-top:8px;">
           Need help? <a href="mailto:info@ayurveda-food.com" style="color:var(--gold);">info@ayurveda-food.com</a>
         </div>
@@ -756,10 +906,10 @@
   </div>
 
   <nav class="bnav">
-    <button class="bnav-btn on" id="nav-dosha" onclick="goTab('dosha')"><span class="ico">🧬</span>Dosha</button>
-    <button class="bnav-btn" id="nav-scan" onclick="goTab('scan')"><span class="ico">🔍</span>Analyse</button>
-    <button class="bnav-btn" id="nav-journal" onclick="goTab('journal')"><span class="ico">📖</span>Journal</button>
-    <button class="bnav-btn" id="nav-account" onclick="goTab('account')"><span class="ico">👤</span>Account</button>
+    <button class="bnav-btn on" id="nav-today" onclick="goTab('today')"><span class="ico">☀️</span>Today</button>
+    <button class="bnav-btn" id="nav-scan" onclick="goTab('scan')"><span class="ico">📷</span>Scan</button>
+    <button class="bnav-btn" id="nav-insights" onclick="goTab('insights')"><span class="ico">📈</span>Insights</button>
+    <button class="bnav-btn" id="nav-guide" onclick="goTab('guide')"><span class="ico">☸</span>Guide</button>
   </nav>
 </div>
 
@@ -776,6 +926,15 @@
     <div style="max-width:560px;margin:0 auto;padding:18px 16px calc(28px + var(--safe-bottom));">
       <div id="pp-app"></div>
     </div>
+  </div>
+</div>
+
+<!-- Generic sheet (v5) -->
+<div id="afc-sheet" onclick="afcSheetClose()">
+  <div class="api-inner" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div id="afc-sheet-body"></div>
+    <button class="btn btn-outline" style="margin-top:16px;" onclick="afcSheetClose()">Close</button>
   </div>
 </div>
 
@@ -807,6 +966,9 @@ const CONFIG = {
 
   // 3. Create 3 products in Stripe → copy each Price ID (starts with price_)
   STRIPE_PRICES: {
+    // The account's existing live prices: $9.99/month and $59.99/year.
+    // The monthly id was verified live and active in Stripe Workbench on
+    // 9 Oct 2026. Confirm the yearly one the same way before trusting it.
     monthly: 'price_1U0fFR3h8VYXcWowp342kFed',
     yearly:  'price_1U0feM3h8VYXcWowXeyDuLWz',
   },
@@ -964,6 +1126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (params.get('payment') === 'success') {
     // Mark subscription active in localStorage immediately
     localStorage.setItem('ayur_payment_success', 'true');
+    afcFunnel('purchase', localStorage.getItem('afc_pending_plan') || '');
 
     /* ===== Google Ads: purchase conversion (deduped by Stripe session id) ===== */
     try {
@@ -1223,8 +1386,6 @@ function showMainApp() {
       document.getElementById('acct-avatar').style.cssText += ';display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500;background:var(--vata-light);color:var(--vata);';
     }
 
-    document.getElementById('hdr-avatar').textContent = name.charAt(0).toUpperCase();
-
     const status = getSubscriptionStatus();
     const badge  = document.getElementById('acct-badge');
     if (status === 'trial') {
@@ -1235,7 +1396,7 @@ function showMainApp() {
         ? `<span class="sub-badge active">✓ Complimentary Access</span>`
         : `<span class="sub-badge active">✓ Active Member</span>`;
     } else if (status === 'none') {
-      badge.innerHTML = `<span class="sub-badge expired">Free plan — dosha quiz only</span>`;
+      badge.innerHTML = `<span class="sub-badge expired">Free plan — ${afcAnalysesLeft()} of ${AFC_FREE_ANALYSES} analyses left</span>`;
     } else {
       badge.innerHTML = `<span class="sub-badge expired">⚠️ Trial ended — upgrade to continue</span>`;
     }
@@ -1244,6 +1405,11 @@ function showMainApp() {
 
   if (dosha && DOSHA[dosha]) { const saved = JSON.parse(localStorage.getItem('ayur_dosha_scores') || 'null'); renderDoshaResult(saved || fallbackScores(dosha)); }
   renderJournal();
+
+  afcFunnelOncePerDay('app_open');
+  // The first screen of a session is TODAY; later calls (returning from the
+  // paywall, a profile refresh) must not yank the user off the tab they chose.
+  if (!afcBooted) { afcBooted = true; goTab('today'); }
 }
 
 // ══════════════════════════════════════════
@@ -1342,20 +1508,21 @@ function hidePage(id) {
   document.getElementById('page-' + id)?.classList.remove('active');
 }
 function showPaywall() {
+  afcFunnel('paywall_view');
   // Contextual headline: lapsed trialists vs. free-tier users
   try {
     const t = document.getElementById('paywall-title');
     const s = document.getElementById('paywall-sub');
     if (t && s) {
       if (!user) {
-        t.textContent = 'Your 7 days of free access have ended';
-        s.textContent = 'Create an account to continue — your dosha quiz stays free forever:';
+        t.textContent = 'That was your free run';
+        s.textContent = 'Your prakriti stays yours for good. Keep the daily answer, the guide and the weekly pattern:';
       } else if (getSubscriptionStatus() === 'expired' && profile?.trial_start) {
         t.textContent = 'Your free trial has ended';
         s.textContent = 'Your dosha quiz stays free forever — keep the full experience going:';
       } else {
-        t.textContent = 'Go beyond your dosha';
-        s.textContent = 'Your prakriti check is free forever. Unlock the full experience:';
+        t.textContent = 'Know what to eat, every day';
+        s.textContent = 'Your constitution, the season and your recent meals — turned into one clear answer at every meal.';
       }
     }
   } catch (e) {}
@@ -1550,10 +1717,19 @@ function afcTrackTrialSignup() {
 
 async function startCheckout() {
   // Init Stripe lazily in case async CDN wasn't ready at startup
+  // Stripe.js is initialised when it happens to be available, and checkout
+  // does NOT depend on it: create-checkout.js builds the session server-side
+  // and this function redirects to the URL Stripe returns.
+  //
+  // Until v5.1.1 a missing window.Stripe aborted the whole flow with
+  // "Payment system loading — please try again in a moment". js.stripe.com is
+  // among the first things privacy extensions and strict cookie blockers drop,
+  // so anyone running one could never subscribe — and nothing was logged,
+  // because create-checkout was never reached. Do not reintroduce this gate
+  // unless the flow actually starts using Stripe.js.
   if (!stripe && window.Stripe && CONFIG.STRIPE_PK && !CONFIG.STRIPE_PK.startsWith('YOUR_')) {
-    stripe = Stripe(CONFIG.STRIPE_PK);
+    try { stripe = Stripe(CONFIG.STRIPE_PK); } catch (e) {}
   }
-  if (!stripe) { showToast('Payment system loading — please try again in a moment'); return; }
   if (!user)   { showToast('Create an account to subscribe'); showPage('login'); return; }
 
   // Guard against a second concurrent subscription on the same account.
@@ -1570,6 +1746,8 @@ async function startCheckout() {
     showToast('Please confirm the subscription terms to continue');
     return;
   }
+
+  afcFunnel('checkout_start', selectedPlan);
 
   const priceId = CONFIG.STRIPE_PRICES[selectedPlan];
   if (!priceId || priceId.startsWith('YOUR_')) {
@@ -1811,32 +1989,7 @@ async function restorePurchase() {
 // ══════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════
-function goTab(id) {
-  // Guests: quiz only; premium tabs and account lead to sign-in (7-day trial).
-  // Expired members: quiz + account stay; premium tabs lead to the paywall.
-  const st = getSubscriptionStatus();
-  const premium = (id === 'scan' || id === 'journal');
-  if (!user) {
-    // Account settings genuinely require an account.
-    if (id === 'account') { showPage('login'); return; }
-    // Everything else is open for the guest window, then closes.
-    if (premium && !guestTrialActive()) { showPaywall(); return; }
-  } else if (premium && st === 'expired') {
-    showPaywall();
-    return;
-  }
-  ['dosha','scan','journal','account'].forEach(t => {
-    document.getElementById('tab-' + t).classList.toggle('active', t === id);
-    document.getElementById('nav-' + t).classList.toggle('on', t === id);
-  });
-  document.getElementById('content').scrollTop = 0;
-  if (id === 'dosha') renderDailyHint();
-  if (id === 'scan') {
-    document.getElementById('hint-bar').style.display = dosha ? 'none' : 'block';
-    hide('result-area'); show('scan-form'); hide('loader');
-  }
-  if (id === 'journal') renderJournal();
-}
+// Replaced in v5 — see goTab in the NAVIGATION section below.
 
 // ══════════════════════════════════════════
 // DAILY AYURVEDIC NOTE
@@ -2023,6 +2176,7 @@ function calcDosha() {
   const sc = { vata:0, pitta:0, kapha:0 };
   filled.forEach(a => { if(a==='v') sc.vata++; else if(a==='p') sc.pitta++; else sc.kapha++; });
   dosha = classifyPrakriti(sc);
+  afcFunnel('dosha_complete', dosha);
   // Save real scores to localStorage
   localStorage.setItem('ayur_dosha_scores', JSON.stringify(sc));
   saveDosha(dosha);
@@ -2096,10 +2250,13 @@ function renderDoshaResult(sc) {
       ${bars}
       <div class="tip-box"><div class="tip-lbl">Dietary guidance</div><div class="tip-text">${d.guidance}</div></div>
     </div>
-    ${(user || guestTrialActive())
-      ? `<button class="btn btn-dark" onclick="goTab('scan')">Analyse a Food ↗</button>`
-      : `<div style="text-align:center;font-size:12.5px;color:#7A6B58;margin:4px 0 10px;line-height:1.5;">Now put your prakriti to work — photograph any food and see its Ayurvedic effect on <em>your</em> dosha.</div>
-         <button class="btn btn-gold" onclick="showPaywall()">See plans ↗</button>`}
+    <div class="card" style="text-align:center;background:linear-gradient(160deg,#FFFDF8,#FDF6E9);border-color:rgba(184,136,42,.32);">
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:18px;color:var(--dark);margin-bottom:8px;">Now let's see what this means for something you actually eat</div>
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px;">Photograph your next meal. It is judged against the constitution you just found — not against a general idea of healthy eating.</div>
+      <button class="btn btn-dark" onclick="afcStartScan()">📷 Take a photo of your meal</button>
+      ${afcAllowanceLine() ? `<div class="t-allow">${afcAllowanceLine()}</div>` : ''}
+    </div>
+    <button class="btn btn-outline" onclick="goTab('today')">See my day ↗</button>
     <button class="btn btn-outline" onclick="resetDosha()">Retake Assessment</button>`;
   show('dosha-res'); hide('dosha-sel');
 }
@@ -2146,19 +2303,21 @@ async function runAnalysis() {
   const txt = document.getElementById('food-text').value.trim();
   if (!txt && !imgB64) { alert('Please enter a food name or take a photo.'); return; }
 
-  // Check auth + subscription. Guests are allowed through for the guest window.
-  if (!user) {
-    if (!guestTrialActive()) { showPaywall(); return; }
-  } else {
-    const status = getSubscriptionStatus();
-    if (status === 'expired') { showPaywall(); return; }
-  }
+  // Members are unlimited; everyone else gets three analyses inside the
+  // 7-day window. The paywall is reached after a real personal result rather
+  // than in place of one — see afcAfterResult.
+  const ent = afcEntitlement();
+  if (ent === 'blocked') { showPaywall(); return; }
+  afcFunnel('analysis_start', imgB64 ? 'photo' : 'text');
 
   hide('scan-form'); show('loader'); hide('result-area');
   try {
     const res = await callClaude(txt, imgB64);
     renderResult(res);
     await saveToJournal(res);
+    if (ent !== 'paid') afcNoteAnalysisUsed();
+    afcFunnel('analysis_result', verdictFor(doshaScore(res, dosha)));
+    afcAfterResult();
   } catch(e) {
     hide('loader'); show('scan-form');
     const st = e && e.status;
@@ -2316,35 +2475,7 @@ async function afcInjectFoodRef(foodName) {
     'Read the full Ayurvedic profile of ' + afcEsc(hit.name) + ' ↗</a>';
 }
 
-function renderResult(r) {
-  hide('loader');
-  const vata=r.vata||{score:50,effect:'~',desc:''}; const pitta=r.pitta||{score:50,effect:'~',desc:''}; const kapha=r.kapha||{score:50,effect:'~',desc:''};
-  const myScore = doshaScore(r, dosha);
-  const verdict = verdictFor(myScore); const vs2 = VS[verdict]||VS.Neutral;
-  const chips = (r.tastes||[]).map(t=>`<span class="chip" style="color:${TC[t]||'#888'};border-color:${TC[t]||'#888'};background:${TC[t]||'#888'}18">${t}</span>`).join('');
-  const prim = primaryDoshas(dosha);
-  const order = doshaOrder(dosha);
-  const dmap = {vata,pitta,kapha};
-  const impacts = order.map(x => { const info=dmap[x]||{score:50,effect:'~',desc:''}; const hl=prim.indexOf(x)!==-1?`hl hl-${x}`:''; const fx=info.effect||'~'; const ec=fx.includes('↓')?'#2E7D5E':fx.includes('↑')?'#C94A2A':'#C17F3A'; return `<div class="impact-row ${hl}"><span class="imp-name" style="color:${DC[x]}">${DN[x]}</span><span class="imp-fx" style="color:${ec}">${fx}</span><span class="imp-desc">${info.desc||''}</span><span class="imp-score" style="color:${ec}">${info.score??50}</span></div>`; }).join('');
-  document.getElementById('result-area').innerHTML = `
-    <div class="card">
-      <div class="res-header"><span class="res-emoji">${r.emoji||'🍽️'}</span><div><div class="res-name">${r.foodName||'Food'}</div><div class="res-cat">${r.category||''}</div></div></div>
-      <div class="score-row" style="background:${vs2.bg};border-color:${vs2.color}">
-        <div class="score-circ" style="border-color:${vs2.color};background:${vs2.color}18"><span class="score-num" style="color:${vs2.color}">${myScore}</span><span class="score-of" style="color:${vs2.color}">/100</span></div>
-        <div><div class="score-verd" style="color:${vs2.color}">${verdict}${dosha&&DOSHA[dosha]?' for '+DOSHA[dosha].name:''}</div><div class="score-adv">${r.advice||''}</div></div>
-      </div>
-      ${chips?`<div class="tip-lbl" style="margin-bottom:8px">Tastes</div><div class="chips">${chips}</div>`:''}
-      <div class="props-grid"><div class="prop"><div class="prop-l">Rasa</div><div class="prop-v">${r.rasa||'—'}</div></div><div class="prop"><div class="prop-l">Vīrya</div><div class="prop-v">${r.virya||'—'}</div></div><div class="prop"><div class="prop-l">Vipāka</div><div class="prop-v">${r.vipaka||'—'}</div></div><div class="prop"><div class="prop-l">Season</div><div class="prop-v">${r.season||'—'}</div></div></div>
-      <div class="impact-lbl">Impact on doshas</div>${impacts}
-    </div>
-    ${!user ? guestSaveNotice() : ''}
-    <div id="food-ref"></div>
-    <button class="btn btn-dark" onclick="clearScan();goTab('scan')">Analyse Another Food ↗</button>`;
-  show('result-area'); document.getElementById('content').scrollTop=0;
-  // Async and non-blocking: the result is already on screen, and the link
-  // simply appears if there is a page for it.
-  afcInjectFoodRef(r.foodName);
-}
+// renderResult was replaced in v5 - see the RESULT section above.
 
 // ══════════════════════════════════════════
 // JOURNAL
@@ -2622,6 +2753,1158 @@ async function clearJournal() {
 // ══════════════════════════════════════════
 // API KEY
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · NOURISHMENT ENGINE
+// ══════════════════════════════════════════════════════════════════════════
+// Everything below is deterministic and runs on the device. It reads the same
+// 136-food reference the public /food/ pages are built from, so a score shown
+// here and a profile read there can never disagree.
+//
+// Four inputs decide every recommendation:
+//   1. prakriti      — the user's constitution (both halves of a dual type)
+//   2. ṛtu           — the season, which raises one doṣa for everyone
+//   3. kāla          — the time of day, which has its own doṣic window
+//   4. recent meals  — what the journal recorded over the last three days
+//
+// Compliance note: every string this engine can emit describes classical
+// practice or a food's traditional qualities. Nothing here states or implies
+// an effect on a bodily function or a disease — see the AYUR_HINTS note above
+// for the Regulation (EC) 1924/2006 line these must stay on the right side of.
+
+const AFC_EFF_N = {
+  'strongly decreases': -2, 'decreases': -1, 'slightly decreases': -0.5,
+  'neutral': 0, '': 0,
+  'slightly increases': 0.5, 'increases': 1, 'strongly increases': 2,
+};
+function afcEffN(row, d) {
+  if (!row) return 0;
+  const v = AFC_EFF_N[String(row[d + '_effect'] || 'neutral').toLowerCase().trim()];
+  return typeof v === 'number' ? v : 0;
+}
+
+// ── Food rows ────────────────────────────────────────────────────────────
+// One fetch per device per day, cached. The older slug+name index is derived
+// from the same rows so the reference link and the engine never diverge.
+let afcFoodRows = null;
+const AFC_ROWS_KEY = 'afc_food_rows_v5';
+const AFC_ROWS_COLS = 'slug,name,rasa,virya,vipaka,vata_effect,pitta_effect,kapha_effect,short_summary,seasonal_notes';
+
+async function afcLoadFoodRows() {
+  if (afcFoodRows) return afcFoodRows;
+  try {
+    const raw = localStorage.getItem(AFC_ROWS_KEY);
+    if (raw) {
+      const c = JSON.parse(raw);
+      if (c && Array.isArray(c.v) && c.v.length && Date.now() - c.t < 86400000) {
+        afcFoodRows = c.v;
+        return afcFoodRows;
+      }
+    }
+  } catch (e) {}
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('foods').select(AFC_ROWS_COLS).eq('status', 'published').limit(1000);
+    if (error || !Array.isArray(data) || !data.length) return [];
+    afcFoodRows = data;
+    try { localStorage.setItem(AFC_ROWS_KEY, JSON.stringify({ t: Date.now(), v: data })); } catch (e) {}
+    return afcFoodRows;
+  } catch (e) { return []; }
+}
+function afcRowBySlug(slug) {
+  if (!afcFoodRows) return null;
+  return afcFoodRows.find(r => r.slug === slug) || null;
+}
+
+// ── Season (ṛtu) ─────────────────────────────────────────────────────────
+// Classical northern-hemisphere mapping; the southern half of the year is
+// mirrored for viewers whose time zone sits below the equator, because a
+// July recommendation built for Vienna is wrong in Buenos Aires.
+const AFC_SOUTH = /Australia|Pacific\/Auckland|Pacific\/Fiji|America\/Argentina|America\/Sao_Paulo|America\/Santiago|America\/Montevideo|America\/La_Paz|America\/Lima|Africa\/Johannesburg|Africa\/Windhoek|Indian\/Antananarivo/;
+function afcSouthern() {
+  try { return AFC_SOUTH.test(Intl.DateTimeFormat().resolvedOptions().timeZone || ''); }
+  catch (e) { return false; }
+}
+function afcSeason(dt) {
+  let m = (dt || new Date()).getMonth();
+  if (afcSouthern()) m = (m + 6) % 12;
+  if (m >= 9 || m === 0) return 'vata';   // Oct–Jan · cold, dry, mobile
+  if (m >= 1 && m <= 4)  return 'kapha';  // Feb–May · damp, heavy, cool
+  return 'pitta';                          // Jun–Sep · hot, sharp
+}
+const AFC_SEASON_NAME = { vata: 'Vāta season — cool, dry, windy', pitta: 'Pitta season — hot and sharp', kapha: 'Kapha season — damp and heavy' };
+
+// ── Time of day (kāla) ───────────────────────────────────────────────────
+function afcSlotNow(dt) {
+  const h = (dt || new Date()).getHours();
+  if (h < 4)  return 'snack';
+  if (h < 11) return 'breakfast';
+  if (h < 16) return 'lunch';
+  if (h < 21) return 'dinner';
+  return 'snack';
+}
+function afcKalaDosha(dt) {
+  const h = (dt || new Date()).getHours();
+  if (h >= 6  && h < 10) return 'kapha';
+  if (h >= 10 && h < 14) return 'pitta';
+  if (h >= 14 && h < 18) return 'vata';
+  if (h >= 18 && h < 22) return 'kapha';
+  if (h >= 22 || h < 2)  return 'pitta';
+  return 'vata';
+}
+function afcGreeting(dt) {
+  const h = (dt || new Date()).getHours();
+  if (h < 5)  return 'Still awake';
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
+// ── Recent load ──────────────────────────────────────────────────────────
+// What the last three days of the journal did to each doṣa, as roughly −1…+1.
+// A per-doṣa score below 50 in a saved analysis means that meal pushed the
+// doṣa up; above 50 means it settled it.
+function afcRecentLoad() {
+  const out = { vata: 0, pitta: 0, kapha: 0 };
+  if (!Array.isArray(history) || !history.length) return out;
+  const since = Date.now() - 3 * 864e5;
+  const recent = history.filter(h => h && h.full && (h.ts || 0) >= since);
+  if (!recent.length) return out;
+  DOSHA_ORDER.forEach(d => {
+    let sum = 0, n = 0;
+    recent.forEach(h => {
+      const s = h.full[d] && typeof h.full[d].score === 'number' ? h.full[d].score : null;
+      if (s === null) return;
+      sum += (50 - s) / 50; n++;
+    });
+    out[d] = n ? Math.max(-1, Math.min(1, sum / n)) : 0;
+  });
+  return out;
+}
+
+// ── Today's balance ──────────────────────────────────────────────────────
+// Constitution sets the baseline, season and recent meals move it. This is a
+// reading of tendency, not a measurement of the body.
+function afcBalance() {
+  const load = afcRecentLoad();
+  const season = afcSeason();
+  const mine = primaryDoshas(dosha);
+  const out = {};
+  DOSHA_ORDER.forEach(d => {
+    let v = 0;
+    if (mine.indexOf(d) !== -1) v += 0.45;            // your own doṣa runs closer to its edge
+    if (season === d) v += 0.45;                       // the season raises it for everyone
+    if (afcKalaDosha() === d) v += 0.15;               // the hour has its own quality
+    v += load[d] * 0.75;                               // and what you actually ate
+    out[d] = v;
+  });
+  const rank = DOSHA_ORDER.slice().sort((a, b) => out[b] - out[a]);
+  return {
+    values: out, load, season, top: rank[0],
+    state: d => out[d] >= 0.85 ? 'elevated' : out[d] >= 0.5 ? 'slightly elevated' : out[d] <= 0.05 ? 'low' : 'balanced',
+    arrow: d => out[d] >= 0.85 ? '↑' : out[d] >= 0.5 ? '↗' : out[d] <= 0.05 ? '↓' : '→',
+  };
+}
+
+// ── Scoring ──────────────────────────────────────────────────────────────
+// One formula for every recommendation in the app, so a dish cannot score
+// 88 on TODAY and 61 in the guide.
+function afcScoreEffects(eff, opt) {
+  opt = opt || {};
+  const mine = primaryDoshas(dosha);
+  const keys = mine.length ? mine : DOSHA_ORDER;
+  let raw = 0;
+  keys.forEach(d => { raw += eff[d] || 0; });
+  raw = raw / keys.length;
+
+  let s = 74 - raw * 19;
+
+  const season = opt.season || afcSeason();
+  s -= (eff[season] || 0) * 5;
+
+  const kala = opt.kala || afcKalaDosha();
+  s -= (eff[kala] || 0) * 3.5;
+
+  const load = opt.load || afcRecentLoad();
+  DOSHA_ORDER.forEach(d => {
+    if (load[d] > 0.15) s -= (eff[d] || 0) * load[d] * 8;
+  });
+
+  if (opt.bias) DOSHA_ORDER.forEach(d => { if (opt.bias[d]) s -= (eff[d] || 0) * opt.bias[d]; });
+
+  return Math.max(5, Math.min(98, Math.round(s)));
+}
+
+// ── Composed dishes ──────────────────────────────────────────────────────
+// Real meals rather than bare ingredients, because nobody eats "ghee" for
+// dinner. Each part is a slug in the reference library, so a dish's doṣic
+// effect is derived from published data rather than asserted here, and every
+// dish can link back to the profile of its main ingredient.
+const AFC_MEALS = [
+  // ── breakfast ──
+  { id:'porridge-pear', name:'Warm oat porridge with pear & cinnamon', emoji:'🥣', slot:['breakfast'], place:['home'], weight:['light','normal'], parts:[['oats',1],['pear',0.6],['cinnamon',0.3],['ghee',0.3]] },
+  { id:'stewed-apple', name:'Stewed apple with cardamom', emoji:'🍎', slot:['breakfast','snack'], place:['home'], weight:['light'], parts:[['apple',1],['cardamom',0.3],['ghee',0.2]] },
+  { id:'rice-pudding', name:'Rice pudding with cardamom & jaggery', emoji:'🍚', slot:['breakfast','snack'], place:['home'], weight:['normal'], parts:[['rice',1],['milk',0.6],['cardamom',0.3],['jaggery',0.3]] },
+  { id:'buckwheat-dates', name:'Buckwheat porridge with dates', emoji:'🌾', slot:['breakfast'], place:['home'], weight:['normal'], parts:[['buckwheat',1],['dates',0.5],['ghee',0.3]] },
+  { id:'eggs-spinach', name:'Poached eggs with spinach', emoji:'🍳', slot:['breakfast'], place:['home','out'], weight:['normal'], parts:[['eggs',1],['spinach',0.6],['olive-oil',0.3]] },
+  { id:'eggs-toast', name:'Scrambled eggs on toast', emoji:'🍞', slot:['breakfast'], place:['home','out'], weight:['normal','hearty'], parts:[['eggs',1],['bread',0.7],['butter',0.3]] },
+  { id:'yogurt-honey', name:'Yogurt with honey', emoji:'🥛', slot:['breakfast','snack'], place:['home','out'], weight:['light'], parts:[['yogurt',1],['honey',0.4]] },
+  { id:'green-smoothie', name:'Cold fruit smoothie', emoji:'🥤', slot:['breakfast','snack'], place:['home','out'], weight:['light'], parts:[['smoothie',1]] },
+  { id:'croissant-coffee', name:'Pastry and coffee', emoji:'🥐', slot:['breakfast'], place:['out'], weight:['light'], parts:[['bread',0.8],['butter',0.5],['coffee',0.8],['sugar',0.4]] },
+
+  // ── lunch ──
+  { id:'khichdi', name:'Khichdi with ghee & cumin', emoji:'🍚', slot:['lunch','dinner','breakfast'], place:['home'], weight:['light','normal'], parts:[['khichdi',1],['ghee',0.4],['cumin',0.3],['turmeric',0.2]] },
+  { id:'mung-soup', name:'Mung dal soup with cumin', emoji:'🥣', slot:['lunch','dinner'], place:['home','out'], weight:['light','normal'], parts:[['mung-dal',1],['cumin',0.3],['ghee',0.3],['ginger',0.2]] },
+  { id:'lentil-soup', name:'Lentil soup', emoji:'🍲', slot:['lunch','dinner'], place:['home','out'], weight:['normal'], parts:[['lentils',1],['carrot',0.4],['cumin',0.3],['olive-oil',0.3]] },
+  { id:'rice-veg-curry', name:'Basmati rice with vegetable curry', emoji:'🍛', slot:['lunch','dinner'], place:['home','out'], weight:['normal'], parts:[['basmati-rice',1],['courgette',0.5],['carrot',0.5],['coriander',0.3],['ghee',0.3]] },
+  { id:'chickpea-stew', name:'Chickpea stew with cumin & ginger', emoji:'🫕', slot:['lunch','dinner'], place:['home','out'], weight:['normal','hearty'], parts:[['chickpeas',1],['tomato',0.4],['cumin',0.3],['ginger',0.3],['olive-oil',0.3]] },
+  { id:'chicken-quinoa', name:'Grilled chicken with quinoa & greens', emoji:'🍗', slot:['lunch','dinner'], place:['out','home'], weight:['normal'], parts:[['chicken',1],['quinoa',0.6],['asparagus',0.4],['olive-oil',0.3]] },
+  { id:'salmon-rice', name:'Baked salmon with rice', emoji:'🐟', slot:['lunch','dinner'], place:['out','home'], weight:['normal'], parts:[['salmon',1],['rice',0.7],['fennel',0.3],['olive-oil',0.3]] },
+  { id:'veg-soup-barley', name:'Vegetable soup with barley', emoji:'🍜', slot:['lunch','dinner'], place:['home','out'], weight:['light'], parts:[['soup',1],['barley',0.5],['ghee',0.2]] },
+  { id:'pasta-tomato', name:'Pasta with tomato and basil', emoji:'🍝', slot:['lunch','dinner'], place:['out'], weight:['normal','hearty'], parts:[['pasta',1],['tomato',0.7],['olive-oil',0.3],['basil',0.2]] },
+  { id:'pizza', name:'Pizza', emoji:'🍕', slot:['lunch','dinner'], place:['out'], weight:['hearty'], parts:[['pizza',1]] },
+  { id:'raw-salad', name:'Raw salad bowl', emoji:'🥗', slot:['lunch'], place:['out','home'], weight:['light'], parts:[['salad',1],['cucumber',0.4],['lettuce',0.4],['olive-oil',0.3]] },
+  { id:'steak-potato', name:'Steak with potatoes', emoji:'🥩', slot:['lunch','dinner'], place:['out'], weight:['hearty'], parts:[['beef',1],['potato',0.7],['butter',0.3]] },
+
+  // ── dinner ──
+  { id:'veg-soup-ghee', name:'Vegetable soup with ghee', emoji:'🍲', slot:['dinner'], place:['home'], weight:['light'], parts:[['soup',1],['ghee',0.4],['cumin',0.2]] },
+  { id:'steamed-veg-rice', name:'Steamed vegetables with basmati', emoji:'🥦', slot:['dinner'], place:['home'], weight:['light','normal'], parts:[['basmati-rice',1],['broccoli',0.5],['carrot',0.5],['ghee',0.3]] },
+  { id:'sweet-potato', name:'Baked sweet potato with butter', emoji:'🍠', slot:['dinner','lunch'], place:['home'], weight:['normal'], parts:[['sweet-potato',1],['butter',0.4],['cinnamon',0.2]] },
+  { id:'palak-paneer', name:'Paneer with spinach & ginger', emoji:'🧀', slot:['dinner','lunch'], place:['home','out'], weight:['normal'], parts:[['paneer',1],['spinach',0.7],['ginger',0.3],['turmeric',0.2],['ghee',0.3]] },
+  { id:'tofu-stirfry', name:'Tofu stir-fry with ginger', emoji:'🍳', slot:['dinner','lunch'], place:['home','out'], weight:['light','normal'], parts:[['tofu',1],['broccoli',0.5],['ginger',0.4],['sesame-oil',0.3]] },
+  { id:'fish-greens', name:'Fish with steamed greens', emoji:'🐠', slot:['dinner'], place:['out','home'], weight:['normal'], parts:[['fish',1],['green-beans',0.5],['fennel',0.3],['olive-oil',0.3]] },
+  { id:'turkey-roast-veg', name:'Turkey with roasted vegetables', emoji:'🍖', slot:['dinner'], place:['out','home'], weight:['normal','hearty'], parts:[['turkey',1],['pumpkin',0.5],['carrot',0.4],['olive-oil',0.3]] },
+  { id:'fried-platter', name:'Fried food', emoji:'🍟', slot:['dinner','lunch'], place:['out'], weight:['hearty'], parts:[['fried-food',1]] },
+  { id:'cheese-wine', name:'Cheese board with wine', emoji:'🧀', slot:['dinner','snack'], place:['out'], weight:['normal'], parts:[['cheese',1],['wine',0.8],['bread',0.5]] },
+  { id:'leftovers', name:'Reheated leftovers', emoji:'🥡', slot:['dinner','lunch'], place:['home'], weight:['normal'], parts:[['leftovers',1]] },
+
+  // ── snack ──
+  { id:'warm-milk', name:'Warm milk with cardamom', emoji:'🥛', slot:['snack'], place:['home'], weight:['light'], parts:[['milk',1],['cardamom',0.3]] },
+  { id:'soaked-almonds', name:'Soaked almonds', emoji:'🌰', slot:['snack'], place:['home','out'], weight:['light'], parts:[['almonds',1]] },
+  { id:'stewed-pear', name:'Stewed pear with cinnamon', emoji:'🍐', slot:['snack'], place:['home'], weight:['light'], parts:[['pear',1],['cinnamon',0.2],['ghee',0.2]] },
+  { id:'pumpkin-seeds', name:'Roasted pumpkin seeds', emoji:'🎃', slot:['snack'], place:['home','out'], weight:['light'], parts:[['pumpkin-seeds',1]] },
+  { id:'dark-choc', name:'A square of dark chocolate', emoji:'🍫', slot:['snack'], place:['home','out'], weight:['light'], parts:[['dark-chocolate',1]] },
+  { id:'coconut-water', name:'Fresh coconut water', emoji:'🥥', slot:['snack'], place:['home','out'], weight:['light'], parts:[['coconut-water',1]] },
+  { id:'ice-cream', name:'Ice cream', emoji:'🍦', slot:['snack','dinner'], place:['home','out'], weight:['light'], parts:[['ice-cream',1]] },
+];
+
+// Weighted mean of the parts' published effects.
+function afcMealEffects(meal) {
+  const eff = { vata: 0, pitta: 0, kapha: 0 };
+  let w = 0, known = 0;
+  meal.parts.forEach(([slug, weight]) => {
+    const row = afcRowBySlug(slug);
+    if (!row) return;
+    known++; w += weight;
+    DOSHA_ORDER.forEach(d => { eff[d] += afcEffN(row, d) * weight; });
+  });
+  if (!known || !w) return null;
+  DOSHA_ORDER.forEach(d => { eff[d] = eff[d] / w; });
+  return eff;
+}
+
+// ── Recommendation ───────────────────────────────────────────────────────
+function afcRecommend(opt) {
+  opt = opt || {};
+  const slot   = opt.slot   || afcSlotNow();
+  const place  = opt.place  || null;
+  const weight = opt.weight || null;
+  const ctx    = { season: afcSeason(), kala: afcKalaDosha(), load: afcRecentLoad(), bias: opt.bias };
+
+  const scored = AFC_MEALS
+    .filter(m => (opt.anySlot || m.slot.indexOf(slot) !== -1))
+    .filter(m => !place  || m.place.indexOf(place) !== -1)
+    .filter(m => !weight || m.weight.indexOf(weight) !== -1)
+    .map(m => {
+      const eff = afcMealEffects(m);
+      if (!eff) return null;
+      return { meal: m, eff, score: afcScoreEffects(eff, ctx), verdict: verdictFor(afcScoreEffects(eff, ctx)) };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score);
+
+  // A dish is only listed as one to avoid if it actually scores badly. The
+  // two lowest of a good set are still a good set.
+  const worst = scored.filter(x => x.score < 50).slice(-2).reverse();
+  return { slot, ctx, best: scored.slice(0, opt.n || 3), worst: worst, all: scored };
+}
+
+// Why a dish suits — named from the data, never invented.
+function afcMealWhy(item) {
+  const bits = [];
+  const mine = primaryDoshas(dosha);
+  const rows = item.meal.parts.map(([s]) => afcRowBySlug(s)).filter(Boolean);
+  const heating = rows.filter(r => r.virya === 'Heating').length;
+  const cooling = rows.filter(r => r.virya === 'Cooling').length;
+  if (heating > cooling) bits.push('warming overall');
+  else if (cooling > heating) bits.push('cooling overall');
+  mine.forEach(d => {
+    const e = item.eff[d];
+    if (e <= -0.35) bits.push('settles ' + DN[d]);
+    else if (e >= 0.35) bits.push('raises ' + DN[d]);
+  });
+  const season = item.ctx ? item.ctx.season : afcSeason();
+  if (!mine.length && item.eff[season] <= -0.35) bits.push('suits the season');
+  return bits.slice(0, 3).join(' · ');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · FUNNEL
+// ══════════════════════════════════════════════════════════════════════════
+// One call per step of the acquisition path, so the question "is it the
+// product, the paywall, the price, or the traffic?" can be answered from data
+// instead of argued about. Events go to GA4; a local tally is kept so the
+// funnel can also be read on the device without opening an analytics console.
+const AFC_FUNNEL_STEPS = ['app_open','dosha_start','dosha_complete','analysis_start','analysis_result','paywall_view','checkout_start','purchase'];
+function afcFunnel(step, detail) {
+  try {
+    const k = 'afc_funnel';
+    const f = JSON.parse(localStorage.getItem(k) || '{}');
+    f[step] = (f[step] || 0) + 1;
+    f._last = step; f._t = Date.now();
+    localStorage.setItem(k, JSON.stringify(f));
+  } catch (e) {}
+  try {
+    if (typeof gtag === 'function') {
+      gtag('event', 'afc_' + step, { event_category: 'funnel', event_label: detail || '', non_interaction: step === 'app_open' });
+    }
+  } catch (e) {}
+}
+function afcFunnelOncePerDay(step, detail) {
+  try {
+    const k = 'afc_funnel_day_' + step;
+    const today = new Date().toDateString();
+    if (localStorage.getItem(k) === today) return;
+    localStorage.setItem(k, today);
+  } catch (e) {}
+  afcFunnel(step, detail);
+}
+function afcFunnelReadout() {
+  let f = {};
+  try { f = JSON.parse(localStorage.getItem('afc_funnel') || '{}'); } catch (e) {}
+  const rows = AFC_FUNNEL_STEPS.map(s => {
+    const n = f[s] || 0;
+    return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);">' +
+      '<span style="color:var(--muted);">' + s.replace(/_/g, ' ') + '</span><span style="font-weight:500;">' + n + '</span></div>';
+  }).join('');
+  return '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;">This device only. The same steps are sent to Google Analytics, where the whole audience can be read.</div>' + rows;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · FREE ALLOWANCE
+// ══════════════════════════════════════════════════════════════════════════
+// The 7-day window stays as it was; inside it the first three analyses are
+// free. The paywall then arrives immediately after a real personal result
+// rather than before anyone has seen one.
+const AFC_FREE_ANALYSES = 3;
+function afcAnalysesUsed() {
+  try { return Math.max(0, parseInt(localStorage.getItem('afc_free_used') || '0', 10) || 0); } catch (e) { return 0; }
+}
+function afcAnalysesLeft() { return Math.max(0, AFC_FREE_ANALYSES - afcAnalysesUsed()); }
+function afcNoteAnalysisUsed() {
+  try { localStorage.setItem('afc_free_used', String(afcAnalysesUsed() + 1)); } catch (e) {}
+}
+// 'paid' · unlimited · 'free' · allowance remains · 'blocked' · paywall
+function afcEntitlement() {
+  if (user) {
+    const st = getSubscriptionStatus();
+    if (st === 'active' || st === 'trial') return 'paid';
+  }
+  const windowOpen = user ? true : guestTrialActive();
+  if (!windowOpen) return 'blocked';
+  return afcAnalysesLeft() > 0 ? 'free' : 'blocked';
+}
+function afcAllowanceLine() {
+  if (afcEntitlement() === 'paid') return '';
+  const n = afcAnalysesLeft();
+  if (n <= 0) return 'Your free analyses are used up.';
+  return n === 1 ? '1 free analysis left' : n + ' free analyses left';
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · TODAY
+// ══════════════════════════════════════════════════════════════════════════
+async function renderToday() {
+  const el = document.getElementById('today-body');
+  if (!el) return;
+  await afcLoadFoodRows();
+
+  const name = (profile && profile.name) || (user && user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || (user && user.email ? user.email.split('@')[0] : '');
+  const hello = afcGreeting() + (name ? ', ' + afcEsc(String(name).split(' ')[0]) : '');
+
+  // Constitution not set yet — TODAY is the invitation to set it.
+  if (!dosha) {
+    el.innerHTML =
+      '<div class="t-hello">' + hello + '</div>' +
+      '<div class="t-lead">Know what to eat today — based on your Ayurvedic constitution, the season and your recent meals.</div>' +
+      '<div class="card" style="text-align:center;padding:26px 20px;">' +
+        '<div style="font-size:34px;margin-bottom:10px;">🧬</div>' +
+        '<div style="font-family:\'Playfair Display\',serif;font-size:19px;margin-bottom:8px;">First, your constitution</div>' +
+        '<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;">Twenty questions about lifelong patterns. Everything else in the app is judged against the answer.</div>' +
+        '<button class="btn btn-dark" onclick="goTab(\'dosha\')">Find my prakriti ↗</button>' +
+      '</div>' +
+      '<div id="daily-hint"></div>';
+    renderDailyHint();
+    return;
+  }
+
+  const bal  = afcBalance();
+  const slot = afcSlotNow();
+  const rec  = afcRecommend({ slot: slot, n: 2 });
+  const d    = DOSHA[dosha] || DOSHA.sama;
+
+  const balRows = doshaOrder(dosha).map(x => {
+    const st = bal.state(x), ar = bal.arrow(x);
+    const col = st.indexOf('elevated') !== -1 ? '#C94A2A' : st === 'low' ? '#5A7A8B' : '#2E7D5E';
+    const mine = primaryDoshas(dosha).indexOf(x) !== -1;
+    return '<div class="t-bal-row">' +
+      '<span class="t-bal-name" style="color:' + DC[x] + ';' + (mine ? 'font-weight:500;' : 'opacity:.75;') + '">' + DN[x] + '</span>' +
+      '<span class="t-bal-arrow" style="color:' + col + ';">' + ar + '</span>' +
+      '<span class="t-bal-state" style="color:' + col + ';">' + st + '</span></div>';
+  }).join('');
+
+  const slotLabel = { breakfast: 'breakfast', lunch: 'lunch', dinner: 'dinner', snack: 'something light' }[slot];
+
+  const bestHtml = rec.best.length ? rec.best.map(function (b, i) {
+    const vs = VS[b.verdict] || VS.Neutral;
+    return '<div class="t-pick" onclick="afcOpenPick(\'' + b.meal.id + '\')">' +
+      '<span class="t-pick-emoji">' + b.meal.emoji + '</span>' +
+      '<span class="t-pick-body"><span class="t-pick-name">' + afcEsc(b.meal.name) + '</span>' +
+      '<span class="t-pick-why">' + afcEsc(afcMealWhy(b)) + '</span></span>' +
+      '<span class="t-pick-score" style="color:' + vs.color + ';background:' + vs.bg + ';">' + b.score + '</span></div>';
+  }).join('') : '<div class="t-pick-empty">The food reference could not be reached — recommendations return when you are back online.</div>';
+
+  const avoidHtml = rec.worst.length ? rec.worst.map(function (b) {
+    return '<span class="t-avoid-chip">' + b.meal.emoji + ' ' + afcEsc(b.meal.name) + ' · ' + b.score + '</span>';
+  }).join('') : '';
+
+  const loadBits = [];
+  loadBits.push(AFC_SEASON_NAME[bal.season]);
+  loadBits.push('your ' + d.name + ' constitution');
+  const movedBy = DOSHA_ORDER.filter(x => bal.load[x] > 0.2);
+  if (movedBy.length) loadBits.push('recent meals leaning ' + movedBy.map(x => DN[x]).join(' and ') + '-raising');
+  else if (Array.isArray(history) && history.some(h => (h.ts || 0) > Date.now() - 3 * 864e5)) loadBits.push('a steady few days in the journal');
+
+  const allowance = afcAllowanceLine();
+  const open = afcPremiumOpen();
+
+  el.innerHTML =
+    '<div class="t-hello">' + hello + '</div>' +
+    '<div class="t-lead">Here is how today sits for a ' + afcEsc(d.name) + ' constitution.</div>' +
+
+    '<div class="card t-balance">' +
+      '<div class="t-card-lbl">Your balance today</div>' + balRows +
+    '</div>' +
+
+    (open ?
+      '<div class="card">' +
+        '<div class="t-card-lbl">Best ' + slotLabel + ' today</div>' +
+        bestHtml +
+        (avoidHtml ? '<div class="t-card-lbl" style="margin-top:16px;">Better to avoid right now</div><div class="t-avoid">' + avoidHtml + '</div>' : '') +
+        '<div class="t-why"><strong>Why?</strong> ' + afcEsc(loadBits.join(' · ')) + '.</div>' +
+      '</div>'
+      : afcLockCard('Today\u2019s recommendation', 'Your constitution stays yours for good. The daily answer to what to eat \u2014 read from the season, the hour and your last few meals \u2014 is part of Compass+.')) +
+
+    '<button class="btn btn-dark t-cta" onclick="afcStartScan()">📷 Check my meal</button>' +
+    (open ? '<button class="btn btn-outline" onclick="goTab(\'guide\')">What should I eat now? ↗</button>' : '') +
+    (allowance ? '<div class="t-allow">' + afcEsc(allowance) + '</div>' : '') +
+    '<div id="daily-hint" style="margin-top:20px;"></div>';
+
+  renderDailyHint();
+}
+
+function afcOpenPick(id) {
+  const m = AFC_MEALS.find(x => x.id === id);
+  if (!m) return;
+  const eff = afcMealEffects(m);
+  if (!eff) return;
+  const score = afcScoreEffects(eff);
+  const vs = VS[verdictFor(score)] || VS.Neutral;
+  const rows = m.parts.map(([slug, w]) => {
+    const r = afcRowBySlug(slug);
+    if (!r) return '';
+    return '<a class="t-part" href="/food/' + encodeURIComponent(slug) + '/" target="_blank" rel="noopener">' +
+      '<span class="t-part-name">' + afcEsc(r.name) + '</span>' +
+      '<span class="t-part-props">' + afcEsc(r.virya || '') + ' · ' + afcEsc(r.rasa || '') + '</span>' +
+      '<span class="t-part-arrow">↗</span></a>';
+  }).join('');
+  afcSheet(
+    '<div class="sheet-title">' + m.emoji + ' ' + afcEsc(m.name) + '</div>' +
+    '<div style="display:flex;align-items:center;gap:10px;margin:2px 0 14px;">' +
+      '<span style="font-size:22px;font-weight:600;color:' + vs.color + ';">' + score + '</span>' +
+      '<span style="font-size:12px;color:var(--muted);">for your constitution, this season, at this hour</span></div>' +
+    '<div class="t-card-lbl">What it is made of</div>' + rows
+  );
+}
+
+function afcStartScan() {
+  afcFunnel('analysis_start', 'today');
+  goTab('scan');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · GUIDE — "What should I eat now?"
+// ══════════════════════════════════════════════════════════════════════════
+let afcAsk = { slot: null, place: 'home', weight: 'normal' };
+
+function afcAskSet(k, v) {
+  afcAsk[k] = v;
+  document.querySelectorAll('[data-ask="' + k + '"]').forEach(b => b.classList.toggle('on', b.dataset.val === v));
+}
+
+async function renderGuide() {
+  const el = document.getElementById('guide-body');
+  if (!el) return;
+  await afcLoadFoodRows();
+  if (!afcAsk.slot) afcAsk.slot = afcSlotNow();
+
+  if (!afcPremiumOpen()) {
+    el.innerHTML = '<p class="sect-title">What should I eat now?</p>' +
+      afcLockCard('Ask before you eat, not after',
+        'Three taps \u2014 which meal, where you are, how hungry \u2014 and the guide ranks real dishes for your constitution, this season and this hour. Part of Compass+.');
+    return;
+  }
+
+  const chips = (k, opts) => opts.map(([v, label]) =>
+    '<button class="ask-chip' + (afcAsk[k] === v ? ' on' : '') + '" data-ask="' + k + '" data-val="' + v + '" onclick="afcAskSet(\'' + k + '\',\'' + v + '\')">' + label + '</button>').join('');
+
+  el.innerHTML =
+    '<p class="sect-title">What should I eat now?</p>' +
+    '<div class="card">' +
+      '<div class="t-card-lbl">Which meal</div><div class="ask-row">' +
+        chips('slot', [['breakfast','Breakfast'],['lunch','Lunch'],['dinner','Dinner'],['snack','Something light']]) + '</div>' +
+      '<div class="t-card-lbl" style="margin-top:14px;">Where</div><div class="ask-row">' +
+        chips('place', [['home','At home'],['out','Restaurant']]) + '</div>' +
+      '<div class="t-card-lbl" style="margin-top:14px;">How hungry</div><div class="ask-row">' +
+        chips('weight', [['light','Light'],['normal','Normal'],['hearty','Hungry']]) + '</div>' +
+      '<button class="btn btn-dark" style="margin-top:16px;" onclick="afcAnswerAsk()">Show me ↗</button>' +
+    '</div>' +
+    '<div id="ask-result"></div>' +
+
+    '<p class="sect-title" style="margin-top:28px;">Or just ask</p>' +
+    '<div class="card">' +
+      '<textarea id="ask-q" class="ask-box" maxlength="400" ' +
+        'placeholder="I am going to an Italian restaurant tonight — what should I order?"></textarea>' +
+      '<div class="ask-row ask-row-wrap" style="margin-top:10px;">' +
+        AFC_ASK_SEEDS.map(function (s) {
+          return '<button class="ask-seed" onclick="afcSeedQuestion(this)">' + afcEsc(s) + '</button>';
+        }).join('') +
+      '</div>' +
+      '<button class="btn btn-dark" style="margin-top:14px;" id="ask-send" onclick="afcAskGuide()">Ask the guide ↗</button>' +
+    '</div>' +
+    '<div id="ask-reply"></div>' +
+
+    '<p class="sect-title" style="margin-top:26px;">Or pick a situation</p>' +
+    '<div class="ask-row ask-row-wrap">' +
+      Object.keys(AFC_SITUATIONS).map(k =>
+        '<button class="ask-chip ask-chip-wide" onclick="afcSituation(\'' + k + '\')">' + afcEsc(AFC_SITUATIONS[k].q) + '</button>').join('') +
+    '</div>' +
+    '<div id="situation-result"></div>' +
+    '<div class="guide-note">The three-tap picks and the situation answers are worked out on your device, from your prakriti, the season, the hour and your journal. A typed question also goes to the Ayurvedic guide, which reads the same 136-food reference the food pages are built from. Neither is medical advice.</div>';
+}
+
+function afcPickList(list, empty) {
+  if (!list.length) return '<div class="t-pick-empty">' + (empty || 'Nothing to show yet.') + '</div>';
+  return list.map(b => {
+    const vs = VS[b.verdict] || VS.Neutral;
+    return '<div class="t-pick" onclick="afcOpenPick(\'' + b.meal.id + '\')">' +
+      '<span class="t-pick-emoji">' + b.meal.emoji + '</span>' +
+      '<span class="t-pick-body"><span class="t-pick-name">' + afcEsc(b.meal.name) + '</span>' +
+      '<span class="t-pick-why">' + afcEsc(afcMealWhy(b)) + '</span></span>' +
+      '<span class="t-pick-score" style="color:' + vs.color + ';background:' + vs.bg + ';">' + b.score + '</span></div>';
+  }).join('');
+}
+
+function afcAnswerAsk() {
+  const rec = afcRecommend({ slot: afcAsk.slot, place: afcAsk.place, weight: afcAsk.weight, n: 3 });
+  let best = rec.best, worst = rec.worst;
+  if (!best.length) {
+    const wide = afcRecommend({ slot: afcAsk.slot, place: afcAsk.place, n: 3 });
+    best = wide.best; worst = wide.worst;
+  }
+  document.getElementById('ask-result').innerHTML =
+    '<div class="card">' +
+      '<div class="t-card-lbl">Best for you right now</div>' + afcPickList(best) +
+      (worst.length ? '<div class="t-card-lbl" style="margin-top:16px;">Better avoid</div>' + afcPickList(worst) : '') +
+    '</div>';
+}
+
+// Situational guidance. Each entry biases the same engine rather than carrying
+// its own hand-written food list, so answers stay consistent with everything
+// else and with the reference library.
+const AFC_SITUATIONS = {
+  restaurant: { q: 'I am eating out tonight',  slot: 'dinner', place: 'out',
+    line: 'Order for the hour rather than the menu: the evening belongs to Kapha, so lighter and warmer beats rich and cold.' },
+  late:       { q: 'I am hungry late at night', slot: 'snack', place: 'home', bias: { kapha: 6 },
+    line: 'Late eating sits badly with everyone. Something small, warm and simple is the classical answer — and leave a gap before sleeping.' },
+  wine:       { q: 'I drank wine yesterday',    slot: 'breakfast', place: 'home', bias: { pitta: 8 },
+    line: 'Wine is heating and sour, so Pitta is the doṣa carrying yesterday. Favour cooling, sweet and simple this morning.' },
+  cold:       { q: 'It is cold outside',        bias: { vata: 7 },
+    line: 'Cold, dry, moving weather raises Vāta for everyone. Warm, moist, cooked and oily is the counterweight.' },
+  heavy:      { q: 'I feel heavy after eating', bias: { kapha: 8 },
+    line: 'Heaviness after meals is the Kapha signature. Lighter, warmer, more pungent food, and no second helping.' },
+  travel:     { q: 'I am travelling today',     bias: { vata: 8 },
+    line: 'Movement, irregular hours and dry air all raise Vāta. Warm, grounding, regular meals matter more than what exactly is on the plate.' },
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5.1 · THE GUIDE, ASKED IN WORDS
+// ══════════════════════════════════════════════════════════════════════════
+// Calls /.netlify/functions/guide, which grounds the answer in the same
+// published food table this app already reads. Every refusal has a specific
+// response, and a server that cannot answer falls back to the on-device
+// situational engine rather than leaving an empty card.
+const AFC_ASK_SEEDS = [
+  'What should I have for dinner tonight?',
+  'I am eating at an Italian restaurant — what do I order?',
+  'I had wine last night. What about breakfast?',
+  'It is cold and I am tired of soup.',
+];
+
+function afcSeedQuestion(btn) {
+  const box = document.getElementById('ask-q');
+  if (!box || !btn) return;
+  box.value = btn.textContent;
+  box.focus();
+}
+
+function afcAskBusy(on) {
+  const b = document.getElementById('ask-send');
+  if (b) { b.disabled = !!on; b.textContent = on ? 'Thinking…' : 'Ask the guide ↗'; }
+  const r = document.getElementById('ask-reply');
+  if (r && on) {
+    r.innerHTML = '<div class="card"><div class="ask-thinking">' +
+      '<span class="dot"></span><span class="dot"></span><span class="dot"></span>' +
+      '<span style="margin-left:4px;">Reading your constitution, the season and your last few meals…</span></div></div>';
+  }
+}
+
+/** The last few saved analyses, as plain names and scores. Nothing else leaves. */
+function afcRecentForGuide() {
+  return (history || [])
+    .filter(h => h && (h.ts || 0) > Date.now() - 4 * 864e5)
+    .slice(0, 8)
+    .map(h => ({ name: String(h.food || '').slice(0, 60), score: Number(h.score) || null }));
+}
+
+async function afcAskGuide() {
+  const box = document.getElementById('ask-q');
+  const out = document.getElementById('ask-reply');
+  if (!box || !out) return;
+  const question = String(box.value || '').trim();
+  if (!question) { box.focus(); return; }
+  if (!afcPremiumOpen()) { showPaywall(); return; }
+
+  afcAskBusy(true);
+  try {
+    const resp = await fetch('/.netlify/functions/guide', {
+      method: 'POST',
+      headers: await afcAuthHeaders(),
+      body: JSON.stringify({
+        question: question.slice(0, 400),
+        dosha: dosha,
+        hour: new Date().getHours(),
+        southern: afcSouthern(),
+        recent: afcRecentForGuide(),
+      }),
+    });
+
+    if (!resp.ok) {
+      const e = await resp.json().catch(() => ({}));
+      afcAskBusy(false);
+      if (resp.status === 402) { showPaywall(); out.innerHTML = ''; return; }
+      if (resp.status === 401) { showToast('Your session has expired — please sign in again'); showPage('login'); out.innerHTML = ''; return; }
+      if (resp.status === 429) {
+        out.innerHTML = '<div class="card"><div class="ask-answer">' +
+          afcEsc(e.error || 'That is all the questions for today.') + '</div>' +
+          '<div class="ask-meta">The three-tap picks and the situation answers below keep working — they run on this device.</div></div>';
+        return;
+      }
+      afcGuideFallback(out, e.error || 'The guide could not answer just now.');
+      return;
+    }
+
+    const data = await resp.json();
+    afcAskBusy(false);
+    afcRenderGuideAnswer(out, data);
+  } catch (err) {
+    afcAskBusy(false);
+    afcGuideFallback(out, 'No connection to the guide.');
+  }
+}
+
+function afcGuideLine(p, bad) {
+  return '<a class="t-pick" style="text-decoration:none;" href="/food/' + encodeURIComponent(p.slug) + '/" target="_blank" rel="noopener">' +
+    '<span class="t-pick-emoji" style="font-size:0;line-height:0;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + (bad ? '#C94A2A' : '#B8882A') + ';"></span></span>' +
+    '<span class="t-pick-body"><span class="t-pick-name">' + afcEsc(p.name) + '</span>' +
+    (p.why ? '<span class="t-pick-why">' + afcEsc(p.why) + '</span>' : '') + '</span>' +
+    '<span class="t-part-arrow">↗</span></a>';
+}
+
+function afcRenderGuideAnswer(out, data) {
+  const picks = Array.isArray(data.picks) ? data.picks : [];
+  const avoid = Array.isArray(data.avoid) ? data.avoid : [];
+  out.innerHTML =
+    '<div class="card">' +
+      (data.answer ? '<div class="ask-answer">' + afcEsc(data.answer) + '</div>' : '') +
+      (picks.length ? '<div class="t-card-lbl" style="margin-top:16px;">Worth eating</div>' + picks.map(p => afcGuideLine(p, false)).join('') : '') +
+      (avoid.length ? '<div class="t-card-lbl" style="margin-top:16px;">Leave for another day</div>' + avoid.map(p => afcGuideLine(p, true)).join('') : '') +
+      '<div class="ask-meta">Answered for your prakriti, this season and this hour, from the published food reference. ' +
+        'Traditional practice, not medical advice.' +
+        (typeof data.remaining === 'number' ? ' · ' + data.remaining + ' question' + (data.remaining === 1 ? '' : 's') + ' left today' : '') +
+      '</div>' +
+    '</div>';
+}
+
+/** The guide is unreachable: answer with the on-device engine instead. */
+function afcGuideFallback(out, reason) {
+  const rec = afcRecommend({ slot: afcSlotNow(), n: 3 });
+  out.innerHTML =
+    '<div class="card">' +
+      '<div class="ask-answer">' + afcEsc(reason) + ' Here is what the on-device guide suggests for right now instead.</div>' +
+      afcPickList(rec.best) +
+      '<div class="ask-meta">Worked out on this device from your constitution, the season and the hour.</div>' +
+    '</div>';
+}
+
+function afcSituation(key) {
+  const s = AFC_SITUATIONS[key];
+  if (!s) return;
+  const rec = afcRecommend({ slot: s.slot || afcSlotNow(), place: s.place || null, bias: s.bias, n: 3, anySlot: !s.slot });
+  document.getElementById('situation-result').innerHTML =
+    '<div class="card">' +
+      '<div class="t-card-lbl">' + afcEsc(s.q) + '</div>' +
+      '<div class="guide-line">' + afcEsc(s.line) + '</div>' +
+      afcPickList(rec.best) +
+      (rec.worst.length ? '<div class="t-card-lbl" style="margin-top:16px;">Better avoid</div>' + afcPickList(rec.worst) : '') +
+    '</div>';
+  const el = document.getElementById('situation-result');
+  if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · INSIGHTS
+// ══════════════════════════════════════════════════════════════════════════
+// What a week of entries says that a single meal cannot. Everything is read
+// from saved analyses — no meal is ever re-sent anywhere.
+function afcWeekWindow(offsetWeeks) {
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  const end = d.getTime() + 864e5 - (offsetWeeks || 0) * 7 * 864e5;
+  return { from: end - 7 * 864e5, to: end };
+}
+function afcWeekEntries(w) {
+  return (history || []).filter(h => h && (h.ts || 0) >= w.from && (h.ts || 0) < w.to);
+}
+function afcBand(score) { return score >= 65 ? 'balanced' : score >= 45 ? 'mild' : 'strong'; }
+
+function afcWeekPatterns(entries) {
+  const issues = [], habits = [];
+  const hourOf = h => new Date(h.ts || 0).getHours();
+  const cold = entries.filter(h => hourOf(h) < 11 && h.full && h.full.virya === 'Cooling');
+  const lateHeavy = entries.filter(h => hourOf(h) >= 20 && (Number(h.score) || 50) < 55);
+  const rawish = entries.filter(h => h.full && Array.isArray(h.full.tastes) && h.full.tastes.indexOf('Astringent') !== -1 && (Number(h.score) || 50) < 50);
+  const sour = entries.filter(h => h.full && Array.isArray(h.full.tastes) && h.full.tastes.indexOf('Sour') !== -1 && (Number(h.score) || 50) < 55);
+  const warmDinners = entries.filter(h => hourOf(h) >= 17 && (Number(h.score) || 0) >= 65);
+  const goodMornings = entries.filter(h => hourOf(h) < 11 && (Number(h.score) || 0) >= 65);
+
+  if (cold.length >= 2)       issues.push({ n: cold.length,       t: 'Cold food in the morning', d: 'Cooling food before midday sits against the classical pattern of warming a slow morning digestion.', fix: 'Replace ' + Math.min(3, cold.length) + ' cold breakfast' + (Math.min(3, cold.length) === 1 ? '' : 's') + ' next week with something warm and cooked.' });
+  if (lateHeavy.length >= 2)  issues.push({ n: lateHeavy.length,  t: 'Heavy food late in the evening', d: 'The evening is a Kapha window; a rich meal inside it is the most common single cause of a low weekly score.', fix: 'Move your largest meal to the middle of the day next week.' });
+  if (sour.length >= 3)       issues.push({ n: sour.length,       t: 'A lot of sour taste', d: 'Sour is heating and, taken often, is the taste most likely to push a score down for your constitution.', fix: 'Swap sour for sweet or astringent in three meals next week.' });
+  if (rawish.length >= 3)     issues.push({ n: rawish.length,     t: 'Raw and dry food', d: 'Dry, light, astringent food eaten cold is the classical Vāta-raising combination.', fix: 'Cook three of next week’s raw meals and add a little ghee or oil.' });
+
+  if (warmDinners.length >= 2)  habits.push({ t: 'Warm, well-judged dinners', d: warmDinners.length + ' evening meal' + (warmDinners.length === 1 ? '' : 's') + ' scored well for your constitution.' });
+  if (goodMornings.length >= 2) habits.push({ t: 'Strong mornings', d: goodMornings.length + ' breakfast' + (goodMornings.length === 1 ? '' : 'es') + ' suited you well.' });
+
+  issues.sort((a, b) => b.n - a.n);
+  return { issues, habits };
+}
+
+function renderInsights() {
+  const el = document.getElementById('insights-body');
+  if (!el) return;
+
+  if (!user) {
+    el.innerHTML =
+      '<p class="sect-title">Your Ayurvedic week</p>' +
+      '<div class="empty" style="padding-top:24px;"><span class="empty-ico">📈</span>' +
+      '<div class="empty-txt">Weekly insight is built from saved analyses, and saving needs a free account.' +
+      '<br><br>Analysis itself stays open for your first ' + CONFIG.GUEST_DAYS + ' days.</div>' +
+      '<button class="btn btn-gold" style="margin-top:18px;" onclick="showPage(\'login\')">Create a free account ↗</button></div>';
+    return;
+  }
+
+  if (!afcPremiumOpen()) {
+    el.innerHTML = '<p class="sect-title">Your Ayurvedic week</p>' +
+      afcLockCard('What a week says that a meal cannot',
+        'Your balance score, the pattern behind it, and one concrete thing to change next week \u2014 built from your own saved analyses. Part of Compass+.');
+    return;
+  }
+
+  const thisW = afcWeekEntries(afcWeekWindow(0));
+  const lastW = afcWeekEntries(afcWeekWindow(1));
+
+  if (thisW.length < 3) {
+    const n = 3 - thisW.length;
+    el.innerHTML =
+      '<p class="sect-title">Your Ayurvedic week</p>' +
+      '<div class="card" style="text-align:center;padding:24px 20px;">' +
+        '<div style="font-size:30px;margin-bottom:8px;">📈</div>' +
+        '<div style="font-family:\'Playfair Display\',serif;font-size:18px;margin-bottom:8px;">' + n + ' more meal' + (n === 1 ? '' : 's') + ' to go</div>' +
+        '<div style="font-size:13px;color:var(--muted);line-height:1.6;">A week reads properly from three analyses upward. Keep checking your meals and this page starts telling you what a single meal cannot.</div>' +
+        '<button class="btn btn-dark" style="margin-top:16px;" onclick="afcStartScan()">📷 Check a meal</button>' +
+      '</div><div id="journal-week"></div><div id="journal-list"></div>';
+    renderJournalWeek(); renderJournal();
+    return;
+  }
+
+  const avg = Math.round(thisW.reduce((s, h) => s + (Number(h.score) || 0), 0) / thisW.length);
+  const avgLast = lastW.length ? Math.round(lastW.reduce((s, h) => s + (Number(h.score) || 0), 0) / lastW.length) : null;
+  const delta = avgLast === null ? null : avg - avgLast;
+  const bands = { balanced: 0, mild: 0, strong: 0 };
+  thisW.forEach(h => { bands[afcBand(Number(h.score) || 0)]++; });
+  const pat = afcWeekPatterns(thisW);
+  const col = avg >= 70 ? '#2E7D5E' : avg >= 50 ? '#C17F3A' : '#C94A2A';
+  const deltaHtml = delta === null ? '<span class="ins-delta">first full week</span>'
+    : '<span class="ins-delta" style="color:' + (delta >= 0 ? '#2E7D5E' : '#C94A2A') + ';">' + (delta >= 0 ? '↑ ' : '↓ ') + Math.abs(delta) + ' vs last week</span>';
+
+  const issue = pat.issues[0];
+  const habit = pat.habits[0];
+
+  el.innerHTML =
+    '<p class="sect-title">Your Ayurvedic week</p>' +
+    '<div class="card ins-hero">' +
+      '<div class="ins-score" style="color:' + col + ';">' + avg + '<span>/100</span></div>' +
+      '<div class="ins-score-lbl">Balance score</div>' + deltaHtml +
+    '</div>' +
+
+    '<div class="card">' +
+      '<div class="t-card-lbl">You analysed ' + thisW.length + ' meal' + (thisW.length === 1 ? '' : 's') + '</div>' +
+      [['balanced', '#2E7D5E', 'balanced'], ['mild', '#C17F3A', 'mildly aggravating'], ['strong', '#C94A2A', 'strongly aggravating']]
+        .filter(b => bands[b[0]] > 0)
+        .map(b => '<div class="ins-band"><span class="ins-dot" style="background:' + b[1] + ';"></span>' + bands[b[0]] + ' ' + b[2] + '</div>').join('') +
+    '</div>' +
+
+    (issue ?
+      '<div class="card ins-issue">' +
+        '<div class="t-card-lbl">Your biggest issue</div>' +
+        '<div class="ins-issue-t">' + afcEsc(issue.t) + '</div>' +
+        '<div class="ins-issue-d">' + afcEsc(issue.d) + '</div>' +
+      '</div>' : '') +
+
+    (habit ?
+      '<div class="card ins-habit">' +
+        '<div class="t-card-lbl">Your best habit</div>' +
+        '<div class="ins-issue-t" style="color:#2E7D5E;">' + afcEsc(habit.t) + '</div>' +
+        '<div class="ins-issue-d">' + afcEsc(habit.d) + '</div>' +
+      '</div>' : '') +
+
+    '<div class="card ins-next">' +
+      '<div class="t-card-lbl">For next week</div>' +
+      '<div class="ins-issue-d" style="color:var(--dark);">' +
+        afcEsc(issue ? issue.fix : 'Keep going as you are — this week held together well. One more analysed meal a day makes the pattern clearer still.') +
+      '</div>' +
+    '</div>' +
+
+    '<p class="sect-title" style="margin-top:26px;">Meals</p>' +
+    '<div id="journal-week"></div><div id="journal-list"></div>';
+
+  renderJournalWeek();
+  renderJournal();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · WHY THIS SCORE / MAKE IT BETTER
+// ══════════════════════════════════════════════════════════════════════════
+// Classical attributions, applied to what the analysis already returned. The
+// six tastes, the two vīryas and the three vipākas each have a settled effect
+// on each doṣa; naming them turns a bare number into a reason.
+const AFC_TASTE_FX = {
+  Sweet:      { vata: -1, pitta: -1, kapha:  1, w: 'sweet — grounding and building' },
+  Sour:       { vata: -1, pitta:  1, kapha:  1, w: 'sour — heating and moistening' },
+  Salty:      { vata: -1, pitta:  1, kapha:  1, w: 'salty — warming and retaining' },
+  Pungent:    { vata:  1, pitta:  1, kapha: -1, w: 'pungent — heating and drying' },
+  Bitter:     { vata:  1, pitta: -1, kapha: -1, w: 'bitter — cooling and lightening' },
+  Astringent: { vata:  1, pitta: -1, kapha: -1, w: 'astringent — cooling and drying' },
+};
+const AFC_VIRYA_FX = {
+  Heating: { vata: -1, pitta: 1, kapha: -1, w: 'heating vīrya' },
+  Cooling: { vata:  1, pitta: -1, kapha: 1, w: 'cooling vīrya' },
+};
+const AFC_VIPAKA_FX = {
+  Sweet:   { vata: -1, pitta: -1, kapha: 1, w: 'sweet vipāka — the after-effect is building' },
+  Sour:    { vata: -1, pitta:  1, kapha: 1, w: 'sour vipāka — the after-effect is heating' },
+  Pungent: { vata:  1, pitta:  1, kapha: -1, w: 'pungent vipāka — the after-effect is drying' },
+};
+
+// Grouped so a dual constitution cannot be told to serve the same dish warm
+// and let it cool in the same breath: the worse-affected doṣa wins the group.
+const AFC_FIXES = {
+  vata: [
+    { t: 'Serve it warm rather than cold',            g: 'temp'  },
+    { t: 'Add a little ghee or sesame oil',           g: 'fat'   },
+    { t: 'Season it with ginger, cinnamon or cumin',  g: 'spice' },
+    { t: 'Cook it rather than eating it raw',         g: 'prep'  },
+    { t: 'Eat it slowly, at a settled hour' },
+  ],
+  pitta: [
+    { t: 'Let it cool to room temperature',           g: 'temp'  },
+    { t: 'Add coriander, fennel or fresh mint',       g: 'spice' },
+    { t: 'Go easy on chilli, garlic, vinegar and sour' },
+    { t: 'Pair it with something sweet and cooling' },
+  ],
+  kapha: [
+    { t: 'Take a smaller portion',                    g: 'size'  },
+    { t: 'Add ginger, black pepper or turmeric',      g: 'spice' },
+    { t: 'Leave out the dairy and the added sweetness', g: 'fat' },
+    { t: 'Eat it freshly cooked rather than from the fridge', g: 'prep' },
+    { t: 'Make it your midday meal rather than your evening one' },
+  ],
+};
+
+// Reasons, drawn from what the analysis returned rather than composed freely.
+function afcWhyLines(r) {
+  const mine = primaryDoshas(dosha);
+  const keys = mine.length ? mine : DOSHA_ORDER;
+  const lines = [];
+  const push = (fx, label) => {
+    if (!fx) return;
+    let dir = 0;
+    keys.forEach(d => { dir += fx[d] || 0; });
+    lines.push({ good: dir < 0, neutral: dir === 0, text: label });
+  };
+
+  (r.tastes || []).forEach(t => { const fx = AFC_TASTE_FX[t]; if (fx) push(fx, fx.w); });
+  if (r.virya && AFC_VIRYA_FX[r.virya]) push(AFC_VIRYA_FX[r.virya], AFC_VIRYA_FX[r.virya].w);
+  if (r.vipaka && AFC_VIPAKA_FX[r.vipaka]) push(AFC_VIPAKA_FX[r.vipaka], AFC_VIPAKA_FX[r.vipaka].w);
+
+  keys.forEach(d => {
+    const info = r[d];
+    if (info && info.desc) lines.push({ good: (Number(info.score) || 50) >= 55, neutral: false, text: DN[d] + ': ' + info.desc });
+  });
+
+  return lines.slice(0, 7);
+}
+
+// Which of the user's doṣas this food pushes up, worst first.
+function afcOffenders(r) {
+  const mine = primaryDoshas(dosha);
+  const keys = mine.length ? mine : DOSHA_ORDER;
+  return keys
+    .map(d => ({ d: d, score: (r[d] && typeof r[d].score === 'number') ? r[d].score : 50 }))
+    .filter(x => x.score < 55)
+    .sort((a, b) => a.score - b.score);
+}
+
+// The estimate is exactly that, and says so. Each adjustment recovers part of
+// the gap between the doṣa's current score and neutral; nothing here promises
+// an outcome, and the original score is never overwritten.
+function afcImprovement(r, baseScore) {
+  const off = afcOffenders(r);
+  if (!off.length) return null;
+  const tips = [], groups = {};
+  off.forEach(o => {
+    const pool = AFC_FIXES[o.d] || [];
+    const want = o.score < 35 ? 3 : 2;
+    let taken = 0;
+    pool.forEach(f => {
+      if (taken >= want) return;
+      if (f.g && groups[f.g]) return;          // the worse doṣa already claimed it
+      if (tips.indexOf(f.t) !== -1) return;
+      if (f.g) groups[f.g] = true;
+      tips.push(f.t); taken++;
+    });
+  });
+  if (!tips.length) return null;
+
+  const mine = primaryDoshas(dosha);
+  const keys = mine.length ? mine : DOSHA_ORDER;
+  const projected = keys.map(d => {
+    const cur = (r[d] && typeof r[d].score === 'number') ? r[d].score : 50;
+    if (cur >= 55) return cur;
+    return Math.min(82, Math.round(cur + (55 - cur) * 0.75 + 12));
+  });
+  const target = Math.round(projected.reduce((a, b) => a + b, 0) / projected.length);
+  if (target <= baseScore + 4) return null;
+  return { tips: tips.slice(0, 4), target: Math.min(88, target) };
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · PREMIUM STATE
+// ══════════════════════════════════════════════════════════════════════════
+// The daily recommendation, the guide and weekly insight are the paid product.
+// They stay open through the free window so the value is seen first, then lock.
+function afcPremiumOpen() {
+  if (user) {
+    const st = getSubscriptionStatus();
+    return st === 'active' || st === 'trial';
+  }
+  return guestTrialActive();
+}
+function afcLockCard(title, body) {
+  return '<div class="card" style="text-align:center;padding:26px 20px;background:linear-gradient(160deg,#FFFDF8,#FDF6E9);border-color:rgba(184,136,42,.32);">' +
+    '<div style="font-size:30px;margin-bottom:10px;">✨</div>' +
+    '<div style="font-family:\'Playfair Display\',serif;font-size:19px;margin-bottom:8px;">' + afcEsc(title) + '</div>' +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:16px;">' + afcEsc(body) + '</div>' +
+    '<button class="btn btn-gold" onclick="showPaywall()">See plans ↗</button>' +
+    '</div>';
+}
+
+// After a result: either report what is left, or — once the allowance is
+// spent — let the paywall arrive on the back of a real personal answer.
+function afcAfterResult() {
+  if (afcEntitlement() === 'paid') return;
+  const left = afcAnalysesLeft();
+  if (left > 0) { try { showToast(left + ' free analys' + (left === 1 ? 'is' : 'es') + ' left'); } catch (e) {} return; }
+  setTimeout(function () { showPaywall(); }, 2800);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · RESULT
+// ══════════════════════════════════════════════════════════════════════════
+function renderResult(r) {
+  hide('loader');
+  const vata = r.vata || { score:50, effect:'~', desc:'' };
+  const pitta = r.pitta || { score:50, effect:'~', desc:'' };
+  const kapha = r.kapha || { score:50, effect:'~', desc:'' };
+  const myScore = doshaScore(r, dosha);
+  const verdict = verdictFor(myScore);
+  const vs2 = VS[verdict] || VS.Neutral;
+  const chips = (r.tastes || []).map(t => '<span class="chip" style="color:' + (TC[t]||'#888') + ';border-color:' + (TC[t]||'#888') + ';background:' + (TC[t]||'#888') + '18">' + afcEsc(t) + '</span>').join('');
+  const prim = primaryDoshas(dosha);
+  const order = doshaOrder(dosha);
+  const dmap = { vata, pitta, kapha };
+
+  const impacts = order.map(x => {
+    const info = dmap[x] || { score:50, effect:'~', desc:'' };
+    const hl = prim.indexOf(x) !== -1 ? 'hl hl-' + x : '';
+    const fx = info.effect || '~';
+    const ec = fx.indexOf('↓') !== -1 ? '#2E7D5E' : fx.indexOf('↑') !== -1 ? '#C94A2A' : '#C17F3A';
+    return '<div class="impact-row ' + hl + '"><span class="imp-name" style="color:' + DC[x] + '">' + DN[x] + '</span>' +
+      '<span class="imp-fx" style="color:' + ec + '">' + afcEsc(fx) + '</span>' +
+      '<span class="imp-desc">' + afcEsc(info.desc || '') + '</span>' +
+      '<span class="imp-score" style="color:' + ec + '">' + (info.score == null ? 50 : info.score) + '</span></div>';
+  }).join('');
+
+  // Why this score — the classical attributions behind the number.
+  // The server now returns its own reasons, grounded in the analysis it just
+  // performed. They beat anything derivable on the device, so they win when
+  // present; the derivation stays for older payloads and offline journal
+  // entries saved before v5.1.
+  const why = (Array.isArray(r.why) && r.why.length)
+    ? r.why.map(t => ({ good: false, neutral: true, text: t }))
+    : afcWhyLines(r);
+  const whyHtml = why.length ? '<div class="why-lbl">Why ' + (myScore >= 65 ? '' : 'only ') + myScore + '?</div>' +
+    why.map(w => '<div class="why-row"><span class="why-mark" style="color:' + (w.neutral ? '#C17F3A' : w.good ? '#2E7D5E' : '#C94A2A') + '">' +
+      (w.neutral ? '•' : w.good ? '✓' : '✕') + '</span><span>' + afcEsc(w.text) + '</span></div>').join('') : '';
+
+  // Make it better — the part that turns a verdict into something to do.
+  const imp = (r.improve && Array.isArray(r.improve.tips) && r.improve.tips.length
+               && Number(r.improve.target) > myScore)
+    ? { tips: r.improve.tips.slice(0, 4), target: Math.round(Number(r.improve.target)) }
+    : afcImprovement(r, myScore);
+  const impHtml = imp ? '<div class="fix-box">' +
+    '<div class="fix-head"><span class="fix-title">Make it better</span><span class="fix-target">→ ' + imp.target + '/100</span></div>' +
+    imp.tips.map(t => '<div class="fix-row"><span style="color:#2E7D5E;">✓</span><span>' + afcEsc(t) + '</span></div>').join('') +
+    '<div class="fix-note">An estimate of where these adjustments would put this dish for your constitution. The score above is what was actually analysed.</div>' +
+    '</div>' : '';
+
+  document.getElementById('result-area').innerHTML =
+    '<div class="card">' +
+      '<div class="res-header"><span class="res-emoji">' + (r.emoji || '🍽️') + '</span><div>' +
+        '<div class="res-name">' + afcEsc(r.foodName || 'Food') + '</div>' +
+        '<div class="res-cat">' + afcEsc(r.category || '') + '</div></div></div>' +
+      '<div class="score-row" style="background:' + vs2.bg + ';border-color:' + vs2.color + '">' +
+        '<div class="score-circ" style="border-color:' + vs2.color + ';background:' + vs2.color + '18">' +
+          '<span class="score-num" style="color:' + vs2.color + '">' + myScore + '</span>' +
+          '<span class="score-of" style="color:' + vs2.color + '">/100</span></div>' +
+        '<div><div class="score-verd" style="color:' + vs2.color + '">' + verdict + (dosha && DOSHA[dosha] ? ' for ' + DOSHA[dosha].name : '') + '</div>' +
+        '<div class="score-adv">' + afcEsc(r.advice || '') + '</div></div></div>' +
+      (chips ? '<div class="tip-lbl" style="margin-bottom:8px">Tastes</div><div class="chips">' + chips + '</div>' : '') +
+      '<div class="props-grid">' +
+        '<div class="prop"><div class="prop-l">Rasa</div><div class="prop-v">' + afcEsc(r.rasa || '—') + '</div></div>' +
+        '<div class="prop"><div class="prop-l">Vīrya</div><div class="prop-v">' + afcEsc(r.virya || '—') + '</div></div>' +
+        '<div class="prop"><div class="prop-l">Vipāka</div><div class="prop-v">' + afcEsc(r.vipaka || '—') + '</div></div>' +
+        '<div class="prop"><div class="prop-l">Season</div><div class="prop-v">' + afcEsc(r.season || '—') + '</div></div></div>' +
+      '<div class="impact-lbl">Impact on doshas</div>' + impacts +
+      whyHtml + impHtml +
+    '</div>' +
+    (!user ? guestSaveNotice() : '') +
+    '<div id="food-ref"></div>' +
+    '<button class="btn btn-dark" onclick="clearScan();goTab(\'scan\')">Analyse Another Food ↗</button>' +
+    '<button class="btn btn-outline" onclick="goTab(\'today\')">Back to today</button>';
+
+  show('result-area');
+  document.getElementById('content').scrollTop = 0;
+  afcInjectFoodRef(r.foodName);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · GENERIC SHEET
+// ══════════════════════════════════════════════════════════════════════════
+function afcSheet(html) {
+  const s = document.getElementById('afc-sheet');
+  if (!s) return;
+  document.getElementById('afc-sheet-body').innerHTML = html;
+  s.classList.add('show');
+}
+function afcSheetClose() {
+  const s = document.getElementById('afc-sheet');
+  if (s) s.classList.remove('show');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// v5 · NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════
+// TODAY · SCAN · INSIGHTS · GUIDE. Every tab answers "what do I get here?";
+// account settings moved to the header, where administration belongs.
+const AFC_TABS = ['today','scan','insights','guide','dosha','account'];
+
+function goTab(id) {
+  const st = getSubscriptionStatus();
+  // Analysis is the gated action, and it is gated inside runAnalysis so the
+  // paywall lands after a result rather than instead of a screen. Browsing
+  // any tab is free; the account screen still needs an account.
+  if (!user && id === 'account') { showPage('login'); return; }
+  if (AFC_TABS.indexOf(id) === -1) id = 'today';
+
+  AFC_TABS.forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.classList.toggle('active', t === id);
+    const nav = document.getElementById('nav-' + t);
+    if (nav) nav.classList.toggle('on', t === id);
+  });
+  // The dosha quiz and the account screen have no bottom-nav button; TODAY
+  // stays lit for the quiz because that is where it is reached from.
+  if (id === 'dosha') {
+    const nav = document.getElementById('nav-today');
+    if (nav) nav.classList.add('on');
+  }
+
+  const c = document.getElementById('content');
+  if (c) c.scrollTop = 0;
+
+  if (id === 'today')    renderToday();
+  if (id === 'guide')    renderGuide();
+  if (id === 'insights') renderInsights();
+  if (id === 'dosha') {
+    renderDailyHint();
+    afcFunnel('dosha_start');
+  }
+  if (id === 'account') {
+    const f = document.getElementById('acct-funnel');
+    if (f) f.innerHTML = afcFunnelReadout();
+  }
+  if (id === 'scan') {
+    const hb = document.getElementById('hint-bar');
+    if (hb) hb.style.display = dosha ? 'none' : 'block';
+    const al = document.getElementById('scan-allow');
+    if (al) { const line = afcAllowanceLine(); al.textContent = line; al.style.display = line ? 'block' : 'none'; }
+    hide('result-area'); show('scan-form'); hide('loader');
+  }
+}
+
+let afcBooted = false;
+
 function showApiSheet() { document.getElementById('api-sheet').classList.add('show'); }
 function saveKey() {
   const k = document.getElementById('api-input').value.trim();

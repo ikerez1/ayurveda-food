@@ -2,6 +2,19 @@
   functions = "netlify/functions"
   publish = "."
 
+# publish = "." serves this whole directory, and until now that included the
+# backend itself: https://ayurveda-food.com/netlify/functions/analyse.js
+# returned the full guard implementation, its environment variable names and
+# its quota defaults to anyone who asked. No secret lives in those files — the
+# keys are environment variables — but handing out the exact shape of the
+# guard is a free gift to anyone probing it. The functions are *invoked* at
+# /.netlify/functions/* (with the leading dot), which this rule does not touch.
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/_astro/*"
   to = "https://ayurveda-content.netlify.app/_astro/:splat"
