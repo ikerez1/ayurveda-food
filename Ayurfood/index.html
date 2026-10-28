@@ -609,7 +609,7 @@
 
   <div class="login-card">
     <h2>Create your free account</h2>
-    <p>Find your constitution, then photograph a meal and see how it sits with it. Three analyses and seven days are open with no card — an account is what lets you <strong>save</strong> them and watch the pattern build week by week.</p>
+    <p>Find your constitution, then photograph a meal and see how it sits with it. Three analyses a day for seven days, with no card — an account is what lets you <strong>save</strong> them and watch the pattern build week by week.</p>
     <button class="btn btn-google" onclick="signInGoogle()">
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
       Continue with Google
@@ -619,9 +619,9 @@
     <input type="password" id="pass-input" class="text-input" placeholder="Password">
     <button class="btn btn-dark" onclick="signInEmail()" id="email-btn">Sign In</button>
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
-    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · 3 free food analyses · No ads · then $9.99/month or $59.99/year. Cancel any time.</p>
+    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · 3 free analyses a day · No ads · then $3.99/month or $29.99/year. Cancel any time.</p>
     <p style="text-align:center;margin-top:12px;"><a href="#" onclick="enterGuestMode();return false;" style="font-size:13px;color:rgba(251,248,243,0.65);text-decoration:underline;">← Keep looking around without an account</a></p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v5.2.0</p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v5.2.1</p>
   </div>
 </div>
 
@@ -658,7 +658,7 @@
     <div class="cmp-h">&nbsp;</div><div class="cmp-h cmp-c">Free</div><div class="cmp-h cmp-c">Compass+</div>
     <div>Dosha assessment</div><div class="cmp-c">✓</div><div class="cmp-c">✓</div>
     <div>Ayurvedic food library — 136 foods</div><div class="cmp-c">✓</div><div class="cmp-c">✓</div>
-    <div>Food analyses</div><div class="cmp-c">3</div><div class="cmp-c">∞</div>
+    <div>Food analyses</div><div class="cmp-c">3 a day</div><div class="cmp-c">∞</div>
     <div>Daily “what to eat today”</div><div class="cmp-c">7 days</div><div class="cmp-c">✓</div>
     <div>“What should I eat now?”</div><div class="cmp-c">7 days</div><div class="cmp-c">✓</div>
     <div>Weekly insight &amp; patterns</div><div class="cmp-c">7 days</div><div class="cmp-c">✓</div>
@@ -671,14 +671,14 @@
     <div class="plan-card" data-plan="monthly" data-price-id="" onclick="selectPlan(this)">
       <div class="plan-row">
         <div><div class="plan-name">Monthly</div><div class="plan-sub">Billed every month</div></div>
-        <div><div class="plan-price">$9.99<span style="font-size:12px;color:var(--muted)">/mo</span></div></div>
+        <div><div class="plan-price">$3.99<span style="font-size:12px;color:var(--muted)">/mo</span></div></div>
       </div>
     </div>
     <div class="plan-card popular selected" data-plan="yearly" data-price-id="" onclick="selectPlan(this)">
       <div class="popular-badge">Best Value</div>
       <div class="plan-row">
-        <div><div class="plan-name">Yearly</div><div class="plan-sub">$59.99 billed once a year</div><div class="plan-save">Save 50% vs monthly</div></div>
-        <div><div class="plan-price">$59.99<span style="font-size:12px;color:var(--muted)">/yr</span></div><div style="font-size:11px;color:var(--muted);text-align:right">billed annually · $5.00/mo equivalent</div></div>
+        <div><div class="plan-name">Yearly</div><div class="plan-sub">$29.99 billed once a year</div><div class="plan-save">Save 37% vs monthly</div></div>
+        <div><div class="plan-price">$29.99<span style="font-size:12px;color:var(--muted)">/yr</span></div><div style="font-size:11px;color:var(--muted);text-align:right">billed annually · $2.50/mo equivalent</div></div>
       </div>
     </div>
   </div>
@@ -897,7 +897,7 @@
       </div>
 
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px;">
-        AyurFood v5.2.0 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
+        AyurFood v5.2.1 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
         <div style="margin-top:8px;">
           Need help? <a href="mailto:info@ayurveda-food.com" style="color:var(--gold);">info@ayurveda-food.com</a>
         </div>
@@ -966,11 +966,9 @@ const CONFIG = {
 
   // 3. Create 3 products in Stripe → copy each Price ID (starts with price_)
   STRIPE_PRICES: {
-    // The account's existing live prices: $9.99/month and $59.99/year.
-    // The monthly id was verified live and active in Stripe Workbench on
-    // 9 Oct 2026. Confirm the yearly one the same way before trusting it.
-    monthly: 'price_1U0fFR3h8VYXcWowp342kFed',
-    yearly:  'price_1U0feM3h8VYXcWowXeyDuLWz',
+    // $3.99/month and $29.99/year.
+    monthly: 'price_1UVVvi3h8VYXcWowZZVpv2yk',
+    yearly:  'price_1UVVxo3h8VYXcWowSZ5vtciz',
   },
 
   // 4. Your Netlify site URL (for Stripe redirect after payment)
@@ -1133,11 +1131,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const afcSid = params.get('session_id') || '';
       const afcKey = 'afc_purchase_tracked_' + afcSid;
       if (typeof gtag === 'function' && !localStorage.getItem(afcKey)) {
-        const afcValues = { monthly: 9.99, yearly: 59.99 };
+        const afcValues = { monthly: 3.99, yearly: 29.99 };
         const afcPlan = localStorage.getItem('afc_pending_plan') || 'yearly';
         gtag('event', 'conversion', {
           send_to: 'AW-18337228944/CnwKCJiGm9QcEJDR76dE',
-          value: afcValues[afcPlan] || 59.99,
+          value: afcValues[afcPlan] || 29.99,
           currency: 'USD',
           transaction_id: afcSid
         });
@@ -1396,7 +1394,7 @@ function showMainApp() {
         ? `<span class="sub-badge active">✓ Complimentary Access</span>`
         : `<span class="sub-badge active">✓ Active Member</span>`;
     } else if (status === 'none') {
-      badge.innerHTML = `<span class="sub-badge expired">Free plan — ${afcAnalysesLeft()} of ${AFC_FREE_ANALYSES} analyses left</span>`;
+      badge.innerHTML = `<span class="sub-badge expired">Free plan — ${afcAnalysesLeft()} of ${AFC_FREE_PER_DAY} analyses left today</span>`;
     } else {
       badge.innerHTML = `<span class="sub-badge expired">⚠️ Trial ended — upgrade to continue</span>`;
     }
@@ -1641,8 +1639,8 @@ async function signOut() {
 // CONFIG.STRIPE_PRICES — create-checkout.js independently re-derives the
 // disclosure from Stripe, so a mismatch here shows up as inconsistent copy.
 const PLAN_TERMS = {
-  monthly: { total: '$9.99',  per: 'month' },
-  yearly:  { total: '$59.99', per: 'year'  },
+  monthly: { total: '$3.99',  per: 'month' },
+  yearly:  { total: '$29.99', per: 'year'  },
 };
 
 // No free trial is granted at Checkout: the first charge is taken immediately.
@@ -3093,16 +3091,40 @@ function afcFunnelReadout() {
 // ══════════════════════════════════════════════════════════════════════════
 // v5 · FREE ALLOWANCE
 // ══════════════════════════════════════════════════════════════════════════
-// The 7-day window stays as it was; inside it the first three analyses are
-// free. The paywall then arrives immediately after a real personal result
-// rather than before anyone has seen one.
-const AFC_FREE_ANALYSES = 3;
-function afcAnalysesUsed() {
-  try { return Math.max(0, parseInt(localStorage.getItem('afc_free_used') || '0', 10) || 0); } catch (e) { return 0; }
+// The 7-day window stays as it was; inside it three analyses are free EACH
+// DAY, and the count resets at local midnight.
+//
+// v5.0.0 made it three in total, which quietly contradicted the product: the
+// daily balance, and the weekly pattern that needs several meals before it
+// says anything, both assume a second visit. Three-ever meant most visitors
+// never reached day two and so never saw what was being sold. The 8/day cap
+// in analyse.js still bounds the API spend; worst case per guest is 21
+// analyses across the week.
+const AFC_FREE_PER_DAY = 3;
+
+/** Local calendar day. Local, not UTC, so the reset lands at the user's midnight. */
+function afcDayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
 }
-function afcAnalysesLeft() { return Math.max(0, AFC_FREE_ANALYSES - afcAnalysesUsed()); }
+function afcAnalysesUsed() {
+  try {
+    const raw = localStorage.getItem('afc_free_used_day');
+    if (!raw) return 0;
+    const o = JSON.parse(raw);
+    if (!o || o.d !== afcDayKey()) return 0;
+    return Math.max(0, parseInt(o.n, 10) || 0);
+  } catch (e) { return 0; }
+}
+function afcAnalysesLeft() { return Math.max(0, AFC_FREE_PER_DAY - afcAnalysesUsed()); }
 function afcNoteAnalysisUsed() {
-  try { localStorage.setItem('afc_free_used', String(afcAnalysesUsed() + 1)); } catch (e) {}
+  try {
+    localStorage.setItem('afc_free_used_day',
+      JSON.stringify({ d: afcDayKey(), n: afcAnalysesUsed() + 1 }));
+    // The v5.0.0 lifetime counter is dead weight now; drop it so an old
+    // device does not carry a spent allowance around forever.
+    localStorage.removeItem('afc_free_used');
+  } catch (e) {}
 }
 // 'paid' · unlimited · 'free' · allowance remains · 'blocked' · paywall
 function afcEntitlement() {
@@ -3117,8 +3139,8 @@ function afcEntitlement() {
 function afcAllowanceLine() {
   if (afcEntitlement() === 'paid') return '';
   const n = afcAnalysesLeft();
-  if (n <= 0) return 'Your free analyses are used up.';
-  return n === 1 ? '1 free analysis left' : n + ' free analyses left';
+  if (n <= 0) return 'That is today\u2019s free analyses \u2014 three more tomorrow.';
+  return (n === 1 ? '1 free analysis' : n + ' free analyses') + ' left today';
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -3754,7 +3776,17 @@ function afcLockCard(title, body) {
 function afcAfterResult() {
   if (afcEntitlement() === 'paid') return;
   const left = afcAnalysesLeft();
-  if (left > 0) { try { showToast(left + ' free analys' + (left === 1 ? 'is' : 'es') + ' left'); } catch (e) {} return; }
+  if (left > 0) {
+    try { showToast(left + ' free analys' + (left === 1 ? 'is' : 'es') + ' left today'); } catch (e) {}
+    return;
+  }
+  // Once a day at most. With a daily allowance the paywall would otherwise
+  // reappear every evening of the window, which reads as nagging rather than
+  // as an offer.
+  try {
+    if (localStorage.getItem('afc_paywall_day') === afcDayKey()) return;
+    localStorage.setItem('afc_paywall_day', afcDayKey());
+  } catch (e) {}
   setTimeout(function () { showPaywall(); }, 2800);
 }
 
