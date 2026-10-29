@@ -265,6 +265,14 @@
     .t-why strong { color: var(--dark); }
     .t-cta { font-size: 15px; padding: 15px; }
     .t-allow { text-align: center; font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+    .t-breath { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; margin-top: 16px; background: linear-gradient(160deg, #F3F1FB, #FBF8F3); }
+    .t-breath:active { opacity: .7; }
+    .t-breath-ico { font-size: 26px; flex-shrink: 0; }
+    .t-breath-body { flex: 1; min-width: 0; }
+    .t-breath-name { display: block; font-family: 'Playfair Display', serif; font-size: 16px; color: var(--dark); }
+    .t-breath-why { display: block; font-size: 11.5px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+    .t-breath-go { color: var(--gold); font-size: 14px; flex-shrink: 0; }
+    .t-breath-safe { font-size: 10.5px; color: var(--muted); line-height: 1.5; margin: 6px 2px 0; }
 
     .t-part { display: flex; align-items: center; gap: 8px; padding: 9px 0; text-decoration: none; }
     .t-part + .t-part { border-top: 1px solid var(--border); }
@@ -621,7 +629,7 @@
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
     <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · 3 free analyses a day · No ads · then $3.99/month or $29.99/year. Cancel any time.</p>
     <p style="text-align:center;margin-top:12px;"><a href="#" onclick="enterGuestMode();return false;" style="font-size:13px;color:rgba(251,248,243,0.65);text-decoration:underline;">← Keep looking around without an account</a></p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v5.2.1</p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v5.2.2</p>
   </div>
 </div>
 
@@ -730,7 +738,7 @@
     <h1>Āyurveda Food Compass</h1>
     <p>Know what to eat today</p>
     <div class="hdr-right">
-      <button class="btn btn-outline btn-sm" onclick="goTab('account')" aria-label="Settings" style="border-radius:20px;padding:6px 11px;font-size:13px;">
+      <button class="btn btn-outline btn-sm" onclick="goTab('account')" aria-label="Settings" style="border-radius:22px;padding:7px 13px;font-size:18px;line-height:1;">
         <span id="hdr-avatar">⚙︎</span>
       </button>
     </div>
@@ -897,7 +905,7 @@
       </div>
 
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px;">
-        AyurFood v5.2.1 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
+        AyurFood v5.2.2 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
         <div style="margin-top:8px;">
           Need help? <a href="mailto:info@ayurveda-food.com" style="color:var(--gold);">info@ayurveda-food.com</a>
         </div>
@@ -3230,9 +3238,60 @@ async function renderToday() {
     '<button class="btn btn-dark t-cta" onclick="afcStartScan()">📷 Check my meal</button>' +
     (open ? '<button class="btn btn-outline" onclick="goTab(\'guide\')">What should I eat now? ↗</button>' : '') +
     (allowance ? '<div class="t-allow">' + afcEsc(allowance) + '</div>' : '') +
+    afcBreathCard(bal, slot) +
     '<div id="daily-hint" style="margin-top:20px;"></div>';
 
   renderDailyHint();
+}
+
+// v5.2.2 · Breath for today — links into breath.ayurveda-food.com.
+// Wording describes classical practice only (no effect on a body function).
+const AFC_BREATH_URL = 'https://breath.ayurveda-food.com/';
+const AFC_BREATH = {
+  nadi:     { name: 'Nadi Shodhana', tag: 'alternate-nostril breath', ico: '🌗' },
+  bhramari: { name: 'Bhramari',      tag: 'humming-bee breath',       ico: '🐝' },
+  kapal:    { name: 'Kapalabhati',   tag: 'skull-shining breath',     ico: '☀️' },
+  ujjayi:   { name: 'Ujjayi',        tag: 'ocean breath',             ico: '🌊' }
+};
+function afcBreathPick(bal, slot) {
+  // Today's most elevated doṣa if any is raised; otherwise the constitution.
+  let d = null;
+  try { if (bal && bal.top && bal.state(bal.top).indexOf('elevated') !== -1) d = bal.top; } catch (e) {}
+  if (!d) d = (primaryDoshas(dosha) || [])[0] || 'vata';
+  const early = slot === 'breakfast' || slot === 'lunch';
+  let t, why;
+  if (d === 'kapha') {
+    // Kapalabhati is classically practised early, on an empty stomach.
+    t = early ? 'kapal' : 'ujjayi';
+    why = early ? 'Classical practice pairs Kapha with a brisk, warming breath, done before eating.'
+                : 'Classical practice pairs Kapha with a steady, audible breath later in the day.';
+  } else if (d === 'pitta') {
+    t = 'bhramari';
+    why = 'Classical practice pairs Pitta with a soft, humming, unhurried breath.';
+  } else {
+    t = 'nadi';
+    why = 'Classical practice pairs Vāta with an even, alternating rhythm.';
+  }
+  const raised = bal && bal.top === d && d !== (primaryDoshas(dosha) || [])[0];
+  return { t: t, d: d, why: why, raised: raised };
+}
+function afcBreathCard(bal, slot) {
+  const p = afcBreathPick(bal, slot);
+  const b = AFC_BREATH[p.t];
+  const url = AFC_BREATH_URL + '?t=' + p.t +
+    '&utm_source=compass&utm_medium=today&utm_campaign=breath';
+  const lead = p.raised ? 'For ' + DN[p.d] + ', which reads raised today. ' : '';
+  return '<a class="card t-breath" href="' + url + '" target="_blank" rel="noopener" ' +
+      'onclick="afcFunnel(\'breath_start\', \'' + p.t + '\')">' +
+      '<span class="t-breath-ico">' + b.ico + '</span>' +
+      '<span class="t-breath-body">' +
+        '<span class="t-card-lbl" style="display:block;margin-bottom:4px;">Breath for today · 3 minutes</span>' +
+        '<span class="t-breath-name">' + b.name + ' <span style="font-family:\'DM Sans\',sans-serif;font-size:12px;color:var(--muted);">' + b.tag + '</span></span>' +
+        '<span class="t-breath-why">' + afcEsc(lead + p.why) + '</span>' +
+      '</span><span class="t-breath-go">↗</span></a>' +
+    '<div class="t-breath-safe">Practise seated, never while driving or standing in a headset. Stop if you feel dizzy or short of breath. ' +
+      (p.t === 'kapal' ? 'Skip Kapalabhati in pregnancy, with high blood pressure, heart disease, hernia or epilepsy, or after abdominal surgery. ' : '') +
+      'If you have a medical condition, ask your doctor first.</div>';
 }
 
 function afcOpenPick(id) {
