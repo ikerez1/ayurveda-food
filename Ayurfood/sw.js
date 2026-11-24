@@ -1,8 +1,9 @@
-const CACHE = 'ayurfood-v4';
+const CACHE = 'ayurfood-v6';
 const PRECACHE = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/i18n/uk.js?v=5.4.0',
   '/icon-72.png',
   '/icon-96.png',
   '/icon-128.png',

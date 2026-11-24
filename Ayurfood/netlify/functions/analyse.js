@@ -61,6 +61,18 @@ const AFC_CLAIM_PATTERNS = [
   /\b(indigestion|bloating|constipation|acid reflux|heartburn|nausea|insomnia|migraines?|headaches?)\b/i,
   /\b(anti-?inflammatory|antioxidant|immune[- ]boosting|medicinal|therapeutic)\b/i,
   /\b(diagnos\w+|prescrib\w+|dosage)\b|\d\s*(mg|g|ml)\b/i,
+  // ── Ukrainian (v5.3.0). Stems, because Ukrainian inflects; JS \b is ASCII-only,
+  // so the left edge is a Unicode-letter lookbehind instead.
+  /(?<!\p{L})(виліков|лікує|лікуют|лікуван|лікувальн|зціл|ліки від|засіб від)/iu,
+  /(?<!\p{L})(запобіга|профілакти|захища\p{L}*\s+від|знижу\p{L}*\s+ризик)/iu,
+  /(?<!\p{L})(покращ|підвищ|зміцн|посил|підтриму|стимулю|нормалізу|прискор|сприя|допомага)\p{L}*\s+(\p{L}+\s+)?(імун|метабол|обмін\p{L}*\s+речовин|травлен|печінк|серц|мозк|мозок|пам[ʼ'’]?ят|енергі|схудн|сон|сну)/iu,
+  /(?<!\p{L})(детокс|шлак|токсин|очищ\p{L}*\s+(організм|печінк|кров|кишк))/iu,
+  /(?<!\p{L})(схудн|скинути\s+вагу|зниженн\p{L}*\s+ваги|спалю\p{L}*\s+жир|жироспал)/iu,
+  /(?<!\p{L})(зниж|підвищ|регулю|нормалізу)\p{L}*\s+(рів\p{L}*\s+)?(цукр|тиск|холестерин|запален|глюкоз)/iu,
+  /(?<!\p{L})(діабет|рак(?!\p{L})|раков|онколог|артрит|депресі|тривожн\p{L}*\s+розлад|гіпертоні|хвороб\p{L}*\s+крона|синдром\p{L}*\s+подразнен)/iu,
+  /(?<!\p{L})(нетравлен|диспепс|здутт|метеоризм|закреп|рефлюкс|печі[яїю](?!\p{L})|нудот|безсонн|мігрен|головн\p{L}*\s+біл)/iu,
+  /(?<!\p{L})(протизапальн|антиоксидант|імуностимул|лікарськ|терапевтичн|цілющ|оздоровч)/iu,
+  /(?<!\p{L})(діагноз|діагност|дозуванн|дозу(?!\p{L})|призначенн\p{L}*\s+лікар)|\d\s*(мг|г|мл)(?!\p{L})/iu,
 ];
 
 function afcClaimHit(text) {
@@ -317,7 +329,20 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { foodName, imageB64, dosha } = JSON.parse(event.body || '{}');
+    const body = JSON.parse(event.body || '{}');
+    const { foodName, imageB64, dosha } = body;
+    // v5.3.0 · Ukrainian. Enum fields stay English because the client keys on
+    // them (tastes, virya, vipaka, verdict, effect); foodName stays English
+    // because the food reference is matched on it. Everything a person reads
+    // is written in Ukrainian, under the same legal rule.
+    const lang = (body && body.lang === 'uk') ? 'uk' : 'en';
+    const langRule = lang !== 'uk' ? '' : `
+
+OUTPUT LANGUAGE — UKRAINIAN.
+Write "category", "season", every "desc", "advice", every "why" and every "tips" entry in natural, correct Ukrainian (українська мова), addressed to the person as "ви". Add "foodNameUk": the dish's usual Ukrainian name.
+Keep these EXACTLY in English, as specified: "foodName", "rasa", "virya", "vipaka", "tastes", "verdict", and "effect".
+Sanskrit terms in Ukrainian prose: Вата, Пітта, Капха, доша, раса, вірʼя, віпака, агні.
+The legal rule above applies to the Ukrainian text in full. Never write "покращує травлення", "зміцнює імунітет", "виводить токсини", "сприяє схудненню", "знижує запалення" or anything similar, and name no disease or symptom. Write "Аюрведа вважає імбир зігрівальним і вживає його перед їжею", never "імбир покращує травлення".`;
 
     // ── Layer 2: size, checked before anything is paid for.
     if (typeof imageB64 === 'string' && imageB64.length > MAX_IMAGE_B64) {
@@ -413,7 +438,7 @@ Set "verdict" from the score for the user's own constitution: 80+ Excellent, 65-
 LANGUAGE — this is a legal requirement, not a style note.
 This text is shown to EU consumers and is governed by Regulation (EC) 1924/2006. Describe traditional practice and the qualities of the food. NEVER state or imply that a food affects a bodily function or treats, prevents or reduces the risk of any condition. Do not write that something aids digestion, boosts immunity, detoxifies, reduces inflammation, lowers blood sugar or causes weight loss. Do not name a disease or a symptom. Do not give a dosage. Write "Ayurveda treats ginger as warming and takes it before a meal", never "ginger aids digestion".
 
-Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoji":"emoji","category":"string","rasa":"string","virya":"Heating or Cooling","vipaka":"Sweet or Sour or Pungent","tastes":["Sweet"],"season":"string","vata":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"pitta":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"kapha":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"verdict":"Excellent|Good|Neutral|Caution|Avoid","advice":"string","why":["string"],"improve":{"target":0-100,"tips":["string"]}}`;
+Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoji":"emoji","category":"string","rasa":"string","virya":"Heating or Cooling","vipaka":"Sweet or Sour or Pungent","tastes":["Sweet"],"season":"string","vata":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"pitta":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"kapha":{"score":0-100,"effect":"\u2193|~|\u2191|\u2191\u2191","desc":"string"},"verdict":"Excellent|Good|Neutral|Caution|Avoid","advice":"string","why":["string"],"improve":{"target":0-100,"tips":["string"]}}${lang === 'uk' ? ' — plus "foodNameUk":"string"' : ''}${langRule}`;
 
     const content = imageB64
       ? [{ type:'image', source:{ type:'base64', media_type:'image/jpeg', data:imageB64 }},
@@ -428,7 +453,7 @@ Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoj
 
     const requestBody = JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1900,
+      max_tokens: lang === 'uk' ? 2400 : 1900,
       system: systemPrompt,
       messages: [{ role: 'user', content }]
     });
@@ -482,13 +507,17 @@ Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoj
         }
       });
 
-      obj.advice = afcSafeText(obj.advice, 'Judge this one on its qualities above.', 'advice');
+      obj.advice = afcSafeText(obj.advice, lang === 'uk' ? 'Оцініть цю страву за її якостями вище.' : 'Judge this one on its qualities above.', 'advice');
+      obj.category = afcSafeText(obj.category, '', 'category');
+      obj.season = afcSafeText(obj.season, '', 'season');
+      if (lang === 'uk') obj.foodNameUk = afcSafeText(String(obj.foodNameUk || '').slice(0, 80), '', 'foodNameUk');
+      else delete obj.foodNameUk;
 
       // "why": at most five short reasons, each clean. A dropped reason leaves
       // the rest standing — a partial explanation beats none, and the client
       // falls back to its own derivation when the array comes back empty.
       obj.why = (Array.isArray(obj.why) ? obj.why : [])
-        .map(w => String(w == null ? '' : w).trim().slice(0, 110))
+        .map(w => String(w == null ? '' : w).trim().slice(0, lang === 'uk' ? 140 : 110))
         .filter(w => w && !afcClaimHit(w))
         .slice(0, 5);
 
@@ -496,7 +525,7 @@ Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoj
       // this constitution, so the model cannot promise a transformation.
       if (obj.improve && typeof obj.improve === 'object') {
         const tips = (Array.isArray(obj.improve.tips) ? obj.improve.tips : [])
-          .map(t => String(t == null ? '' : t).trim().slice(0, 90))
+          .map(t => String(t == null ? '' : t).trim().slice(0, lang === 'uk' ? 115 : 90))
           .filter(t => t && !afcClaimHit(t))
           .slice(0, 4);
 

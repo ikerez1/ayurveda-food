@@ -2,6 +2,140 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- ===== v5.3.0 · i18n — language pick + dictionary load (must run first) ===== -->
+  <script>
+  (function () {
+    var L = null;
+    try {
+      var q = new URLSearchParams(location.search).get('lang');
+      if (q === 'uk' || q === 'en') localStorage.setItem('afc_lang', q);
+    } catch (e) {}
+    try { L = localStorage.getItem('afc_lang'); } catch (e) {}
+    if (L !== 'uk' && L !== 'en') {
+      var ls = [].concat(navigator.languages || [], navigator.language || []);
+      L = ls.some(function (x) { return /^uk(-|$)/i.test(String(x)); }) ? 'uk' : 'en';
+    }
+    window.AFC_LANG = L;
+    window.AFC_LOCALE = L === 'uk' ? 'uk-UA' : undefined;
+    document.documentElement.lang = L;
+    // Synchronous on purpose: the dictionary must exist before the first paint,
+    // and only Ukrainian visitors pay for it. Same origin, so it is not subject
+    // to Chrome's cross-origin document.write intervention.
+    if (L === 'uk') document.write('<script src="/i18n/uk.js?v=5.4.0"><\/script>');
+  })();
+  </script>
+  <script>
+  /* t(en, vars)              → translated string, {name} placeholders filled
+     tn(n, one, many, vars)   → plural-aware; Ukrainian dictionary holds [one, few, many]
+     tr(text)                 → dictionary + pattern lookup for free text and data
+     The DOM pass translates every text node, placeholder/title/aria-label and
+     known inline-HTML block as it is inserted, so plain literals need no t(). */
+  (function () {
+    var U = (window.AFC_LANG === 'uk' && window.AFC_UK) || null;
+    var D = (U && U.t) || {}, H = (U && U.h) || {}, RX = (U && U.rx) || [], F = (U && U.foods) || {};
+    var on = !!U;
+    function norm(s) { return String(s).replace(/\s+/g, ' ').trim(); }
+    function sub(s, v) {
+      return v ? String(s).replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; }) : String(s);
+    }
+    function ukForm(n) {
+      n = Math.abs(Math.round(n)) % 100; var n1 = n % 10;
+      if (n > 10 && n < 20) return 2; if (n1 === 1) return 0; if (n1 > 1 && n1 < 5) return 1; return 2;
+    }
+    // A key may carry a context prefix ("hunger|Light") where one English word
+    // needs two Ukrainian ones; English falls back to the text after the bar.
+    window.t = function (en, v) {
+      if (on) { var u = D[en]; if (typeof u === 'string') return sub(u, v); }
+      return sub(String(en).replace(/^[a-z]+\|/, ''), v);
+    };
+    window.tn = function (n, one, many, v) {
+      v = Object.assign({ n: n }, v || {});
+      if (on) {
+        var u = D[many];
+        if (Array.isArray(u)) return sub(u[ukForm(n)], v);
+        if (typeof u === 'string') return sub(u, v);
+      }
+      return sub(n === 1 ? one : many, v);
+    };
+    window.tr = function (s) {
+      if (!on || s == null) return s;
+      var k = norm(s); if (!k) return s;
+      var u = D[k]; if (typeof u === 'string') return u;
+      for (var i = 0; i < RX.length; i++) {
+        var m = k.match(RX[i][0]);
+        if (m) return typeof RX[i][1] === 'function' ? RX[i][1].apply(null, m) : k.replace(RX[i][0], RX[i][1]);
+      }
+      return s;
+    };
+    /** Ukrainian name of a reference food, by slug; the English name otherwise. */
+    window.afcFoodName = function (slug, fallback) {
+      return (on && slug && F[slug]) || fallback || slug || '';
+    };
+    window.afcSetLang = function (l) {
+      try { localStorage.setItem('afc_lang', l === 'uk' ? 'uk' : 'en'); } catch (e) {}
+      location.reload();
+    };
+    if (!on) return;
+
+    var SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, NOSCRIPT: 1, svg: 1, SVG: 1 };
+    var ATTRS = ['placeholder', 'title', 'aria-label'];
+    function doText(n) {
+      var v = n.nodeValue;
+      if (!v || !/[A-Za-z]/.test(v)) return;
+      var r = window.tr(v);
+      if (r !== v && r != null) {
+        var lead = v.match(/^\s*/)[0], trail = v.match(/\s*$/)[0];
+        if (/^[,.;:]/.test(r)) lead = '';   // "$3.99" + ", а надалі…" — no space before the comma
+        var nv = lead + r + trail;
+        if (nv !== v) n.nodeValue = nv;
+      }
+    }
+    function doHref(el) {
+      if (el.tagName !== 'A') return;
+      var h = el.getAttribute('href');
+      if (h && h.indexOf('/food/') === 0) el.setAttribute('href', '/uk' + h);
+    }
+    function doAttrs(el) {
+      for (var i = 0; i < ATTRS.length; i++) {
+        var a = el.getAttribute(ATTRS[i]);
+        if (a && /[A-Za-z]/.test(a)) { var r = window.tr(a); if (r !== a) el.setAttribute(ATTRS[i], r); }
+      }
+    }
+    function walk(el) {
+      if (el.nodeType === 3) { doText(el); return; }
+      if (el.nodeType !== 1) return;
+      if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') { doAttrs(el); return; }
+      if (SKIP[el.tagName]) return;
+      doHref(el);
+      if (el.hasAttribute('data-no-i18n')) return;
+      doAttrs(el);
+      if (el.firstElementChild) {
+        var k = norm(el.innerHTML);
+        if (k.length < 1200 && typeof H[k] === 'string') { el.innerHTML = H[k]; return; }
+      }
+      for (var c = el.firstChild; c; c = c.nextSibling) walk(c);
+    }
+    window.afcTranslateTree = walk;
+    document.addEventListener('DOMContentLoaded', function () {
+      walk(document.body);
+      new MutationObserver(function (ms) {
+        for (var i = 0; i < ms.length; i++) {
+          var m = ms[i];
+          if (m.type === 'characterData') doText(m.target);
+          else if (m.type === 'attributes') doAttrs(m.target);
+          else for (var j = 0; j < m.addedNodes.length; j++) walk(m.addedNodes[j]);
+        }
+      }).observe(document.body, { childList: true, subtree: true, characterData: true,
+                                  attributes: true, attributeFilter: ATTRS });
+      // Ukrainian visitors get the Ukrainian privacy notice.
+      document.querySelectorAll('a[href="/privacy.html"]').forEach(function (a) { a.setAttribute('href', '/privacy-uk.html'); });
+    });
+    // Native dialogs are not DOM: route them through the dictionary too.
+    var _a = window.alert, _c = window.confirm;
+    window.alert = function (s) { return _a.call(window, window.tr(s)); };
+    window.confirm = function (s) { return _c.call(window, window.tr(s)); };
+  })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#B8882A">
   <meta name="mobile-web-app-capable" content="yes">
@@ -580,7 +714,15 @@
     #page-program #pp-app .rk{font-size:13px;font-weight:600;color:var(--dark);min-width:110px;flex-shrink:0;}
     #page-program #pp-app .rv{font-size:13px;color:var(--muted);}
 
-  </style>
+    /* v5.4.0 · weather line */
+  .t-wx{margin-top:12px;padding-top:10px;border-top:1px solid rgba(0,0,0,.06);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;justify-content:space-between;font-size:12.5px;color:#5C4E3D;}
+  .t-wx-main{line-height:1.5;}
+  .t-wx-src{font-size:10.5px;color:#9A8B78;text-decoration:none;}
+  .pp-wx{font-size:12px;color:#5C4E3D;background:rgba(201,138,54,.08);border-radius:10px;padding:8px 10px;margin:8px 0 4px;line-height:1.5;}
+  .pp-adj{display:block;font-size:11.5px;color:#8A6A3A;margin-top:3px;}
+  .pp-was{display:block;font-size:11px;color:#9A8B78;text-decoration:line-through;margin-top:2px;}
+  .daydate .pp-wxchip{margin-left:8px;font-size:11px;opacity:.85;}
+</style>
 </head>
 <body>
 
@@ -640,9 +782,10 @@
     <input type="password" id="pass-input" class="text-input" placeholder="Password">
     <button class="btn btn-dark" onclick="signInEmail()" id="email-btn">Sign In</button>
     <button class="btn btn-outline" onclick="signUpEmail()">Create Account</button>
-    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.<br>Free dosha quiz · 3 free analyses a day · No ads · then $3.99/month or $29.99/year. Cancel any time.</p>
+    <p class="login-terms">By continuing you agree to our <a href="#">Terms</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.<br>Free dosha quiz · 3 free analyses a day · No ads · then $3.99/month or $29.99/year. Cancel any time.</p>
     <p style="text-align:center;margin-top:12px;"><a href="#" onclick="enterGuestMode();return false;" style="font-size:13px;color:rgba(251,248,243,0.65);text-decoration:underline;">← Keep looking around without an account</a></p>
-    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v5.2.2</p>
+    <p data-no-i18n style="text-align:center;margin-top:14px;font-size:12px;"><a href="#" onclick="afcSetLang('en');return false;" style="color:rgba(251,248,243,0.75);">English</a> · <a href="#" onclick="afcSetLang('uk');return false;" style="color:rgba(251,248,243,0.75);">Українська</a></p>
+    <p style="font-size:10px;color:#aaa;text-align:center;margin-top:8px;">v5.4.0</p>
   </div>
 </div>
 
@@ -751,6 +894,7 @@
     <h1>Āyurveda Food Compass</h1>
     <p>Know what to eat today</p>
     <div class="hdr-right">
+      <button class="btn btn-outline btn-sm" data-no-i18n onclick="afcSetLang(AFC_LANG==='uk'?'en':'uk')" aria-label="Language · Мова" style="border-radius:22px;padding:7px 11px;font-size:12px;line-height:1;margin-right:6px;font-weight:600;letter-spacing:.5px;"><script>document.write(AFC_LANG==='uk'?'EN':'УК')</script></button>
       <button class="btn btn-outline btn-sm" onclick="goTab('account')" aria-label="Settings" style="border-radius:22px;padding:7px 13px;font-size:18px;line-height:1;">
         <span id="hdr-avatar">⚙︎</span>
       </button>
@@ -891,6 +1035,11 @@
           <span class="menu-label">Retake Dosha Assessment</span>
           <span class="menu-arrow">›</span>
         </div>
+        <div class="menu-item" data-no-i18n onclick="afcSetLang(AFC_LANG==='uk'?'en':'uk')">
+          <span class="menu-icon">🌐</span>
+          <span class="menu-label">Language · Мова: <script>document.write(AFC_LANG==='uk'?'Українська':'English')</script></span>
+          <span class="menu-arrow">›</span>
+        </div>
         <div class="menu-item" onclick="clearJournal()">
           <span class="menu-icon">🗑️</span>
           <span class="menu-label">Clear Food Journal</span>
@@ -922,7 +1071,7 @@
       </div>
 
       <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px;">
-        AyurFood v5.2.2 · <a href="#" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
+        AyurFood v5.4.0 · <a href="/privacy.html" target="_blank" rel="noopener" style="color:var(--gold);">Privacy</a> · <a href="#" style="color:var(--gold);">Terms</a>
         <div style="margin-top:8px;">
           Need help? <a href="mailto:info@ayurveda-food.com" style="color:var(--gold);">info@ayurveda-food.com</a>
         </div>
@@ -1413,13 +1562,13 @@ function showMainApp() {
     const badge  = document.getElementById('acct-badge');
     if (status === 'trial') {
       const d = getTrialDaysLeft();
-      badge.innerHTML = `<span class="sub-badge trial">⏳ Trial — ${d} day${d!==1?'s':''} left</span>`;
+      badge.innerHTML = `<span class="sub-badge trial">⏳ ${tn(d, 'Trial — {n} day left', 'Trial — {n} days left')}</span>`;
     } else if (status === 'active') {
       badge.innerHTML = isComped()
         ? `<span class="sub-badge active">✓ Complimentary Access</span>`
         : `<span class="sub-badge active">✓ Active Member</span>`;
     } else if (status === 'none') {
-      badge.innerHTML = `<span class="sub-badge expired">Free plan — ${afcAnalysesLeft()} of ${AFC_FREE_PER_DAY} analyses left today</span>`;
+      badge.innerHTML = `<span class="sub-badge expired">${t('Free plan — {a} of {b} analyses left today', { a: afcAnalysesLeft(), b: AFC_FREE_PER_DAY })}</span>`;
     } else {
       badge.innerHTML = `<span class="sub-badge expired">⚠️ Trial ended — upgrade to continue</span>`;
     }
@@ -1481,7 +1630,7 @@ function guestSaveNotice() {
          '<button class="btn btn-gold" style="margin:0;" onclick="showPage(\'login\')">' +
          'Create an account to save this \u2197</button>' +
          '<div style="font-size:11px;color:#9A8B78;margin-top:8px;">' +
-         d + ' day' + (d === 1 ? '' : 's') + ' of free access remaining \u00b7 no card needed' +
+         tn(d, '{n} day of free access remaining · no card needed', '{n} days of free access remaining · no card needed') +
          '</div></div>';
 }
 
@@ -1512,8 +1661,8 @@ function updateTrialBanner() {
   const days  = guest ? guestDaysLeft() : getTrialDaysLeft();
   if (days > 0 && !localStorage.getItem('trial_banner_dismissed')) {
     txt.textContent = guest
-      ? `${days} day${days!==1?'s':''} of free access \u2014 nothing saved yet`
-      : `${days} day${days!==1?'s':''} left in free trial`;
+      ? tn(days, '{n} day of free access — nothing saved yet', '{n} days of free access — nothing saved yet')
+      : tn(days, '{n} day left in free trial', '{n} days left in free trial');
     el.classList.add('show');
   } else {
     el.classList.remove('show');
@@ -1686,7 +1835,7 @@ function renderArlDisclosure() {
     // moment the subscription is created.
     const period = ARL_PERIOD_DAYS[selectedPlan] || ARL_PERIOD_DAYS.yearly;
     const renews = new Date(Date.now() + (ARL_TRIAL_DAYS + period) * 86400000);
-    const dateStr = renews.toLocaleDateString(undefined,
+    const dateStr = renews.toLocaleDateString(AFC_LOCALE,
       { year: 'numeric', month: 'long', day: 'numeric' });
 
     ['arl-total', 'arl-total-2', 'arl-total-3'].forEach(id => {
@@ -1822,7 +1971,7 @@ async function startCheckout() {
       return;
     }
     if (!resp.ok || data.error) {
-      showToast('Checkout error: ' + (data.error || 'Unknown error'));
+      showToast(t('Checkout error:') + ' ' + tr(data.error || 'Unknown error'));
       return;
     }
 
@@ -1832,7 +1981,7 @@ async function startCheckout() {
 
   } catch (err) {
     hideSpinner();
-    showToast('Checkout failed: ' + err.message);
+    showToast(t('Checkout failed:') + ' ' + err.message);
   }
 }
 
@@ -1853,13 +2002,13 @@ function renderSubscriptionDetail(status) {
   let endsOn = null;
   if (profile?.subscription_end) {
     const d = new Date(profile.subscription_end);
-    if (!isNaN(d)) endsOn = d.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+    if (!isNaN(d)) endsOn = d.toLocaleDateString(AFC_LOCALE, { year:'numeric', month:'long', day:'numeric' });
   }
 
   // A grant has no Stripe subscription behind it: nothing renews and there is
   // nothing to cancel. Saying "renews automatically" would misstate the plan.
   if (isComped()) {
-    detail.textContent = endsOn ? 'Complimentary access until ' + endsOn : 'Complimentary access';
+    detail.textContent = endsOn ? t('Complimentary access until {d}', { d: endsOn }) : t('Complimentary access');
     row.style.display = 'none';
     return;
   }
@@ -1870,18 +2019,18 @@ function renderSubscriptionDetail(status) {
   if (hasStripeSubscription()) {
     if (cancelled) {
       detail.textContent = endsOn
-        ? 'Cancelled — access continues until ' + endsOn
-        : 'Cancelled — access continues to the end of your paid period';
+        ? t('Cancelled — access continues until {d}', { d: endsOn })
+        : t('Cancelled — access continues to the end of your paid period');
       row.style.display = 'none';
     } else {
-      detail.textContent = endsOn ? 'Renews automatically on ' + endsOn : 'Renews automatically';
+      detail.textContent = endsOn ? t('Renews automatically on {d}', { d: endsOn }) : t('Renews automatically');
       row.style.display = 'flex';
     }
   } else if (status === 'trial') {
     // Legacy card-free trial: nothing on file, nothing to cancel.
     const d = getTrialDaysLeft();
-    detail.textContent = 'Free trial — no payment method on file · '
-                       + d + ' day' + (d !== 1 ? 's' : '') + ' left';
+    detail.textContent = t('Free trial — no payment method on file') + ' · '
+                       + tn(d, '{n} day left', '{n} days left');
     row.style.display = 'none';
   } else {
     detail.textContent = '';
@@ -1913,9 +2062,8 @@ async function cancelSubscription() {
   if (!supabase || !user) { showToast('Please sign in first'); return; }
 
   const ok = confirm(
-    'Cancel your subscription?\n\n' +
-    'You will keep full access until the end of the period you have already paid for. ' +
-    'You will not be charged again.'
+    t('Cancel your subscription?') + '\n\n' +
+    t('You will keep full access until the end of the period you have already paid for. You will not be charged again.')
   );
   if (!ok) return;
 
@@ -1958,11 +2106,11 @@ async function cancelSubscription() {
     renderSubscriptionDetail(getSubscriptionStatus());
 
     const until = data.access_until
-      ? new Date(data.access_until).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' })
+      ? new Date(data.access_until).toLocaleDateString(AFC_LOCALE, { year:'numeric', month:'long', day:'numeric' })
       : null;
     showToast(data.already
-      ? ('Already cancelled' + (until ? ' — access until ' + until : ''))
-      : ('✓ Cancelled' + (until ? ' — access until ' + until : '')));
+      ? (t('Already cancelled') + (until ? ' — ' + t('access until {d}', { d: until }) : ''))
+      : ('✓ ' + t('Cancelled') + (until ? ' — ' + t('access until {d}', { d: until }) : '')));
 
   } catch (err) {
     hideSpinner();
@@ -2005,7 +2153,7 @@ async function restorePurchase() {
     }
   } catch(e) {
     hideSpinner();
-    showToast('Could not check subscription — ' + e.message);
+    showToast(t('Could not check subscription') + ' — ' + e.message);
   }
 }
 
@@ -2132,7 +2280,7 @@ function renderDailyHint() {
   const tint = h.f && DOSHA[h.f] ? DOSHA[h.f] : null;
   const accent = tint ? tint.color : '#B8882A';
   const wash   = tint ? tint.bg    : '#FDF9F1';
-  const tag    = tint ? tint.name + ' note' : 'For every constitution';
+  const tag    = tint ? t('{d} note', { d: tint.name }) : t('For every constitution');
   el.innerHTML =
     '<div style="background:' + wash + ';border:1px solid ' + accent + '55;' +
     'border-radius:14px;padding:15px 17px;margin-bottom:18px;">' +
@@ -2195,7 +2343,7 @@ function pickOpt(el, qi, d) {
 
 function calcDosha() {
   const filled = quizAns.filter(Boolean);
-  if (filled.length < 10) { alert(`Please answer at least 10 questions (${filled.length}/20 answered).`); return; }
+  if (filled.length < 10) { alert(t('Please answer at least 10 questions ({n}/20 answered).', { n: filled.length })); return; }
   const sc = { vata:0, pitta:0, kapha:0 };
   filled.forEach(a => { if(a==='v') sc.vata++; else if(a==='p') sc.pitta++; else sc.kapha++; });
   dosha = classifyPrakriti(sc);
@@ -2227,10 +2375,8 @@ function offerJournalRescore(d) {
   const name = (DOSHA[d] || {}).name || d;
   const many = eligible.length !== 1;
   const ok = confirm(
-    'Recalculate ' + eligible.length + ' saved journal entr' + (many ? 'ies' : 'y') +
-    ' for a ' + name + ' constitution?\n\n' +
-    'The original analysis of each food is reused \u2014 nothing is sent for re-analysis. ' +
-    'Choose Cancel to keep the scores as they were recorded.'
+    tn(eligible.length, 'Recalculate {n} saved journal entry for a {d} constitution?', 'Recalculate {n} saved journal entries for a {d} constitution?', { d: name }) + '\n\n' +
+    t('The original analysis of each food is reused — nothing is sent for re-analysis. Choose Cancel to keep the scores as they were recorded.')
   );
   if (!ok) return;
   history.forEach(h => {
@@ -2245,7 +2391,7 @@ function offerJournalRescore(d) {
       .then(() => {}, () => {});
   }
   renderJournal();
-  try { showToast('Journal recalculated for ' + name); } catch (e) {}
+  try { showToast(t('Journal recalculated for {d}', { d: name })); } catch (e) {}
 }
 
 function renderDoshaResult(sc) {
@@ -2265,9 +2411,9 @@ function renderDoshaResult(sc) {
       <div class="dres-head">
         <div class="dres-icon" style="background:${d.bg};border:2px solid ${d.color}">${d.icon}</div>
         <div>
-          <div class="dres-name" style="color:${d.color}">${d.name} Prakriti</div>
+          <div class="dres-name" style="color:${d.color}">${t('{d} Prakriti', { d: d.name })}</div>
           <div class="dres-sub">${d.element} · ${d.qualities.join(', ')}</div>
-          <div style="font-size:10px;color:#7A6B58;margin-top:3px;">${answered>0?'Based on '+answered+'/20 questions':'Manually selected'}</div>
+          <div style="font-size:10px;color:#7A6B58;margin-top:3px;">${answered>0?t('Based on {n}/20 questions', { n: answered }):t('Manually selected')}</div>
         </div>
       </div>
       ${bars}
@@ -2324,7 +2470,7 @@ function clearScan() {
 
 async function runAnalysis() {
   const txt = document.getElementById('food-text').value.trim();
-  if (!txt && !imgB64) { alert('Please enter a food name or take a photo.'); return; }
+  if (!txt && !imgB64) { alert(t('Please enter a food name or take a photo.')); return; }
 
   // Members are unlimited; everyone else gets three analyses inside the
   // 7-day window. The paywall is reached after a real personal result rather
@@ -2369,7 +2515,7 @@ async function runAnalysis() {
       showToast('Analysis is temporarily unavailable — please try again shortly');
       return;
     }
-    alert('Analysis failed. Please try again.\n\n' + (e.message||String(e)));
+    alert(t('Analysis failed. Please try again.') + '\n\n' + tr(e.message||String(e)));
   }
 }
 
@@ -2396,7 +2542,7 @@ async function callClaude(foodName, b64) {
   const resp = await fetch('/.netlify/functions/analyse', {
     method: 'POST',
     headers: await afcAuthHeaders(),
-    body: JSON.stringify({ foodName, imageB64: b64, dosha })
+    body: JSON.stringify({ foodName, imageB64: b64, dosha, lang: AFC_LANG })
   });
   if (!resp.ok) {
     const e = await resp.json().catch(() => ({}));
@@ -2495,7 +2641,7 @@ async function afcInjectFoodRef(foodName) {
     '<a href="/food/' + encodeURIComponent(hit.slug) + '/" target="_blank" rel="noopener" ' +
     'style="display:block;text-align:center;padding:12px;margin-top:10px;border:1px solid rgba(184,136,42,0.35);' +
     'border-radius:10px;color:#B8882A;font-size:13px;text-decoration:none;">' +
-    'Read the full Ayurvedic profile of ' + afcEsc(hit.name) + ' ↗</a>';
+    afcEsc(t('Read the full Ayurvedic profile of {f}', { f: afcFoodName(hit.slug, hit.name) })) + ' ↗</a>';
 }
 
 // renderResult was replaced in v5 - see the RESULT section above.
@@ -2507,7 +2653,7 @@ async function saveToJournal(r) {
   const vata=r.vata||{score:50}; const pitta=r.pitta||{score:50}; const kapha=r.kapha||{score:50};
   const score = doshaScore(r, dosha);
   const entry = {
-    food:r.foodName||'Food', emoji:r.emoji||'🍽️', category:r.category||'',
+    food:(AFC_LANG === 'uk' && r.foodNameUk) || r.foodName || t('Food'), emoji:r.emoji||'🍽️', category:r.category||'',
     score, verdict: verdictFor(score), dosha, ts:Date.now(),
     // Save full result for journal detail view
     full: r
@@ -2538,8 +2684,8 @@ function renderJournal() {
       '<button class="btn btn-gold" style="margin-top:18px;" onclick="showPage(\'login\')">' +
       'Create a free account \u2197</button>' +
       (d > 0
-        ? '<div style="font-size:11px;color:#9A8B78;margin-top:10px;">' + d + ' day' +
-          (d === 1 ? '' : 's') + ' of free access remaining</div>'
+        ? '<div style="font-size:11px;color:#9A8B78;margin-top:10px;">' +
+          tn(d, '{n} day of free access remaining', '{n} days of free access remaining') + '</div>'
         : '') +
       '</div>';
     return;
@@ -2560,7 +2706,7 @@ function renderJournal() {
     const d = new Date(ts);
     const opts = { day:'numeric', month:'long' };
     if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
-    return d.toLocaleDateString(undefined, opts);
+    return d.toLocaleDateString(AFC_LOCALE, opts);
   }
 
   // history is stored newest-first; carry original index for detail/delete handlers
@@ -2579,10 +2725,10 @@ function renderJournal() {
   el.innerHTML = groups.map(g => {
     const good = g.items.filter(x => GOODV[x.h.verdict]).length;
     const n = g.items.length;
-    const summary = n + (n===1 ? ' entry' : ' entries') + (good ? ' · ' + good + ' ✓' : '');
+    const summary = tn(n, '{n} entry', '{n} entries') + (good ? ' · ' + good + ' ✓' : '');
     const rows = g.items.map(({h, i}) => {
       const vs2 = VS[h.verdict] || VS.Neutral;
-      const time = h.ts ? new Date(h.ts).toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' }) : '';
+      const time = h.ts ? new Date(h.ts).toLocaleTimeString(AFC_LOCALE, { hour:'2-digit', minute:'2-digit' }) : '';
       return `
       <div class="hist-item" onclick="showJournalDetail(${i})" style="cursor:pointer;position:relative;">
         <span class="hist-emo">${h.emoji}</span>
@@ -2634,7 +2780,7 @@ function renderJournalWeek() {
     const t = today0 - k * 864e5;
     const has = daysWith.has(t);
     const isToday = k === 0;
-    dots += `<span title="${new Date(t).toLocaleDateString(undefined,{weekday:'short'})}" style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;background:${has ? '#B8882A' : 'rgba(122,107,88,.2)'};${isToday ? 'outline:1.5px solid #B8882A;outline-offset:1.5px;' : ''}"></span>`;
+    dots += `<span title="${new Date(t).toLocaleDateString(AFC_LOCALE,{weekday:'short'})}" style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;background:${has ? '#B8882A' : 'rgba(122,107,88,.2)'};${isToday ? 'outline:1.5px solid #B8882A;outline-offset:1.5px;' : ''}"></span>`;
   }
 
   const line = pct >= 70 ? 'Beautifully in tune with your dosha this week.'
@@ -2654,7 +2800,7 @@ function renderJournalWeek() {
         </div>
         <div style="text-align:center;">
           <div style="font-size:26px;font-weight:600;line-height:1;">${total}</div>
-          <div style="font-size:10.5px;color:rgba(251,248,243,.65);margin-top:3px;">meal${total===1?'':'s'}</div>
+          <div style="font-size:10.5px;color:rgba(251,248,243,.65);margin-top:3px;">${tn(total, 'meal', 'meals')}</div>
         </div>
         <div style="text-align:center;">
           <div style="font-size:26px;font-weight:600;line-height:1;">${avgScore}</div>
@@ -2681,7 +2827,7 @@ function showJournalDetail(i) {
 
 function showJournalBasic(h) {
   const vs2 = VS[h.verdict] || VS.Neutral;
-  const date = h.ts ? new Date(h.ts).toLocaleString() : '';
+  const date = h.ts ? new Date(h.ts).toLocaleString(AFC_LOCALE) : '';
   // Show in a simple overlay
   let overlay = document.getElementById('journal-overlay');
   if (!overlay) {
@@ -2719,7 +2865,7 @@ let _deleteIndex = -1;
 
 function deleteJournalItem(i) {
   _deleteIndex = i;
-  const name = history[i]?.food || 'this entry';
+  const name = history[i]?.food || t('this entry');
 
   let dlg = document.getElementById('delete-confirm-dlg');
   if (!dlg) {
@@ -2733,7 +2879,7 @@ function deleteJournalItem(i) {
     <div style="background:#FBF8F3;border-radius:16px;padding:24px;width:100%;max-width:320px;text-align:center;">
       <div style="font-size:28px;margin-bottom:12px;">🗑️</div>
       <div style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:8px;">Delete entry?</div>
-      <div style="font-size:13px;color:#7A6B58;margin-bottom:20px;">"${name}" will be permanently removed from your journal.</div>
+      <div style="font-size:13px;color:#7A6B58;margin-bottom:20px;">${afcEsc(t('"{f}" will be permanently removed from your journal.', { f: name }))}</div>
       <div style="display:flex;gap:10px;">
         <button id="dlg-cancel-btn"
           style="flex:1;padding:12px;border-radius:10px;border:1px solid #e0d8cf;background:#fff;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;">
@@ -2765,7 +2911,7 @@ function deleteJournalItem(i) {
 }
 
 async function clearJournal() {
-  if (!confirm('Clear all journal entries?')) return;
+  if (!confirm(t('Clear all journal entries?'))) return;
   history = [];
   localStorage.removeItem('ayur_hist');
   if (supabase && user) await supabase.from('profiles').update({ food_journal: [] }).eq('id', user.id);
@@ -2788,6 +2934,8 @@ async function clearJournal() {
 //   2. ṛtu           — the season, which raises one doṣa for everyone
 //   3. kāla          — the time of day, which has its own doṣic window
 //   4. recent meals  — what the journal recorded over the last three days
+//   5. weather       — today's weather where the person is (v5.4.0); when it
+//                      is known it carries most of the season's weight
 //
 // Compliance note: every string this engine can emit describes classical
 // practice or a food's traditional qualities. Nothing here states or implies
@@ -2857,6 +3005,120 @@ function afcSeason(dt) {
 }
 const AFC_SEASON_NAME = { vata: 'Vāta season — cool, dry, windy', pitta: 'Pitta season — hot and sharp', kapha: 'Kapha season — damp and heavy' };
 
+// ── Weather (v5.4.0) ─────────────────────────────────────────────────────
+// The fifth input. Ṛtucaryā reads the season from its qualities — cold, dry,
+// windy is Vāta; hot and bright is Pitta; cold, damp and grey is Kapha — and the
+// weather outside today is the same reading, made locally and for this week
+// instead of from the calendar. The calendar season stays as the fallback.
+//
+// Location never touches the browser: /.netlify/functions/weather derives a
+// city from Netlify's own IP geolocation, asks MET Norway, and returns weather
+// plus the city name. Nothing here asks for permission or stores a position.
+const AFC_WX_KEY = 'afc_wx_v1';
+const AFC_WX_TTL = 90 * 60 * 1000;
+let afcWx = null;
+let afcWxLoading = null;
+
+const afcClamp = (x) => Math.max(0, Math.min(1, x));
+
+/** Weather point → how strongly it raises each doṣa, 0…1. */
+function afcWxPress(w) {
+  if (!w || typeof w.t !== 'number') return null;
+  const t = w.t, rh = typeof w.rh === 'number' ? w.rh : 65, wind = w.wind || 0;
+  const cloud = typeof w.cloud === 'number' ? w.cloud / 100 : 0.5;
+  const wet = Math.max(w.precip >= 0.2 ? Math.min(1, 0.5 + w.precip / 4) : 0, w.wet || 0, /rain|snow|sleet|fog/.test(w.symbol || '') ? 0.6 : 0);
+  const cold = afcClamp((14 - t) / 16), hot = afcClamp((t - 22) / 12);
+  const dry = afcClamp((60 - rh) / 35), damp = Math.max(afcClamp((rh - 72) / 23), wet);
+  const windy = afcClamp((wind - 12) / 28);
+  return {
+    vata:  afcClamp(0.45 * cold + 0.35 * windy + 0.3 * dry * (t < 22 ? 1 : 0.4)),
+    pitta: afcClamp(0.75 * hot + 0.25 * (1 - cloud) * afcClamp((t - 16) / 10)),
+    kapha: afcClamp(0.4 * cold * (0.4 + 0.6 * Math.max(damp, cloud)) + 0.45 * damp + 0.15 * cloud * (t < 20 ? 1 : 0)),
+  };
+}
+/** The doṣa the weather raises, when it clearly raises one. */
+function afcWxTop(p) {
+  if (!p) return null;
+  const r = DOSHA_ORDER.slice().sort((a, b) => p[b] - p[a]);
+  return p[r[0]] >= 0.35 ? r[0] : null;
+}
+/** "+3°C, cloudy, damp" — words, not numbers, after the temperature. */
+function afcWxDesc(w) {
+  if (!w || typeof w.t !== 'number') return '';
+  const bits = [(w.t > 0 ? '+' : '') + Math.round(w.t) + '°C'];
+  const s = w.symbol || '';
+  if (/snow|sleet/.test(s)) bits.push(t('snow'));
+  else if (w.precip >= 0.2 || (w.wet || 0) >= 0.3 || /rain/.test(s)) bits.push(t('rain'));
+  else if (/fog/.test(s)) bits.push(t('fog'));
+  else if (typeof w.cloud === 'number' && w.cloud >= 70) bits.push(t('cloudy'));
+  else if (typeof w.cloud === 'number' && w.cloud <= 25) bits.push(t('clear'));
+  if ((w.wind || 0) >= 25) bits.push(t('windy'));
+  if (typeof w.rh === 'number' && w.rh >= 82 && bits.length < 3) bits.push(t('damp'));
+  else if (typeof w.rh === 'number' && w.rh <= 40) bits.push(t('dry'));
+  return bits.join(', ');
+}
+function afcLocalDate(dt) {
+  const d = dt || new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+/** Pressure from the weather now, or null when weather is unknown. */
+function afcWxNow() { return afcWx && afcWx.current ? afcWxPress(afcWx.current) : null; }
+/** A forecast day for a local date, or null beyond the 7-day outlook. */
+function afcWxDay(date) {
+  if (!afcWx || !Array.isArray(afcWx.days)) return null;
+  return afcWx.days.find(x => x.date === afcLocalDate(date)) || null;
+}
+
+/** Fetch once per 90 minutes; every view re-renders when it arrives. */
+function afcLoadWeather() {
+  if (afcWxLoading) return afcWxLoading;
+  try {
+    const c = JSON.parse(localStorage.getItem(AFC_WX_KEY) || 'null');
+    if (c && c.v && Date.now() - c.t < AFC_WX_TTL) { afcWx = c.v; return Promise.resolve(afcWx); }
+    if (c && c.v && Date.now() - c.t < 12 * 3600 * 1000) afcWx = c.v;   // stale but better than nothing offline
+  } catch (e) {}
+  let tz = 'UTC';
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
+  afcWxLoading = fetch('/.netlify/functions/weather?tz=' + encodeURIComponent(tz), { signal: AbortSignal.timeout ? AbortSignal.timeout(7000) : undefined })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => {
+      if (j && j.wx && j.wx.current) {
+        afcWx = j.wx;
+        try { localStorage.setItem(AFC_WX_KEY, JSON.stringify({ t: Date.now(), v: afcWx })); } catch (e) {}
+        afcWxRefreshViews();
+      }
+      return afcWx;
+    })
+    .catch(() => afcWx)
+    .finally(() => { setTimeout(() => { afcWxLoading = null; }, AFC_WX_TTL); });
+  return afcWxLoading;
+}
+function afcWxRefreshViews() {
+  try {
+    const vis = id => { const el = document.getElementById(id); return el && el.offsetParent !== null; };
+    if (vis('today-body')) renderToday();
+    if (vis('guide-body') && typeof renderGuide === 'function') renderGuide();
+    if (vis('pp-app') && window.PP && PP.refresh) PP.refresh();
+  } catch (e) {}
+}
+/** The card line on TODAY. */
+function afcWxLine() {
+  if (!afcWx || !afcWx.current) return '';
+  const top = afcWxTop(afcWxNow());
+  const place = afcWx.place && afcWx.place.city ? afcEsc(afcWx.place.city) : t('Where you are');
+  return '<div class="t-wx">' +
+    '<span class="t-wx-main">🌦 ' + place + ' · ' + afcEsc(afcWxDesc(afcWx.current)) +
+      (top ? ' → <strong style="color:' + DC[top] + ';">' + afcEsc(t('{d} rises', { d: DN[top] })) + '</strong>' : '') + '</span>' +
+    '<a class="t-wx-src" href="https://www.met.no/en" target="_blank" rel="noopener">' + afcEsc(t('Weather: MET Norway')) + '</a>' +
+  '</div>';
+}
+/** What guide.js receives: numbers and a doṣa key — never a place. */
+function afcWxForGuide() {
+  if (!afcWx || !afcWx.current) return null;
+  const c = afcWx.current;
+  return { t: c.t, rh: c.rh, wind: c.wind, cloud: c.cloud, precip: c.precip, symbol: c.symbol, raises: afcWxTop(afcWxNow()) };
+}
+
 // ── Time of day (kāla) ───────────────────────────────────────────────────
 function afcSlotNow(dt) {
   const h = (dt || new Date()).getHours();
@@ -2877,10 +3139,10 @@ function afcKalaDosha(dt) {
 }
 function afcGreeting(dt) {
   const h = (dt || new Date()).getHours();
-  if (h < 5)  return 'Still awake';
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (h < 5)  return t('Still awake');
+  if (h < 12) return t('Good morning');
+  if (h < 18) return t('Good afternoon');
+  return t('Good evening');
 }
 
 // ── Recent load ──────────────────────────────────────────────────────────
@@ -2911,19 +3173,21 @@ function afcRecentLoad() {
 function afcBalance() {
   const load = afcRecentLoad();
   const season = afcSeason();
+  const wx = afcWxNow();
   const mine = primaryDoshas(dosha);
   const out = {};
   DOSHA_ORDER.forEach(d => {
     let v = 0;
     if (mine.indexOf(d) !== -1) v += 0.45;            // your own doṣa runs closer to its edge
-    if (season === d) v += 0.45;                       // the season raises it for everyone
+    if (season === d) v += wx ? 0.2 : 0.45;            // the season raises it for everyone…
+    if (wx) v += wx[d] * 0.8;                          // …and today's weather says by how much
     if (afcKalaDosha() === d) v += 0.15;               // the hour has its own quality
     v += load[d] * 0.75;                               // and what you actually ate
     out[d] = v;
   });
   const rank = DOSHA_ORDER.slice().sort((a, b) => out[b] - out[a]);
   return {
-    values: out, load, season, top: rank[0],
+    values: out, load, season, wx, top: rank[0],
     state: d => out[d] >= 0.85 ? 'elevated' : out[d] >= 0.5 ? 'slightly elevated' : out[d] <= 0.05 ? 'low' : 'balanced',
     arrow: d => out[d] >= 0.85 ? '↑' : out[d] >= 0.5 ? '↗' : out[d] <= 0.05 ? '↓' : '→',
   };
@@ -2943,7 +3207,9 @@ function afcScoreEffects(eff, opt) {
   let s = 74 - raw * 19;
 
   const season = opt.season || afcSeason();
-  s -= (eff[season] || 0) * 5;
+  const wx = opt.wx !== undefined ? opt.wx : afcWxNow();
+  s -= (eff[season] || 0) * (wx ? 2.5 : 5);
+  if (wx) DOSHA_ORDER.forEach(d => { s -= (eff[d] || 0) * wx[d] * 6; });
 
   const kala = opt.kala || afcKalaDosha();
   s -= (eff[kala] || 0) * 3.5;
@@ -3032,7 +3298,7 @@ function afcRecommend(opt) {
   const slot   = opt.slot   || afcSlotNow();
   const place  = opt.place  || null;
   const weight = opt.weight || null;
-  const ctx    = { season: afcSeason(), kala: afcKalaDosha(), load: afcRecentLoad(), bias: opt.bias };
+  const ctx    = { season: afcSeason(), kala: afcKalaDosha(), load: afcRecentLoad(), bias: opt.bias, wx: afcWxNow() };
 
   const scored = AFC_MEALS
     .filter(m => (opt.anySlot || m.slot.indexOf(slot) !== -1))
@@ -3059,15 +3325,17 @@ function afcMealWhy(item) {
   const rows = item.meal.parts.map(([s]) => afcRowBySlug(s)).filter(Boolean);
   const heating = rows.filter(r => r.virya === 'Heating').length;
   const cooling = rows.filter(r => r.virya === 'Cooling').length;
-  if (heating > cooling) bits.push('warming overall');
-  else if (cooling > heating) bits.push('cooling overall');
+  if (heating > cooling) bits.push(t('warming overall'));
+  else if (cooling > heating) bits.push(t('cooling overall'));
   mine.forEach(d => {
     const e = item.eff[d];
-    if (e <= -0.35) bits.push('settles ' + DN[d]);
-    else if (e >= 0.35) bits.push('raises ' + DN[d]);
+    if (e <= -0.35) bits.push(t('settles {d}', { d: DN[d] }));
+    else if (e >= 0.35) bits.push(t('raises {d}', { d: DN[d] }));
   });
   const season = item.ctx ? item.ctx.season : afcSeason();
-  if (!mine.length && item.eff[season] <= -0.35) bits.push('suits the season');
+  const wxTop = afcWxTop(item.ctx ? item.ctx.wx : afcWxNow());
+  if (wxTop && item.eff[wxTop] <= -0.35 && bits.length < 3) bits.push(t('suits today’s weather'));
+  else if (!mine.length && item.eff[season] <= -0.35) bits.push(t('suits the season'));
   return bits.slice(0, 3).join(' · ');
 }
 
@@ -3164,8 +3432,8 @@ function afcEntitlement() {
 function afcAllowanceLine() {
   if (afcEntitlement() === 'paid') return '';
   const n = afcAnalysesLeft();
-  if (n <= 0) return 'That is today\u2019s free analyses \u2014 three more tomorrow.';
-  return (n === 1 ? '1 free analysis' : n + ' free analyses') + ' left today';
+  if (n <= 0) return t('That is today’s free analyses — three more tomorrow.');
+  return tn(n, '{n} free analysis left today', '{n} free analyses left today');
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -3174,6 +3442,7 @@ function afcAllowanceLine() {
 async function renderToday() {
   const el = document.getElementById('today-body');
   if (!el) return;
+  afcLoadWeather();          // re-renders TODAY when it lands; never blocks it
   await afcLoadFoodRows();
 
   const name = (profile && profile.name) || (user && user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || (user && user.email ? user.email.split('@')[0] : '');
@@ -3210,7 +3479,7 @@ async function renderToday() {
       '<span class="t-bal-state" style="color:' + col + ';">' + st + '</span></div>';
   }).join('');
 
-  const slotLabel = { breakfast: 'breakfast', lunch: 'lunch', dinner: 'dinner', snack: 'something light' }[slot];
+  const slotTitle = { breakfast: t('Best breakfast today'), lunch: t('Best lunch today'), dinner: t('Best dinner today'), snack: t('Best something light today') }[slot];
 
   const bestHtml = rec.best.length ? rec.best.map(function (b, i) {
     const vs = VS[b.verdict] || VS.Neutral;
@@ -3222,33 +3491,39 @@ async function renderToday() {
   }).join('') : '<div class="t-pick-empty">The food reference could not be reached — recommendations return when you are back online.</div>';
 
   const avoidHtml = rec.worst.length ? rec.worst.map(function (b) {
-    return '<span class="t-avoid-chip">' + b.meal.emoji + ' ' + afcEsc(b.meal.name) + ' · ' + b.score + '</span>';
+    return '<span class="t-avoid-chip" data-no-i18n>' + b.meal.emoji + ' ' + afcEsc(b.meal.name) + ' · ' + b.score + '</span>';
   }).join('') : '';
 
   const loadBits = [];
-  loadBits.push(AFC_SEASON_NAME[bal.season]);
-  loadBits.push('your ' + d.name + ' constitution');
+  const wxTop = afcWxTop(bal.wx);
+  if (afcWx && afcWx.current) {
+    loadBits.push(wxTop ? t('today’s weather raises {d}', { d: DN[wxTop] }) : t('mild weather today'));
+  } else {
+    loadBits.push(AFC_SEASON_NAME[bal.season]);
+  }
+  loadBits.push(t('your {d} constitution', { d: d.name }));
   const movedBy = DOSHA_ORDER.filter(x => bal.load[x] > 0.2);
-  if (movedBy.length) loadBits.push('recent meals leaning ' + movedBy.map(x => DN[x]).join(' and ') + '-raising');
-  else if (Array.isArray(history) && history.some(h => (h.ts || 0) > Date.now() - 3 * 864e5)) loadBits.push('a steady few days in the journal');
+  if (movedBy.length) loadBits.push(t('recent meals leaning {d}-raising', { d: movedBy.map(x => DN[x]).join(t(' and ')) }));
+  else if (Array.isArray(history) && history.some(h => (h.ts || 0) > Date.now() - 3 * 864e5)) loadBits.push(t('a steady few days in the journal'));
 
   const allowance = afcAllowanceLine();
   const open = afcPremiumOpen();
 
   el.innerHTML =
     '<div class="t-hello">' + hello + '</div>' +
-    '<div class="t-lead">Here is how today sits for a ' + afcEsc(d.name) + ' constitution.</div>' +
+    '<div class="t-lead">' + afcEsc(t('Here is how today sits for a {d} constitution.', { d: d.name })) + '</div>' +
 
     '<div class="card t-balance">' +
       '<div class="t-card-lbl">Your balance today</div>' + balRows +
+      afcWxLine() +
     '</div>' +
 
     (open ?
       '<div class="card">' +
-        '<div class="t-card-lbl">Best ' + slotLabel + ' today</div>' +
+        '<div class="t-card-lbl">' + slotTitle + '</div>' +
         bestHtml +
         (avoidHtml ? '<div class="t-card-lbl" style="margin-top:16px;">Better to avoid right now</div><div class="t-avoid">' + avoidHtml + '</div>' : '') +
-        '<div class="t-why"><strong>Why?</strong> ' + afcEsc(loadBits.join(' · ')) + '.</div>' +
+        '<div class="t-why" data-no-i18n><strong>' + t('Why?') + '</strong> ' + afcEsc(loadBits.join(' · ')) + '.</div>' +
       '</div>'
       : afcLockCard('Today\u2019s recommendation', 'Your constitution stays yours for good. The daily answer to what to eat \u2014 read from the season, the hour and your last few meals \u2014 is part of Compass+.')) +
 
@@ -3280,14 +3555,14 @@ function afcBreathPick(bal, slot) {
   if (d === 'kapha') {
     // Kapalabhati is classically practised early, on an empty stomach.
     t = early ? 'kapal' : 'ujjayi';
-    why = early ? 'Classical practice pairs Kapha with a brisk, warming breath, done before eating.'
-                : 'Classical practice pairs Kapha with a steady, audible breath later in the day.';
+    why = early ? window.t('Classical practice pairs Kapha with a brisk, warming breath, done before eating.')
+                : window.t('Classical practice pairs Kapha with a steady, audible breath later in the day.');
   } else if (d === 'pitta') {
     t = 'bhramari';
-    why = 'Classical practice pairs Pitta with a soft, humming, unhurried breath.';
+    why = window.t('Classical practice pairs Pitta with a soft, humming, unhurried breath.');
   } else {
     t = 'nadi';
-    why = 'Classical practice pairs Vāta with an even, alternating rhythm.';
+    why = window.t('Classical practice pairs Vāta with an even, alternating rhythm.');
   }
   const raised = bal && bal.top === d && d !== (primaryDoshas(dosha) || [])[0];
   return { t: t, d: d, why: why, raised: raised };
@@ -3297,18 +3572,18 @@ function afcBreathCard(bal, slot) {
   const b = AFC_BREATH[p.t];
   const url = AFC_BREATH_URL + '?t=' + p.t +
     '&utm_source=compass&utm_medium=today&utm_campaign=breath';
-  const lead = p.raised ? 'For ' + DN[p.d] + ', which reads raised today. ' : '';
+  const lead = p.raised ? t('For {d}, which reads raised today.', { d: DN[p.d] }) + ' ' : '';
   return '<a class="card t-breath" href="' + url + '" target="_blank" rel="noopener" ' +
       'onclick="afcFunnel(\'breath_start\', \'' + p.t + '\')">' +
       '<span class="t-breath-ico">' + b.ico + '</span>' +
       '<span class="t-breath-body">' +
         '<span class="t-card-lbl" style="display:block;margin-bottom:4px;">Breath for today · 3 minutes</span>' +
         '<span class="t-breath-name">' + b.name + ' <span style="font-family:\'DM Sans\',sans-serif;font-size:12px;color:var(--muted);">' + b.tag + '</span></span>' +
-        '<span class="t-breath-why">' + afcEsc(lead + p.why) + '</span>' +
+        '<span class="t-breath-why" data-no-i18n>' + afcEsc(lead + p.why) + '</span>' +
       '</span><span class="t-breath-go">↗</span></a>' +
-    '<div class="t-breath-safe">Practise seated, never while driving or standing in a headset. Stop if you feel dizzy or short of breath. ' +
-      (p.t === 'kapal' ? 'Skip Kapalabhati in pregnancy, with high blood pressure, heart disease, hernia or epilepsy, or after abdominal surgery. ' : '') +
-      'If you have a medical condition, ask your doctor first.</div>';
+    '<div class="t-breath-safe" data-no-i18n>' + afcEsc(t('Practise seated, never while driving or standing in a headset. Stop if you feel dizzy or short of breath.')) + ' ' +
+      (p.t === 'kapal' ? afcEsc(t('Skip Kapalabhati in pregnancy, with high blood pressure, heart disease, hernia or epilepsy, or after abdominal surgery.')) + ' ' : '') +
+      afcEsc(t('If you have a medical condition, ask your doctor first.')) + '</div>';
 }
 
 function afcOpenPick(id) {
@@ -3322,8 +3597,8 @@ function afcOpenPick(id) {
     const r = afcRowBySlug(slug);
     if (!r) return '';
     return '<a class="t-part" href="/food/' + encodeURIComponent(slug) + '/" target="_blank" rel="noopener">' +
-      '<span class="t-part-name">' + afcEsc(r.name) + '</span>' +
-      '<span class="t-part-props">' + afcEsc(r.virya || '') + ' · ' + afcEsc(r.rasa || '') + '</span>' +
+      '<span class="t-part-name">' + afcEsc(afcRowName(r)) + '</span>' +
+      '<span class="t-part-props" data-no-i18n>' + afcEsc(tr(r.virya || '')) + ' · ' + afcEsc(afcTasteList(r.rasa)) + '</span>' +
       '<span class="t-part-arrow">↗</span></a>';
   }).join('');
   afcSheet(
@@ -3351,6 +3626,7 @@ function afcAskSet(k, v) {
 }
 
 async function renderGuide() {
+  afcLoadWeather();
   const el = document.getElementById('guide-body');
   if (!el) return;
   await afcLoadFoodRows();
@@ -3374,7 +3650,7 @@ async function renderGuide() {
       '<div class="t-card-lbl" style="margin-top:14px;">Where</div><div class="ask-row">' +
         chips('place', [['home','At home'],['out','Restaurant']]) + '</div>' +
       '<div class="t-card-lbl" style="margin-top:14px;">How hungry</div><div class="ask-row">' +
-        chips('weight', [['light','Light'],['normal','Normal'],['hearty','Hungry']]) + '</div>' +
+        chips('weight', [['light',t('hunger|Light')],['normal',t('hunger|Normal')],['hearty',t('hunger|Hungry')]]) + '</div>' +
       '<button class="btn btn-dark" style="margin-top:16px;" onclick="afcAnswerAsk()">Show me ↗</button>' +
     '</div>' +
     '<div id="ask-result"></div>' +
@@ -3501,9 +3777,11 @@ async function afcAskGuide() {
       body: JSON.stringify({
         question: question.slice(0, 400),
         dosha: dosha,
+        lang: AFC_LANG,
         hour: new Date().getHours(),
         southern: afcSouthern(),
         recent: afcRecentForGuide(),
+        weather: afcWxForGuide(),
       }),
     });
 
@@ -3534,7 +3812,7 @@ async function afcAskGuide() {
 function afcGuideLine(p, bad) {
   return '<a class="t-pick" style="text-decoration:none;" href="/food/' + encodeURIComponent(p.slug) + '/" target="_blank" rel="noopener">' +
     '<span class="t-pick-emoji" style="font-size:0;line-height:0;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + (bad ? '#C94A2A' : '#B8882A') + ';"></span></span>' +
-    '<span class="t-pick-body"><span class="t-pick-name">' + afcEsc(p.name) + '</span>' +
+    '<span class="t-pick-body"><span class="t-pick-name">' + afcEsc(afcFoodName(p.slug, p.name)) + '</span>' +
     (p.why ? '<span class="t-pick-why">' + afcEsc(p.why) + '</span>' : '') + '</span>' +
     '<span class="t-part-arrow">↗</span></a>';
 }
@@ -3547,9 +3825,9 @@ function afcRenderGuideAnswer(out, data) {
       (data.answer ? '<div class="ask-answer">' + afcEsc(data.answer) + '</div>' : '') +
       (picks.length ? '<div class="t-card-lbl" style="margin-top:16px;">Worth eating</div>' + picks.map(p => afcGuideLine(p, false)).join('') : '') +
       (avoid.length ? '<div class="t-card-lbl" style="margin-top:16px;">Leave for another day</div>' + avoid.map(p => afcGuideLine(p, true)).join('') : '') +
-      '<div class="ask-meta">Answered for your prakriti, this season and this hour, from the published food reference. ' +
-        'Traditional practice, not medical advice.' +
-        (typeof data.remaining === 'number' ? ' · ' + data.remaining + ' question' + (data.remaining === 1 ? '' : 's') + ' left today' : '') +
+      '<div class="ask-meta" data-no-i18n>' + afcEsc(t('Answered for your prakriti, this season and this hour, from the published food reference.')) + ' ' +
+        afcEsc(t('Traditional practice, not medical advice.')) +
+        (typeof data.remaining === 'number' ? ' · ' + afcEsc(tn(data.remaining, '{n} question left today', '{n} questions left today')) : '') +
       '</div>' +
     '</div>';
 }
@@ -3559,7 +3837,7 @@ function afcGuideFallback(out, reason) {
   const rec = afcRecommend({ slot: afcSlotNow(), n: 3 });
   out.innerHTML =
     '<div class="card">' +
-      '<div class="ask-answer">' + afcEsc(reason) + ' Here is what the on-device guide suggests for right now instead.</div>' +
+      '<div class="ask-answer" data-no-i18n>' + afcEsc(tr(reason)) + ' ' + afcEsc(t('Here is what the on-device guide suggests for right now instead.')) + '</div>' +
       afcPickList(rec.best) +
       '<div class="ask-meta">Worked out on this device from your constitution, the season and the hour.</div>' +
     '</div>';
@@ -3605,13 +3883,13 @@ function afcWeekPatterns(entries) {
   const warmDinners = entries.filter(h => hourOf(h) >= 17 && (Number(h.score) || 0) >= 65);
   const goodMornings = entries.filter(h => hourOf(h) < 11 && (Number(h.score) || 0) >= 65);
 
-  if (cold.length >= 2)       issues.push({ n: cold.length,       t: 'Cold food in the morning', d: 'Cooling food before midday sits against the classical pattern of warming a slow morning digestion.', fix: 'Replace ' + Math.min(3, cold.length) + ' cold breakfast' + (Math.min(3, cold.length) === 1 ? '' : 's') + ' next week with something warm and cooked.' });
-  if (lateHeavy.length >= 2)  issues.push({ n: lateHeavy.length,  t: 'Heavy food late in the evening', d: 'The evening is a Kapha window; a rich meal inside it is the most common single cause of a low weekly score.', fix: 'Move your largest meal to the middle of the day next week.' });
-  if (sour.length >= 3)       issues.push({ n: sour.length,       t: 'A lot of sour taste', d: 'Sour is heating and, taken often, is the taste most likely to push a score down for your constitution.', fix: 'Swap sour for sweet or astringent in three meals next week.' });
-  if (rawish.length >= 3)     issues.push({ n: rawish.length,     t: 'Raw and dry food', d: 'Dry, light, astringent food eaten cold is the classical Vāta-raising combination.', fix: 'Cook three of next week’s raw meals and add a little ghee or oil.' });
+  if (cold.length >= 2)       issues.push({ n: cold.length,       t: t('Cold food in the morning'), d: t('Cooling food before midday sits against the classical pattern of warming a slow morning digestion.'), fix: tn(Math.min(3, cold.length), 'Replace {n} cold breakfast next week with something warm and cooked.', 'Replace {n} cold breakfasts next week with something warm and cooked.') });
+  if (lateHeavy.length >= 2)  issues.push({ n: lateHeavy.length,  t: t('Heavy food late in the evening'), d: t('The evening is a Kapha window; a rich meal inside it is the most common single cause of a low weekly score.'), fix: t('Move your largest meal to the middle of the day next week.') });
+  if (sour.length >= 3)       issues.push({ n: sour.length,       t: t('A lot of sour taste'), d: t('Sour is heating and, taken often, is the taste most likely to push a score down for your constitution.'), fix: t('Swap sour for sweet or astringent in three meals next week.') });
+  if (rawish.length >= 3)     issues.push({ n: rawish.length,     t: t('Raw and dry food'), d: t('Dry, light, astringent food eaten cold is the classical Vāta-raising combination.'), fix: t('Cook three of next week’s raw meals and add a little ghee or oil.') });
 
-  if (warmDinners.length >= 2)  habits.push({ t: 'Warm, well-judged dinners', d: warmDinners.length + ' evening meal' + (warmDinners.length === 1 ? '' : 's') + ' scored well for your constitution.' });
-  if (goodMornings.length >= 2) habits.push({ t: 'Strong mornings', d: goodMornings.length + ' breakfast' + (goodMornings.length === 1 ? '' : 'es') + ' suited you well.' });
+  if (warmDinners.length >= 2)  habits.push({ t: t('Warm, well-judged dinners'), d: tn(warmDinners.length, '{n} evening meal scored well for your constitution.', '{n} evening meals scored well for your constitution.') });
+  if (goodMornings.length >= 2) habits.push({ t: t('Strong mornings'), d: tn(goodMornings.length, '{n} breakfast suited you well.', '{n} breakfasts suited you well.') });
 
   issues.sort((a, b) => b.n - a.n);
   return { issues, habits };
@@ -3647,7 +3925,7 @@ function renderInsights() {
       '<p class="sect-title">Your Ayurvedic week</p>' +
       '<div class="card" style="text-align:center;padding:24px 20px;">' +
         '<div style="font-size:30px;margin-bottom:8px;">📈</div>' +
-        '<div style="font-family:\'Playfair Display\',serif;font-size:18px;margin-bottom:8px;">' + n + ' more meal' + (n === 1 ? '' : 's') + ' to go</div>' +
+        '<div style="font-family:\'Playfair Display\',serif;font-size:18px;margin-bottom:8px;">' + tn(n, '{n} more meal to go', '{n} more meals to go') + '</div>' +
         '<div style="font-size:13px;color:var(--muted);line-height:1.6;">A week reads properly from three analyses upward. Keep checking your meals and this page starts telling you what a single meal cannot.</div>' +
         '<button class="btn btn-dark" style="margin-top:16px;" onclick="afcStartScan()">📷 Check a meal</button>' +
       '</div><div id="journal-week"></div><div id="journal-list"></div>';
@@ -3663,7 +3941,7 @@ function renderInsights() {
   const pat = afcWeekPatterns(thisW);
   const col = avg >= 70 ? '#2E7D5E' : avg >= 50 ? '#C17F3A' : '#C94A2A';
   const deltaHtml = delta === null ? '<span class="ins-delta">first full week</span>'
-    : '<span class="ins-delta" style="color:' + (delta >= 0 ? '#2E7D5E' : '#C94A2A') + ';">' + (delta >= 0 ? '↑ ' : '↓ ') + Math.abs(delta) + ' vs last week</span>';
+    : '<span class="ins-delta" style="color:' + (delta >= 0 ? '#2E7D5E' : '#C94A2A') + ';">' + (delta >= 0 ? '↑ ' : '↓ ') + t('{n} vs last week', { n: Math.abs(delta) }) + '</span>';
 
   const issue = pat.issues[0];
   const habit = pat.habits[0];
@@ -3676,10 +3954,10 @@ function renderInsights() {
     '</div>' +
 
     '<div class="card">' +
-      '<div class="t-card-lbl">You analysed ' + thisW.length + ' meal' + (thisW.length === 1 ? '' : 's') + '</div>' +
+      '<div class="t-card-lbl">' + tn(thisW.length, 'You analysed {n} meal', 'You analysed {n} meals') + '</div>' +
       [['balanced', '#2E7D5E', 'balanced'], ['mild', '#C17F3A', 'mildly aggravating'], ['strong', '#C94A2A', 'strongly aggravating']]
         .filter(b => bands[b[0]] > 0)
-        .map(b => '<div class="ins-band"><span class="ins-dot" style="background:' + b[1] + ';"></span>' + bands[b[0]] + ' ' + b[2] + '</div>').join('') +
+        .map(b => '<div class="ins-band"><span class="ins-dot" style="background:' + b[1] + ';"></span>' + t('{n} ' + b[2], { n: bands[b[0]] }) + '</div>').join('') +
     '</div>' +
 
     (issue ?
@@ -3853,7 +4131,7 @@ function afcAfterResult() {
   if (afcEntitlement() === 'paid') return;
   const left = afcAnalysesLeft();
   if (left > 0) {
-    try { showToast(left + ' free analys' + (left === 1 ? 'is' : 'es') + ' left today'); } catch (e) {}
+    try { showToast(tn(left, '{n} free analysis left today', '{n} free analyses left today')); } catch (e) {}
     return;
   }
   // Once a day at most. With a daily allowance the paywall would otherwise
@@ -3901,7 +4179,7 @@ function renderResult(r) {
   const why = (Array.isArray(r.why) && r.why.length)
     ? r.why.map(t => ({ good: false, neutral: true, text: t }))
     : afcWhyLines(r);
-  const whyHtml = why.length ? '<div class="why-lbl">Why ' + (myScore >= 65 ? '' : 'only ') + myScore + '?</div>' +
+  const whyHtml = why.length ? '<div class="why-lbl">' + (myScore >= 65 ? t('Why {n}?', { n: myScore }) : t('Why only {n}?', { n: myScore })) + '</div>' +
     why.map(w => '<div class="why-row"><span class="why-mark" style="color:' + (w.neutral ? '#C17F3A' : w.good ? '#2E7D5E' : '#C94A2A') + '">' +
       (w.neutral ? '•' : w.good ? '✓' : '✕') + '</span><span>' + afcEsc(w.text) + '</span></div>').join('') : '';
 
@@ -3919,19 +4197,19 @@ function renderResult(r) {
   document.getElementById('result-area').innerHTML =
     '<div class="card">' +
       '<div class="res-header"><span class="res-emoji">' + (r.emoji || '🍽️') + '</span><div>' +
-        '<div class="res-name">' + afcEsc(r.foodName || 'Food') + '</div>' +
+        '<div class="res-name">' + afcEsc((AFC_LANG === 'uk' && r.foodNameUk) || r.foodName || t('Food')) + '</div>' +
         '<div class="res-cat">' + afcEsc(r.category || '') + '</div></div></div>' +
       '<div class="score-row" style="background:' + vs2.bg + ';border-color:' + vs2.color + '">' +
         '<div class="score-circ" style="border-color:' + vs2.color + ';background:' + vs2.color + '18">' +
           '<span class="score-num" style="color:' + vs2.color + '">' + myScore + '</span>' +
           '<span class="score-of" style="color:' + vs2.color + '">/100</span></div>' +
-        '<div><div class="score-verd" style="color:' + vs2.color + '">' + verdict + (dosha && DOSHA[dosha] ? ' for ' + DOSHA[dosha].name : '') + '</div>' +
+        '<div><div class="score-verd" style="color:' + vs2.color + '" data-no-i18n>' + (dosha && DOSHA[dosha] ? t('{v} for {d}', { v: tr(verdict), d: DOSHA[dosha].name }) : tr(verdict)) + '</div>' +
         '<div class="score-adv">' + afcEsc(r.advice || '') + '</div></div></div>' +
       (chips ? '<div class="tip-lbl" style="margin-bottom:8px">Tastes</div><div class="chips">' + chips + '</div>' : '') +
       '<div class="props-grid">' +
-        '<div class="prop"><div class="prop-l">Rasa</div><div class="prop-v">' + afcEsc(r.rasa || '—') + '</div></div>' +
+        '<div class="prop"><div class="prop-l">Rasa</div><div class="prop-v">' + afcEsc(r.rasa ? afcTasteList(r.rasa) : '—') + '</div></div>' +
         '<div class="prop"><div class="prop-l">Vīrya</div><div class="prop-v">' + afcEsc(r.virya || '—') + '</div></div>' +
-        '<div class="prop"><div class="prop-l">Vipāka</div><div class="prop-v">' + afcEsc(r.vipaka || '—') + '</div></div>' +
+        '<div class="prop"><div class="prop-l">Vipāka</div><div class="prop-v" data-no-i18n>' + afcEsc(r.vipaka ? t('vipaka|' + r.vipaka) : '—') + '</div></div>' +
         '<div class="prop"><div class="prop-l">Season</div><div class="prop-v">' + afcEsc(r.season || '—') + '</div></div></div>' +
       '<div class="impact-lbl">Impact on doshas</div>' + impacts +
       whyHtml + impHtml +
@@ -4112,6 +4390,36 @@ function showLoginStatus(msg, color) {
 function showError(msg, color) {
   showLoginStatus(msg, color);
 }
+
+// ══════════════════════════════════════════
+// v5.3.0 · LOCALISED DATA
+// ══════════════════════════════════════════
+// Display strings in the data tables are swapped for the dictionary's, in place,
+// so every join, chip and concatenation downstream is already Ukrainian. Object
+// keys, enum values and anything compared in code are left exactly as they are.
+function afcLocaliseData() {
+  if (window.AFC_LANG !== 'uk' || !window.AFC_UK) return;
+  Object.keys(DOSHA).forEach(k => {
+    const d = DOSHA[k];
+    d.name = tr(d.name); d.element = tr(d.element); d.guidance = tr(d.guidance);
+    d.qualities = d.qualities.map(tr);
+  });
+  Object.keys(DN).forEach(k => { DN[k] = tr(DN[k]); });
+  Object.keys(AFC_SEASON_NAME).forEach(k => { AFC_SEASON_NAME[k] = tr(AFC_SEASON_NAME[k]); });
+  AYUR_HINTS.forEach(x => { x.t = tr(x.t); x.d = tr(x.d); });
+  AFC_MEALS.forEach(m => { m.name = tr(m.name); });
+  Object.keys(AFC_SITUATIONS).forEach(k => { const s = AFC_SITUATIONS[k]; s.q = tr(s.q); s.line = tr(s.line); });
+  for (let i = 0; i < AFC_ASK_SEEDS.length; i++) AFC_ASK_SEEDS[i] = tr(AFC_ASK_SEEDS[i]);
+  Object.keys(AFC_FIXES).forEach(k => AFC_FIXES[k].forEach(f => { f.t = tr(f.t); }));
+  [AFC_TASTE_FX, AFC_VIRYA_FX, AFC_VIPAKA_FX].forEach(m => Object.keys(m).forEach(k => { m[k].w = tr(m[k].w); }));
+  Object.keys(AFC_BREATH).forEach(k => { AFC_BREATH[k].tag = tr(AFC_BREATH[k].tag); });
+}
+afcLocaliseData();
+
+/** A food row's display name: Ukrainian by slug when available. */
+function afcRowName(r) { return r ? afcFoodName(r.slug, r.name) : ''; }
+/** A taste list such as "Sweet, Astringent", element by element. */
+function afcTasteList(s) { return String(s || '').split(/\s*,\s*/).filter(Boolean).map(tr).join(', '); }
 </script>
   <script>
   (function () {
@@ -4156,6 +4464,37 @@ function closeProgram(){
 var PP = (function () {
 
 /* ---------------------------- data ---------------------------- */
+// v5.4.0 · Weather adjustments for the program's menu. Rows are the weather's
+// doṣa, columns the person's dominant doṣa. Every line is classical practice —
+// temperature, preparation, spice, portion — and never an effect on the body.
+var WX_ADJ = {
+  VATA: {
+    VATA:  { note:"Cold, dry or windy weather doubles your own Vāta tendency — make every meal warm, moist and unhurried.",
+             breakfast:"serve it hot, with an extra spoon of ghee", lunch:"add a cup of warm broth alongside", dinner:"make it a soup or stew; nothing raw", snacks:"Warm spiced milk with soaked dates" },
+    PITTA: { note:"Cold, dry or windy weather asks for warmth even from a Pitta constitution — warm food, gentle spices.",
+             breakfast:"eat it warm rather than chilled", lunch:"cook the vegetables instead of serving them raw", dinner:"add a little ghee; keep the spices mild", snacks:"Stewed pear with cardamom, served warm" },
+    KAPHA: { note:"Cold, dry or windy weather — keep your meals warm and light, with a little more oil than usual.",
+             breakfast:"serve it hot, with ginger", lunch:"add a teaspoon of ghee or sesame oil", dinner:"choose a warm soup over anything cold", snacks:"Ginger tea with a few soaked almonds" }
+  },
+  PITTA: {
+    VATA:  { note:"Hot weather — cool things down without making them cold or dry.",
+             breakfast:"let it cool to room temperature", lunch:"add cucumber, coriander or fresh mint", dinner:"keep it moist and mildly spiced", snacks:"Sweet ripe fruit at room temperature" },
+    PITTA: { note:"Hot, bright weather doubles your own Pitta tendency — cooling, sweet and bitter at every meal.",
+             breakfast:"serve it at room temperature, never hot", lunch:"add coriander, cucumber and bitter greens", dinner:"leave out chilli, garlic, vinegar and sour", snacks:"Fresh coconut water or sweet melon" },
+    KAPHA: { note:"Hot weather — lighter and cooler, but still lightly spiced.",
+             breakfast:"keep it light and not too sweet", lunch:"add bitter greens and fresh herbs", dinner:"eat early and light", snacks:"Cucumber slices with mint" }
+  },
+  KAPHA: {
+    VATA:  { note:"Cold, damp, grey weather — warm and well spiced, but not heavy.",
+             breakfast:"serve it hot, with ginger and cinnamon", lunch:"add black pepper and a little more ginger", dinner:"keep the portion modest and the meal hot", snacks:"Ginger–lemon water, warm" },
+    PITTA: { note:"Cold, damp, grey weather — lighter and warmer than usual, with mild pungent spices.",
+             breakfast:"choose the lighter version and serve it warm", lunch:"add ginger and a pinch of black pepper", dinner:"keep it light; skip heavy dairy", snacks:"A few roasted pumpkin seeds" },
+    KAPHA: { note:"Cold, damp, grey weather doubles your own Kapha tendency — light, warm, dry and pungent at every meal.",
+             breakfast:"a small portion, hot, with ginger", lunch:"add black pepper, ginger and turmeric", dinner:"make it the lightest meal of the day; no dairy", snacks:"Hot ginger tea; nothing sweet" }
+  }
+};
+var WX_KEY = { vata:'VATA', pitta:'PITTA', kapha:'KAPHA' };
+
 var DOSHA_META = {
   VATA:{name:"Vāta",color:"#B0833A",icon:"🌬️",element:"Air & Ether · Light, Dry, Cold, Mobile",
     guidance:"Favour warm, moist, and grounding foods. Cooked vegetables, ghee, warm milk, and sweet fruits pacify Vāta. Avoid raw, cold, and dry foods."},
@@ -4286,7 +4625,7 @@ function scoreAnswers(answers){
   var dual=(pct[ranked[0]]-pct[ranked[1]]<=8)?ranked[1]:null;
   return {s:s,pct:pct,dominant:dominant,dual:dual};
 }
-function fmtDate(d){return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});}
+function fmtDate(d){return d.toLocaleDateString(AFC_LOCALE,{weekday:"short",day:"numeric",month:"short"});}
 function esc(t){var e=document.createElement("div");e.textContent=t;return e.innerHTML;}
 
 /* --------------------------- render -------------------------- */
@@ -4301,7 +4640,7 @@ function renderQuiz(){
   var done=answered>=PP_MIN;
   var remaining=PP_MIN-answered;
   var html='<h2 class="section">Your prakriti assessment</h2>'+
-    '<p class="lead">Answer for how you have been most of your life, not just lately. Answer at least '+PP_MIN+' to see your program — the rest are optional and improve accuracy. <strong>'+answered+'/'+QUESTIONS.length+' answered.</strong></p>';
+    '<p class="lead">'+esc(t('Answer for how you have been most of your life, not just lately. Answer at least {m} to see your program — the rest are optional and improve accuracy.',{m:PP_MIN}))+' <strong>'+esc(t('{a}/{b} answered.',{a:answered,b:QUESTIONS.length}))+'</strong></p>';
   QUESTIONS.forEach(function(q,i){
     html+='<div class="card q"><div class="qtext"><span class="qnum">'+String(i+1).padStart(2,"0")+'</span>'+esc(q.text)+'</div><div class="opts">';
     q.opts.forEach(function(o){
@@ -4313,7 +4652,7 @@ function renderQuiz(){
     html+='</div></div>';
   });
   html+='<button id="submit" class="cta primary"'+(done?"":" disabled")+'>See my 3-week program ↗</button>';
-  if(!done) html+='<p class="hint">Answer '+remaining+' more to unlock your program ('+PP_MIN+' minimum).</p>';
+  if(!done) html+='<p class="hint">'+esc(t('Answer {r} more to unlock your program ({m} minimum).',{r:remaining,m:PP_MIN}))+'</p>';
   else if(answered<QUESTIONS.length) html+='<p class="hint">You can see your program now, or answer more for greater accuracy.</p>';
   app.innerHTML=html;
 
@@ -4330,6 +4669,16 @@ function renderQuiz(){
   });
 }
 
+function ppWxChip(date){
+  if(typeof afcWxDay!=='function') return '';
+  var w=afcWxDay(date); if(!w||typeof w.t!=='number') return '';
+  return '<span class="pp-wxchip">'+(w.t>0?'+':'')+Math.round(w.t)+'°</span>';
+}
+function ppMealRow(label,meal,adj){
+  if(!adj) return '<div class="row"><span class="rk">'+label+'</span><span class="rv">'+meal+'</span></div>';
+  return '<div class="row"><span class="rk">'+label+'</span><span class="rv" data-no-i18n>'+esc(tr(meal))+
+    '<span class="pp-adj">☁ '+esc(tr(adj))+'</span></span></div>';
+}
 function bar(label,val,col){
   return '<div class="bar"><div class="barhead"><span class="barlabel" style="color:'+col+'">'+label+
     '</span><span class="barval">'+val+'%</span></div><div class="track"><div class="fill" style="width:'+val+'%;background:'+col+'"></div></div></div>';
@@ -4337,7 +4686,7 @@ function bar(label,val,col){
 
 function renderResults(){
   var r=state.result, meta=DOSHA_META[r.dominant];
-  var label=r.dual?(meta.name+"–"+DOSHA_META[r.dual].name+" Prakriti"):(meta.name+" Prakriti");
+  var label=t('{d} Prakriti',{d:r.dual?(tr(meta.name)+"–"+tr(DOSHA_META[r.dual].name)):tr(meta.name)});
   var html='<h2 class="section">Your prakriti</h2>';
 
   html+='<div class="card prakcard">'+
@@ -4351,15 +4700,15 @@ function renderResults(){
     '</div>';
 
   html+='<h2 class="section">Your 3-week program</h2>'+
-    '<p class="lead">A daily routine and meal rhythm to bring '+meta.name+' back into balance.</p>';
+    '<p class="lead">'+esc(t('A daily routine and meal rhythm to bring {d} back into balance.',{d:tr(meta.name)}))+'</p>';
 
   html+='<div class="weektabs">';
   WEEKS.forEach(function(w,i){
     var active=state.week===i;
-    html+='<button class="weektab" data-week="'+i+'" style="'+(active?"color:#fff;background:"+meta.color+";border-color:"+meta.color+";":"")+'">Week '+(i+1)+'</button>';
+    html+='<button class="weektab" data-week="'+i+'" style="'+(active?"color:#fff;background:"+meta.color+";border-color:"+meta.color+";":"")+'">'+t('Week {n}',{n:i+1})+'</button>';
   });
   html+='</div>';
-  html+='<div class="card weeknote"><span class="wt">'+WEEKS[state.week].title+'.</span> <span class="wn">'+WEEKS[state.week].note+'</span></div>';
+  html+='<div class="card weeknote"><span class="wt">'+tr(WEEKS[state.week].title)+'.</span> <span class="wn">'+WEEKS[state.week].note+'</span></div>';
 
   var start=new Date();
   for(var d=0;d<7;d++){
@@ -4367,19 +4716,29 @@ function renderResults(){
     var date=new Date(start); date.setDate(start.getDate()+dayIndex);
     var open=state.openDay===d;
     html+='<div class="card day">'+
-      '<button class="dayhead" data-day="'+d+'"><span class="dayname">Day '+(dayIndex+1)+
-      '<span class="daydate">'+fmtDate(date)+'</span></span><span class="plus'+(open?" open":"")+'">+</span></button>';
+      '<button class="dayhead" data-day="'+d+'"><span class="dayname">'+t('Day {n}',{n:dayIndex+1})+
+      '<span class="daydate">'+fmtDate(date)+ppWxChip(date)+'</span></span><span class="plus'+(open?" open":"")+'">+</span></button>';
     if(open){
       var routine=ROUTINE[r.dominant];
       var meals=MEALS[r.dominant][dayIndex%MEALS[r.dominant].length];
+      // v5.4.0 · the forecast for this date, when it falls inside the 7-day outlook
+      var wday=(typeof afcWxDay==='function')?afcWxDay(date):null;
+      var wtop=wday?afcWxTop(afcWxPress(wday)):null;
+      var adj=wtop?WX_ADJ[WX_KEY[wtop]][r.dominant]:null;
       html+='<div class="daybody"><div class="daydiv"></div>'+
+        (wday?'<div class="pp-wx">🌦 '+esc(afcWxDesc(wday))+(wday.tmin!=null&&wday.tmax!=null?' ('+Math.round(wday.tmin)+'…'+Math.round(wday.tmax)+'°C)':'')+
+          (adj?' → <strong>'+esc(t('{d} rises',{d:DN[wtop]}))+'</strong><br>'+esc(tr(adj.note)):'<br>'+esc(t('Mild weather — the menu stays as planned.')))+'</div>':'')+
         '<div class="subhead" style="color:'+meta.color+'">Daily routine</div>';
       Object.keys(routine).forEach(function(k){ html+='<div class="row"><span class="rk">'+k+'</span><span class="rv">'+routine[k]+'</span></div>'; });
       html+='<div style="height:14px"></div><div class="subhead" style="color:'+meta.color+'">Meals</div>'+
-        '<div class="row"><span class="rk">Breakfast</span><span class="rv">'+meals.breakfast+'</span></div>'+
-        '<div class="row"><span class="rk">Lunch</span><span class="rv">'+meals.lunch+'</span></div>'+
-        '<div class="row"><span class="rk">Dinner</span><span class="rv">'+meals.dinner+'</span></div>'+
-        '<div class="row"><span class="rk">Snacks</span><span class="rv">'+meals.snacks+'</span></div></div>';
+        ppMealRow('Breakfast',meals.breakfast,adj&&adj.breakfast)+
+        ppMealRow('Lunch',meals.lunch,adj&&adj.lunch)+
+        ppMealRow('Dinner',meals.dinner,adj&&adj.dinner)+
+        (adj
+          ? '<div class="row"><span class="rk">Snacks</span><span class="rv" data-no-i18n>'+esc(tr(adj.snacks))+
+              '<span class="pp-adj">'+esc(t('chosen for today’s weather'))+'</span><span class="pp-was">'+esc(tr(meals.snacks))+'</span></span></div>'
+          : '<div class="row"><span class="rk">Snacks</span><span class="rv">'+meals.snacks+'</span></div>')+
+        '</div>';
     }
     html+='</div>';
   }
@@ -4401,13 +4760,14 @@ function renderResults(){
   function openProgram(){
     // (Re)mount fresh each open unless a result already exists this session
     if(!state.result){ state.view="quiz"; state.answers={}; }
+    if(typeof afcLoadWeather==='function') afcLoadWeather();
     render();
   }
   function resetProgram(){
     state.answers={}; state.result=null; state.view="quiz"; state.week=0; state.openDay=0;
     render();
   }
-  return { open: openProgram, reset: resetProgram };
+  return { open: openProgram, reset: resetProgram, refresh: function(){ if(state.view==="results") render(); } };
 })();
 
 </script>

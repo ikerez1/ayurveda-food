@@ -35,6 +35,14 @@
   status = 200
   force = true
 
+# v5.3.0 · Ukrainian food reference. The content site falls back to the English
+# article (302 → /food/<slug>/) for anything not yet translated.
+[[redirects]]
+  from = "/uk/food/*"
+  to = "https://ayurveda-content.netlify.app/uk/food/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/sitemap.xml"
   to = "https://ayurveda-content.netlify.app/sitemap.xml"

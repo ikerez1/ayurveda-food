@@ -282,6 +282,18 @@ const CLAIM_PATTERNS = [
   /\b(indigestion|bloating|constipation|acid reflux|heartburn|nausea|insomnia|migraines?|headaches?)\b/i,
   /\b(anti-?inflammatory|antioxidant|immune[- ]boosting|medicinal|therapeutic)\b/i,
   /\b(diagnos\w+|prescrib\w+|dosage)\b|\d\s*(mg|g|ml)\b/i,
+  // ── Ukrainian (v5.3.0). Stems, because Ukrainian inflects; JS \b is ASCII-only,
+  // so the left edge is a Unicode-letter lookbehind instead.
+  /(?<!\p{L})(виліков|лікує|лікуют|лікуван|лікувальн|зціл|ліки від|засіб від)/iu,
+  /(?<!\p{L})(запобіга|профілакти|захища\p{L}*\s+від|знижу\p{L}*\s+ризик)/iu,
+  /(?<!\p{L})(покращ|підвищ|зміцн|посил|підтриму|стимулю|нормалізу|прискор|сприя|допомага)\p{L}*\s+(\p{L}+\s+)?(імун|метабол|обмін\p{L}*\s+речовин|травлен|печінк|серц|мозк|мозок|пам[ʼ'’]?ят|енергі|схудн|сон|сну)/iu,
+  /(?<!\p{L})(детокс|шлак|токсин|очищ\p{L}*\s+(організм|печінк|кров|кишк))/iu,
+  /(?<!\p{L})(схудн|скинути\s+вагу|зниженн\p{L}*\s+ваги|спалю\p{L}*\s+жир|жироспал)/iu,
+  /(?<!\p{L})(зниж|підвищ|регулю|нормалізу)\p{L}*\s+(рів\p{L}*\s+)?(цукр|тиск|холестерин|запален|глюкоз)/iu,
+  /(?<!\p{L})(діабет|рак(?!\p{L})|раков|онколог|артрит|депресі|тривожн\p{L}*\s+розлад|гіпертоні|хвороб\p{L}*\s+крона|синдром\p{L}*\s+подразнен)/iu,
+  /(?<!\p{L})(нетравлен|диспепс|здутт|метеоризм|закреп|рефлюкс|печі[яїю](?!\p{L})|нудот|безсонн|мігрен|головн\p{L}*\s+біл)/iu,
+  /(?<!\p{L})(протизапальн|антиоксидант|імуностимул|лікарськ|терапевтичн|цілющ|оздоровч)/iu,
+  /(?<!\p{L})(діагноз|діагност|дозуванн|дозу(?!\p{L})|призначенн\p{L}*\s+лікар)|\d\s*(мг|г|мл)(?!\p{L})/iu,
 ];
 
 function claimIssues(text) {
@@ -311,6 +323,7 @@ THE PERSON
 ${ctx.dosha}
 Season: ${ctx.season}
 Time where they are: ${ctx.kala} (local hour ${ctx.hour})
+${ctx.weather ? 'Weather where they are right now: ' + ctx.weather + '\nLet it shape the answer as ṛtucaryā does — warmth and moisture against cold and wind, cooling against heat, lightness and pungency against cold damp — and say so when it is the reason for a pick.' : ''}
 ${ctx.recent ? 'What they have eaten recently, with the app\'s score for their constitution:\n' + ctx.recent : 'No recent meals recorded.'}
 
 THE FOOD LIBRARY — the only foods you may name
@@ -332,7 +345,10 @@ Never give medical advice. If the question describes symptoms or illness, answer
 OUTPUT
 Return ONLY JSON, no preamble and no markdown fences:
 {"answer":"2-3 sentences","picks":[{"slug":"exact-slug","name":"Name","why":"under 14 words"}],"avoid":[{"slug":"exact-slug","name":"Name","why":"under 14 words"}]}
-Give 2 to 4 picks and 0 to 3 avoids.`;
+Give 2 to 4 picks and 0 to 3 avoids.${ctx.lang === 'uk' ? `
+
+OUTPUT LANGUAGE — UKRAINIAN
+Write "answer" and every "why" in natural, correct Ukrainian (українська мова), addressing the person as "ви". Keep "slug" exactly as in the library; "name" may stay as in the library (the app shows its own Ukrainian name). The person may write in Ukrainian or Russian — always answer in Ukrainian. Sanskrit terms: Вата, Пітта, Капха, доша, раса, вірʼя, віпака, агні. The legal rule applies to the Ukrainian text in full: never write "покращує травлення", "зміцнює імунітет", "виводить токсини", "сприяє схудненню" or similar, and name no disease or symptom.` : ''}`;
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -347,7 +363,7 @@ function sanitise(obj, rows) {
       if (!p || typeof p !== 'object') return null;
       const row = bySlug[String(p.slug || '').trim()];
       if (!row) return null;
-      return { slug: row.slug, name: row.name, why: String(p.why || '').slice(0, 90) };
+      return { slug: row.slug, name: row.name, why: String(p.why || '').slice(0, 115) };
     })
     .filter(Boolean)
     .slice(0, 4);
@@ -423,6 +439,7 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || '{}');
     const question = String(body.question || '').trim();
     const dosha    = body.dosha;
+    const lang     = body.lang === 'uk' ? 'uk' : 'en';
 
     // ── Layer 2: size.
     if (!question) {
@@ -492,6 +509,25 @@ exports.handler = async (event) => {
     const southern = body.southern === true;
     const season   = seasonOf(now, southern);
 
+    // v5.4.0 · weather arrives as numbers and a doṣa key, never as text, so
+    // nothing the client sends can steer the prompt.
+    const weather = (function (w) {
+      if (!w || typeof w !== 'object') return '';
+      const num = (x, lo, hi) => (Number.isFinite(Number(x)) ? Math.min(hi, Math.max(lo, Math.round(Number(x)))) : null);
+      const t = num(w.t, -60, 60), rh = num(w.rh, 0, 100), wind = num(w.wind, 0, 250), cloud = num(w.cloud, 0, 100);
+      const precip = Number.isFinite(Number(w.precip)) ? Math.min(50, Math.max(0, Number(w.precip))) : 0;
+      if (t === null) return '';
+      const sym = String(w.symbol || '').toLowerCase().replace(/[^a-z_]/g, '').slice(0, 40);
+      const parts = [t + '°C'];
+      if (rh !== null) parts.push('humidity ' + rh + '%');
+      if (wind !== null) parts.push('wind ' + wind + ' km/h');
+      if (cloud !== null) parts.push('cloud ' + cloud + '%');
+      if (precip >= 0.2 || /rain|snow|sleet/.test(sym)) parts.push(/snow|sleet/.test(sym) ? 'snow' : 'rain');
+      const raises = ['vata', 'pitta', 'kapha'].indexOf(w.raises) !== -1
+        ? ' — the app reads this as raising ' + { vata: 'Vāta', pitta: 'Pitta', kapha: 'Kapha' }[w.raises] : '';
+      return parts.join(', ') + raises + '.';
+    })(body.weather);
+
     const recent = (Array.isArray(body.recent) ? body.recent : [])
       .slice(0, MAX_RECENT)
       .map(r => {
@@ -507,7 +543,9 @@ exports.handler = async (event) => {
       kala:   kalaOf(hour),
       hour:   hour,
       recent: recent,
+      weather: weather,
       foods:  foodLines(rows),
+      lang:   lang,
     });
 
     const apiKey = process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY_FOR_AYURFOOD;
@@ -549,7 +587,7 @@ exports.handler = async (event) => {
         'Regulation (EC) 1924/2006: ' + issues.join(', ') + '. ' +
         'Rewrite the whole answer describing only traditional practice and the qualities of the food ' +
         '(warming, cooling, heavy, light, dry, moist, grounding). Name no bodily function, no disease, ' +
-        'and no outcome.';
+        'and no outcome.' + (lang === 'uk' ? ' Answer in Ukrainian.' : '');
       const retry = await ask(corrective);
       if (retry.status === 200) {
         try {
@@ -567,7 +605,9 @@ exports.handler = async (event) => {
     // returning the part that cannot carry a claim.
     if (claimIssues(payloadText(out)).length) {
       console.error('guide: claim validator failed twice — suppressing generated text');
-      out.answer = 'Here is what suits your constitution at this hour and in this season.';
+      out.answer = lang === 'uk'
+        ? 'Ось що пасує вашій конституції в цю годину і в цей сезон.'
+        : 'Here is what suits your constitution at this hour and in this season.';
       out.picks = out.picks.map(p => ({ slug: p.slug, name: p.name, why: '' }));
       out.avoid = out.avoid.map(p => ({ slug: p.slug, name: p.name, why: '' }));
     }
