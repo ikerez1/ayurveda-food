@@ -87,13 +87,20 @@
       text-align: center;
     }
     .footer a { color: var(--gold); text-decoration: none; }
+      /* v5.4.5 · the dharma wheel as an SVG mask in the text colour. The ☸ character
+       is drawn as a purple emoji tile on iOS and a plain glyph on Android. */
+    .whl { display:inline-block; width:1em; height:1em; vertical-align:-0.13em;
+           background-color:currentColor; -webkit-mask:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><circle cx='12' cy='12' r='8'/><circle cx='12' cy='12' r='2.2' fill='black'/><line x1='15.20' y1='12.00' x2='20.00' y2='12.00'/><line x1='14.26' y1='14.26' x2='17.66' y2='17.66'/><line x1='12.00' y1='15.20' x2='12.00' y2='20.00'/><line x1='9.74' y1='14.26' x2='6.34' y2='17.66'/><line x1='8.80' y1='12.00' x2='4.00' y2='12.00'/><line x1='9.74' y1='9.74' x2='6.34' y2='6.34'/><line x1='12.00' y1='8.80' x2='12.00' y2='4.00'/><line x1='14.26' y1='9.74' x2='17.66' y2='6.34'/><circle cx='22.20' cy='12.00' r='1.1' fill='black' stroke='none'/><circle cx='19.21' cy='19.21' r='1.1' fill='black' stroke='none'/><circle cx='12.00' cy='22.20' r='1.1' fill='black' stroke='none'/><circle cx='4.79' cy='19.21' r='1.1' fill='black' stroke='none'/><circle cx='1.80' cy='12.00' r='1.1' fill='black' stroke='none'/><circle cx='4.79' cy='4.79' r='1.1' fill='black' stroke='none'/><circle cx='12.00' cy='1.80' r='1.1' fill='black' stroke='none'/><circle cx='19.21' cy='4.79' r='1.1' fill='black' stroke='none'/></svg>") center/contain no-repeat;
+           mask:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round'><circle cx='12' cy='12' r='8'/><circle cx='12' cy='12' r='2.2' fill='black'/><line x1='15.20' y1='12.00' x2='20.00' y2='12.00'/><line x1='14.26' y1='14.26' x2='17.66' y2='17.66'/><line x1='12.00' y1='15.20' x2='12.00' y2='20.00'/><line x1='9.74' y1='14.26' x2='6.34' y2='17.66'/><line x1='8.80' y1='12.00' x2='4.00' y2='12.00'/><line x1='9.74' y1='9.74' x2='6.34' y2='6.34'/><line x1='12.00' y1='8.80' x2='12.00' y2='4.00'/><line x1='14.26' y1='9.74' x2='17.66' y2='6.34'/><circle cx='22.20' cy='12.00' r='1.1' fill='black' stroke='none'/><circle cx='19.21' cy='19.21' r='1.1' fill='black' stroke='none'/><circle cx='12.00' cy='22.20' r='1.1' fill='black' stroke='none'/><circle cx='4.79' cy='19.21' r='1.1' fill='black' stroke='none'/><circle cx='1.80' cy='12.00' r='1.1' fill='black' stroke='none'/><circle cx='4.79' cy='4.79' r='1.1' fill='black' stroke='none'/><circle cx='12.00' cy='1.80' r='1.1' fill='black' stroke='none'/><circle cx='19.21' cy='4.79' r='1.1' fill='black' stroke='none'/></svg>") center/contain no-repeat; }
+      .logo-sym .whl { margin-right: 4px; }
+    .logo-sym { white-space: nowrap; }
   </style>
 </head>
 <body>
   <div class="wrap">
 
     <div class="logo-bar">
-      <span class="logo-sym">☸ ॐ ☸</span>
+      <span class="logo-sym"><i class="whl" aria-hidden="true"></i> ॐ <i class="whl" aria-hidden="true"></i></span>
       <div class="logo-name"><a href="https://ayurveda-food.com">Āyurveda Food Compass</a></div>
     </div>
 

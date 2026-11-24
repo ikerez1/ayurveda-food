@@ -176,7 +176,7 @@ var T = {
 // ── Dosha ───────────────────────────────────────────────────────────────
 "Vāta": "Вата", "Pitta": "Пітта", "Kapha": "Капха", "Sama": "Сама",
 "Vāta-Pitta": "Вата-Пітта", "Vāta-Kapha": "Вата-Капха", "Pitta-Kapha": "Пітта-Капха",
-"☸ Complete this once — update anytime": "☸ Пройдіть один раз — оновити можна будь-коли",
+"Complete this once — update anytime": "Пройдіть один раз — оновити можна будь-коли",
 "Know your dosha already?": "Уже знаєте свою дошу?",
 "Air · Ether": "Повітря · Етер", "Fire · Water": "Вогонь · Вода", "Earth · Water": "Земля · Вода",
 "Air · Ether · Fire": "Повітря · Етер · Вогонь", "Air · Earth · Water": "Повітря · Земля · Вода",
@@ -305,7 +305,7 @@ var T = {
 "A balanced constitution is maintained rather than corrected. Eat with the season — warm and moist in autumn and winter, cooling in summer, lighter and more pungent in spring. Favour fresh, freshly cooked meals containing all six tastes, and let whichever dosha is currently aggravated guide any adjustment.": "Збалансовану конституцію підтримують, а не виправляють. Їжте відповідно до сезону — тепле й вологе восени та взимку, охолоджувальне влітку, легше й пекучіше навесні. Обирайте свіжі, щойно приготовані страви з усіма шістьма смаками, а будь-які корективи робіть з огляду на дошу, що зараз підвищена.",
 
 // ── Daily note ──────────────────────────────────────────────────────────
-"☸ Today’s Ayurvedic note": "☸ Аюрведична нотатка дня",
+"Today’s Ayurvedic note": "Аюрведична нотатка дня",
 "For every constitution": "Для всіх конституцій",
 "{d} note": "Нотатка · {d}",
 "Begin with warm water": "Почніть із теплої води",
