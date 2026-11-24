@@ -31,6 +31,9 @@ function supabaseRequest(path, method, body) {
       },
     }, (res) => {
       let data = '';
+      // v5.4.1 · decode as UTF-8 across chunk boundaries: a Cyrillic letter is
+      // two bytes and was being split into two replacement characters.
+      res.setEncoding('utf8');
       res.on('data', c => data += c);
       res.on('end', () => resolve({ status: res.statusCode, body: data }));
     });

@@ -152,6 +152,9 @@ afcGuard.request = function (opts, body) {
   return new Promise((resolve) => {
     const req = https.request(opts, (res) => {
       let data = '';
+      // v5.4.1 · decode as UTF-8 across chunk boundaries: a Cyrillic letter is
+      // two bytes and was being split into two replacement characters.
+      res.setEncoding('utf8');
       res.on('data', c => data += c);
       res.on('end', () => {
         let parsed = null;
@@ -471,6 +474,9 @@ Return ONLY JSON, no preamble and no markdown fences: {"foodName":"string","emoj
         }
       }, (res) => {
         let data = '';
+        // v5.4.1 · decode as UTF-8 across chunk boundaries: a Cyrillic letter is
+        // two bytes and was being split into two replacement characters.
+        res.setEncoding('utf8');
         res.on('data', chunk => data += chunk);
         res.on('end', () => resolve({ status: res.statusCode, body: data }));
       });
